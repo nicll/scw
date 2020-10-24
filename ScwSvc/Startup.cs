@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -10,6 +12,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OData.Edm;
+using ScwSvc.Models;
 
 namespace ScwSvc
 {
@@ -26,6 +30,8 @@ namespace ScwSvc
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddOData();
+            //services.AddODataQueryFilter();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,7 +51,15 @@ namespace ScwSvc
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapODataRoute("api", "api", GetEdmModel());
             });
+        }
+
+        private IEdmModel GetEdmModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Student>("Students");
+            return builder.GetEdmModel();
         }
     }
 }
