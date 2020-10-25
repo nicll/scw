@@ -10,41 +10,31 @@ using ScwSvc.Models;
 
 namespace ScwSvc.Controllers
 {
-    [ODataRoutePrefix("Students")]
+    [Route("api/[controller]")]
+    [ApiController]
     public class StudentsController : ControllerBase
     {
         private readonly ILogger<StudentsController> _logger;
-        private readonly Student[] _students =
-        {
-            CreateNewStudent("Florian Brunner", 123),
-            CreateNewStudent("Nicolas Klement", 234)
-        };
 
         public StudentsController(ILogger<StudentsController> logger)
         {
             _logger = logger;
         }
 
-        [ODataRoute]
-        public IQueryable<Student> Get()
+        [HttpGet("{id}")]
+        public IActionResult GetStudent(string id)
         {
-            return _students.AsQueryable();
+            if (Guid.TryParse(id, out var studentId))
+                return Ok(DummyDb.Students.SingleOrDefault(s => s.StudentId == studentId));
+
+            return BadRequest();
         }
 
-        [ODataRoute("{id}")]
-        public Student Get([FromODataUri] Guid id)
+        [HttpGet]
+        [EnableQuery]
+        public IQueryable<Student> GetStudents()
         {
-            return _students.SingleOrDefault(s => s.Id == id);
-        }
-
-        private static Student CreateNewStudent(string name, int score)
-        {
-            return new Student
-            {
-                Id = Guid.NewGuid(),
-                Name = name,
-                Score = score
-            };
+            return DummyDb.Students.AsQueryable();
         }
     }
 }

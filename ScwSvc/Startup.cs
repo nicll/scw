@@ -50,15 +50,16 @@ namespace ScwSvc
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.EnableDependencyInjection();
                 endpoints.MapControllers();
-                endpoints.MapODataRoute("api", "api", GetEdmModel());
+                endpoints.MapODataRoute("ODataRoute", "odata", GetEdmModel(app.ApplicationServices));
             });
         }
 
-        private IEdmModel GetEdmModel()
+        private IEdmModel GetEdmModel(IServiceProvider serviceProvider)
         {
-            var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<Student>("Students");
+            var builder = new ODataConventionModelBuilder(serviceProvider);
+            builder.EntitySet<Student>("Students").EntityType.Select().Expand().Count().Filter().OrderBy();
             return builder.GetEdmModel();
         }
     }
