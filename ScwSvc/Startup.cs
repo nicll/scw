@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -37,9 +39,16 @@ namespace ScwSvc
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+#if DEBUG
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+#endif
+            {
+                app.UseHsts();
+                app.UseExceptionHandler("/error");
             }
 
             app.UseHttpsRedirection();
@@ -50,9 +59,11 @@ namespace ScwSvc
 
             app.UseEndpoints(endpoints =>
             {
+                var defaultConventions = ODataRoutingConventions.CreateDefault();
                 endpoints.EnableDependencyInjection();
                 endpoints.MapControllers();
-                endpoints.MapODataRoute("ODataRoute", "odata", GetEdmModel(app.ApplicationServices));
+                endpoints.MapODataRoute("ODataRoute", "odata", GetEdmModel(app.ApplicationServices),
+                    new DefaultODataPathHandler(), defaultConventions.Except(defaultConventions.OfType<MetadataRoutingConvention>()));
             });
         }
 

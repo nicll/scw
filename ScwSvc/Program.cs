@@ -20,7 +20,8 @@ namespace ScwSvc
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                        .UseKestrel(options => options.AddServerHeader = false);
                 });
     }
 }
