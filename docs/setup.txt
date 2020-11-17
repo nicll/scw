@@ -1,0 +1,22 @@
+Diese Datei beschreibt wie die aktuelle Version von ScwSvc eingerichtet werden muss.
+
+Um ScwSvc verwenden zu können muss eine PostgreSQL-Datenbank bereitstehen.
+(am einfachsten einfach "docker pull postgres" oder lokal installieren)
+
+Die Verbindung zur Datenbank muss dann für ScwSvc angegeben werden.
+Derzeit wird dies per Umgebungsvariablen gemacht. (später wahrscheinlich über appsettings.json)
+
+Folgende Umgebungsvariablen existieren derzeit:
+
+	SCW1_DBSERVER	IP-Adresse oder Hostname des Datenbankservers.
+			Optional, wenn nicht konfiguriert: 127.0.0.1
+
+	SCW1_DBPORT	Port, der zum Verbinden zur Datenbank verwendet wird.
+			Optional, wenn nicht konfiguriert: 5432 (Postgres default port)
+
+	SCW1_DBUSER	Name des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
+
+	SCW1_DBPASS	Passwort des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
+
+Innerhalb der Postgres-Instanz muss eine Database namens 'scw' existieren für die der angegebene Account auch
+entsprechende Berechtigungen besitzt, damit die Tables angelegt und befüllt werden können.
