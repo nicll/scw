@@ -10,14 +10,9 @@ namespace ScwSvc.Models
 
         public DbSet<TableRef> TableRefs { get; set; }
 
-        public DbStoreContext()
+        public DbStoreContext(DbContextOptions<DbStoreContext> options) : base(options)
         {
             Database.EnsureCreated();
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={Globals.DbConnectionString.User}; Password={Pass}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

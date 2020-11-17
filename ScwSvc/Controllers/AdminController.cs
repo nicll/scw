@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNet.OData;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -12,23 +11,23 @@ namespace ScwSvc.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AdministrativeController : ControllerBase
+    public class AdminController : ControllerBase
     {
         private readonly ILogger<DataSetController> _logger;
         private readonly DbStoreContext _db;
 
-        public AdministrativeController(ILogger<DataSetController> logger)
+        public AdminController(ILogger<DataSetController> logger, DbStoreContext db)
         {
             _logger = logger;
-            _db = new DbStoreContext();
+            _db = db;
         }
 
-        [Authorize(Roles = nameof(UserRole.Admin))]
+        [AuthorizeRoles(nameof(UserRole.Manager), nameof(UserRole.Admin))]
         [HttpGet("[action]")]
         [EnableQuery]
         public async ValueTask<ICollection<User>> AllUsers() => await _db.Users.ToListAsync();
 
-        [Authorize(Roles = nameof(UserRole.Admin))]
+        [AuthorizeRoles(nameof(UserRole.Manager), nameof(UserRole.Admin))]
         [HttpGet("[action]")]
         [EnableQuery]
         public async ValueTask<ICollection<TableRef>> AllTables() => await _db.TableRefs.ToListAsync();

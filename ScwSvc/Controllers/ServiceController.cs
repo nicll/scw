@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ScwSvc.Models;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -20,19 +20,28 @@ namespace ScwSvc.Controllers
     {
         private const string Pepper = "scw-";
 
+        private readonly ILogger<DataSetController> _logger;
+        private readonly DbStoreContext _db;
+
+        public ServiceController(ILogger<DataSetController> logger, DbStoreContext db)
+        {
+            _logger = logger;
+            _db = db;
+        }
+
         [HttpPost("[action]")]
         public async ValueTask<IActionResult> Register([FromBody] AuthenticationModel loginCredentials)
         {
-            using var db = new DbStoreContext();
-            Trace.TraceInformation("Service AUTH: register; user=\"" + loginCredentials.Username + "\"");
+            _logger.LogInformation("Register attempt: user=\"" + loginCredentials.Username + "\"");
 
-            if (await db.Users.AnyAsync(u => u.Name == loginCredentials.Username).ConfigureAwait(false))
+            if (await _db.Users.AnyAsync(u => u.Name == loginCredentials.Username).ConfigureAwait(false))
                 return BadRequest("User with this name already exists.");
 
             var newUserId = Guid.NewGuid();
-            await db.Users.AddAsync(new User() { UserId = newUserId, Name = loginCredentials.Username, PasswordHash = HashUserPassword(newUserId, loginCredentials.Password), Role = UserRole.Common }).ConfigureAwait(false);
-            await db.SaveChangesAsync().ConfigureAwait(false);
+            await _db.Users.AddAsync(new User() { UserId = newUserId, Name = loginCredentials.Username, PasswordHash = HashUserPassword(newUserId, loginCredentials.Password), Role = UserRole.Common }).ConfigureAwait(false);
+            await _db.SaveChangesAsync().ConfigureAwait(false);
 
+            _logger.LogInformation("Register: user=\"" + loginCredentials.Username + "\"");
             return Ok();
         }
 
@@ -48,16 +57,16 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async ValueTask<IActionResult> Login([FromBody] AuthenticationModel loginCredentials)
         {
-            Trace.TraceInformation("Service AUTH: login attempt; user=\"" + loginCredentials.Username + "\"");
-
 #if ENABLE_AD_AUTH
+            _logger.LogInformation("Service AUTH: login attempt; user=\"" + loginCredentials.Username + "\"");
+
             if (!AuthenticateAndAuthorizeWithAD(loginCredentials.Username, loginCredentials.Password, out string? error, out ClaimsIdentity? identity))
                 return BadRequest(error);
 
             // see https://stackoverflow.com/a/37090696
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity), new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
-            Trace.TraceInformation("Service AUTH: login; user=\"" + loginCredentials.Username + "\"");
+            _logger.LogInformation("Service AUTH: login; user=\"" + loginCredentials.Username + "\"");
             return Ok();
 #elif ENABLE_DB_AUTH
             return await LoginWithDB(loginCredentials);
@@ -65,7 +74,7 @@ namespace ScwSvc.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(new ClaimsIdentity(Roles.All.Select(r => new Claim(ClaimTypes.Role, r)).Append(new Claim(ClaimTypes.NameIdentifier, loginCredentials.Username)), CookieAuthenticationDefaults.AuthenticationScheme)),
                 new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
-            Trace.TraceWarning("Auto-Login with full privileges.");
+            _logger.LogWarning("Auto-Login with full privileges.");
             return Ok();
 #else
             return StatusCode(StatusCodes.Status503ServiceUnavailable, "Authentication is disabled.");
@@ -77,8 +86,9 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async ValueTask<IActionResult> LoginWithDB(AuthenticationModel loginCredentials)
         {
-            using var db = new DbStoreContext();
-            if (db.Users.FirstOrDefault(u => u.Name == loginCredentials.Username) is User user)
+            _logger.LogInformation("Login attempt: user=\"" + loginCredentials.Username + "\"");
+
+            if (_db.Users.FirstOrDefault(u => u.Name == loginCredentials.Username) is User user)
             {
                 var enteredPassword = HashUserPassword(user.UserId, loginCredentials.Password);
 
@@ -88,20 +98,16 @@ namespace ScwSvc.Controllers
                             new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString("N")), new Claim(ClaimTypes.Name, user.Name) },
                         CookieAuthenticationDefaults.AuthenticationScheme));
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
-                    Trace.TraceInformation("Service AUTH: login; user=\"" + loginCredentials.Username + "\"");
+                    _logger.LogInformation("Login: user=\"" + loginCredentials.Username + "\"");
 
                     return Ok();
                 }
-                else
-                {
-                    Trace.TraceInformation("Service AUTH: login fail; user=\"" + loginCredentials.Username + "\"");
-                    return BadRequest("Incorrect password.");
-                }
+
+                _logger.LogInformation("Login fail: user=\"" + loginCredentials.Username + "\"");
+                return BadRequest("Incorrect password.");
             }
-            else
-            {
-                return BadRequest("User not found.");
-            }
+
+            return BadRequest("User not found.");
         }
 
         /// <summary>
@@ -140,7 +146,7 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
         public IActionResult Unauthorized([FromQuery] string from)
         {
-            Trace.TraceWarning("Service AUTH: user tried accessing forbidden URL; user=\"" + User.FindFirstValue(ClaimTypes.NameIdentifier) + "\"; query=\"" + from + "\"");
+            _logger.LogWarning("Service AUTH: user tried accessing forbidden URL; user=\"" + User.FindFirstValue(ClaimTypes.NameIdentifier) + "\"; query=\"" + from + "\"");
             return StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to access this URL.");
         }
 
@@ -151,8 +157,17 @@ namespace ScwSvc.Controllers
         /// <returns>200 always</returns>
         [HttpGet("[action]")]
         [ProducesResponseType(typeof(string[]), StatusCodes.Status200OK)]
-        public ActionResult<string[]> MyRole()
+        public ActionResult<string[]> MyRoles()
             => Ok(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray());
+
+        /// <summary>
+        /// Gets the roles of the currently logged-in user.
+        /// </summary>
+        /// <returns>200 always</returns>
+        [HttpGet("[action]")]
+        [ProducesResponseType(typeof(string[]), StatusCodes.Status200OK)]
+        public ActionResult<string[]> MyClaims()
+            => Ok(User.Claims.Select(c => c.Value).ToArray());
 #endif
 
 #if ENABLE_AD_AUTH
@@ -218,46 +233,5 @@ namespace ScwSvc.Controllers
         /// <returns>Whether or not the two areas contain the same content.</returns>
         private static bool CompareHashes(in ReadOnlySpan<byte> left, in ReadOnlySpan<byte> right)
             => left.SequenceEqual(right);
-
-        public static class Permissions // ToDo: refactor this
-        {
-            /// <summary>
-            /// A user that may read a data set.
-            /// </summary>
-            public const string DataSetRead = "ds_read";
-
-            /// <summary>
-            /// A user that may write to data set.
-            /// </summary>
-            public const string DataSetWrite = "ds_write";
-
-            /// <summary>
-            /// A user that is the owner of a data set.
-            /// Users with this permission may perform any action on the data set.
-            /// </summary>
-            public const string DataSetOwner = "ds_own";
-
-            /// <summary>
-            /// A user that may read a sheet.
-            /// </summary>
-            public const string SheetRead = "sh_read";
-
-            /// <summary>
-            /// A user that may write to a sheet.
-            /// </summary>
-            public const string SheetWrite = "sh_write";
-
-            /// <summary>
-            /// A user that is the owner of a sheet.
-            /// Users with this permission may perform any action on the sheet.
-            /// </summary>
-            public const string SheetOwner = "sh_own";
-
-            public static readonly string[] All = new[]
-            {
-                DataSetRead, DataSetWrite, DataSetOwner,
-                SheetRead, SheetWrite, SheetOwner
-            };
-        }
     }
 }

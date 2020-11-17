@@ -15,10 +15,12 @@ namespace ScwSvc.Controllers
     public class DataSetController : ControllerBase
     {
         private readonly ILogger<DataSetController> _logger;
+        private readonly DbStoreContext _db;
 
-        public DataSetController(ILogger<DataSetController> logger)
+        public DataSetController(ILogger<DataSetController> logger, DbStoreContext db)
         {
             _logger = logger;
+            _db = db;
         }
     }
 }

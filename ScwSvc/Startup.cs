@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OData.Edm;
 using ScwSvc.Models;
+using static ScwSvc.Globals.DbConnectionString;
 
 namespace ScwSvc
 {
@@ -34,7 +35,7 @@ namespace ScwSvc
         {
             services.AddControllers()
                 .AddNewtonsoftJson();
-            //services.AddDbContextPool<DbStoreContext>(o => o.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContextPool<DbStoreContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={Globals.DbConnectionString.User}; Password={Pass}"));
             services.AddOData();
             //services.AddODataQueryFilter();
 
@@ -73,6 +74,7 @@ namespace ScwSvc
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
