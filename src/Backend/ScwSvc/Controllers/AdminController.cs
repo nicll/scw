@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.OData;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ScwSvc.Models;
 using System;
@@ -30,22 +31,55 @@ namespace ScwSvc.Controllers
 
         [HttpGet("user")]
         [EnableQuery]
-        public IQueryable<User> AllUsers()
+        public IQueryable<User> GetUsers()
             => _db.Users;
+
+        [HttpGet("user/{userId}")]
+        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        public async ValueTask<IActionResult> GetUser(Guid userId)
+        {
+            if (await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user)
+                return Ok(user);
+
+            return NotFound("User was not found.");
+        }
+
+        [HttpGet("user/{userId}/table")]
+        [ProducesResponseType(typeof(IQueryable<Guid>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        public async ValueTask<IActionResult> GetUserTables(Guid userId)
+        {
+            if (!(await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user))
+                return NotFound("User was not found.");
+
+            return Ok(_db.TableRefs.Where(t => t.OwnerUserId == userId).Select(t => t.TableRefId));
+        }
+
+        [HttpGet("user/{userId}/collaboration")]
+        [ProducesResponseType(typeof(IQueryable<Guid>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        public async ValueTask<IActionResult> GetUserCollaborations(Guid userId)
+        {
+            if (!(await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user))
+                return NotFound("User was not found.");
+
+            return Ok(_db.TableRefs.Where(t => t.Collaborators.Contains(user)).Select(t => t.TableRefId));
+        }
 
         [HttpGet("table")]
         [EnableQuery]
-        public IQueryable<TableRef> AllTables()
+        public IQueryable<TableRef> GetTables()
             => _db.TableRefs;
 
         [HttpGet("dataset")]
         [EnableQuery]
-        public IQueryable<TableRef> AllDataSets()
-            => _db.TableRefs.Where(t => t.Type == TableType.DataSet);
+        public IQueryable<TableRef> GetDataSets()
+            => _db.TableRefs.Where(t => t.Type == TableType.DataSet).Include(d => d.Columns);
 
         [HttpGet("sheet")]
         [EnableQuery]
-        public IQueryable<TableRef> AllSheets()
+        public IQueryable<TableRef> GetSheets()
             => _db.TableRefs.Where(t => t.Type == TableType.Sheet);
 
         [HttpPost("dataset")]
@@ -62,7 +96,7 @@ namespace ScwSvc.Controllers
             var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
-                return Unauthorized("You are logged in with a non-existant user.");
+                return Unauthorized("You are logged in with a non-existent user.");
 
             _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"name=" + dsModel.DisplayName);
 

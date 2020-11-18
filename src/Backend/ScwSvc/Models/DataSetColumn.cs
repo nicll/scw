@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ScwSvc.Models
@@ -6,9 +7,11 @@ namespace ScwSvc.Models
     public class DataSetColumn
     {
         [Required]
+        [JsonIgnore]
         public Guid TableRefId { get; set; }
 
         [Required]
+        [JsonIgnore]
         public TableRef TableRef { get; set; }
 
         [Required]

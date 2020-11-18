@@ -27,6 +27,7 @@ namespace ScwSvc.Models
 
             modelBuilder.Entity<TableRef>().HasOne(t => t.Owner).WithMany(u => u.OwnTables);
             modelBuilder.Entity<TableRef>().HasMany(t => t.Collaborators).WithMany(u => u.Collaborations);
+            modelBuilder.Entity<TableRef>().HasMany(t => t.Columns).WithOne(c => c.TableRef);
 
             modelBuilder.Entity<User>().Property(u => u.PasswordHash).HasMaxLength(32).IsFixedLength();
             modelBuilder.Entity<TableRef>().Property(t => t.LookupName).HasMaxLength(24).IsFixedLength();

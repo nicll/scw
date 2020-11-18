@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -40,18 +41,26 @@ namespace ScwSvc.Models
         public Guid LookupName { get; set; }
 
         /// <summary>
+        /// ID of the user that created this table.
+        /// </summary>
+        [Required]
+        public Guid OwnerUserId { get; set; }
+
+        /// <summary>
         /// The user that created this table.
         /// </summary>
         /// <remarks>
         /// This user may add/remove collaborators and change the table's <see cref="DisplayName"/>.
         /// </remarks>
         [Required]
+        [JsonIgnore]
         public User Owner { get; set; }
 
         /// <summary>
         /// Users that are allowed to edit this table's content.
         /// </summary>
         [Required]
+        [JsonIgnore]
         public ICollection<User> Collaborators { get; set; }
 
         /// <summary>

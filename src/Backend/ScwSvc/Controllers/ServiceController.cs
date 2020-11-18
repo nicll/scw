@@ -40,7 +40,13 @@ namespace ScwSvc.Controllers
                 return BadRequest("User with this name already exists.");
 
             var newUserId = Guid.NewGuid();
-            await _db.Users.AddAsync(new User() { UserId = newUserId, Name = loginCredentials.Username, PasswordHash = HashUserPassword(newUserId, loginCredentials.Password), Role = UserRole.Common }).ConfigureAwait(false);
+            await _db.Users.AddAsync(new User()
+            {
+                UserId = newUserId,
+                Name = loginCredentials.Username,
+                PasswordHash = HashUserPassword(newUserId, loginCredentials.Password),
+                Role = UserRole.Common
+            }).ConfigureAwait(false);
             await _db.SaveChangesAsync().ConfigureAwait(false);
 
             _logger.LogInformation("Register: user=\"" + loginCredentials.Username + "\"");
