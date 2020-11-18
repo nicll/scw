@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 
 namespace ScwSvc
 {
@@ -9,5 +10,36 @@ namespace ScwSvc
 
         internal static string? GetEnvironmentVariableOrNull(string name)
             => Environment.GetEnvironmentVariable(name);
+
+        internal static string? GetUserIdAsStringOrNull(ClaimsPrincipal user)
+            => user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        internal static Guid? GetUserIdAsGuidOrNull(ClaimsPrincipal user)
+        {
+            try
+            {
+                var owner = GetUserIdAsStringOrNull(user);
+                var ownerId = Guid.Parse(owner);
+                return ownerId;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        internal static (string idStr, Guid id)? GetUserIdAsGuidAndStringOrNull(ClaimsPrincipal user)
+        {
+            try
+            {
+                var owner = GetUserIdAsStringOrNull(user);
+                var ownerId = Guid.Parse(owner);
+                return (owner, ownerId);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

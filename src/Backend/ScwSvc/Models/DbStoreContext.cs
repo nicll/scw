@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using static ScwSvc.Globals.DbConnectionString;
 
 namespace ScwSvc.Models
 {
@@ -21,7 +20,7 @@ namespace ScwSvc.Models
 
             // ToDo: change this to use HasIndex + IsUnique as soon as it works again
             modelBuilder.Entity<User>().HasAlternateKey(u => u.Name);
-            modelBuilder.Entity<DataSetColumn>().HasAlternateKey(d => d.Name);
+            modelBuilder.Entity<DataSetColumn>().HasAlternateKey(d => new { d.TableRefId, d.Name });
 
             modelBuilder.Entity<User>().HasMany(u => u.OwnTables).WithOne(t => t.Owner);
             modelBuilder.Entity<User>().HasMany(u => u.Collaborations).WithMany(t => t.Collaborators);

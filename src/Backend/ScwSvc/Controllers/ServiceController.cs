@@ -30,6 +30,8 @@ namespace ScwSvc.Controllers
         }
 
         [HttpPost("[action]")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async ValueTask<IActionResult> Register([FromBody] AuthenticationModel loginCredentials)
         {
             _logger.LogInformation("Register attempt: user=\"" + loginCredentials.Username + "\"");
@@ -117,7 +119,7 @@ namespace ScwSvc.Controllers
         /// <returns>200 always</returns>
         [HttpPost("[action]")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Logout()
+        public async Task<ActionResult> Logout()
         {
             await HttpContext.SignOutAsync().ConfigureAwait(false);
             return Ok();
@@ -131,8 +133,8 @@ namespace ScwSvc.Controllers
         /// <returns>401 always</returns>
         [HttpGet("[action]")]
         [HttpPost("[action]")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-        public IActionResult Unauthenticated([FromQuery] string from)
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<string> Unauthenticated([FromQuery] string from)
             => StatusCode(StatusCodes.Status401Unauthorized, "You are currently not logged in.");
 
         /// <summary>
@@ -143,8 +145,8 @@ namespace ScwSvc.Controllers
         /// <returns>403 always</returns>
         [HttpGet("[action]")]
         [HttpPost("[action]")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
-        public IActionResult Unauthorized([FromQuery] string from)
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public ActionResult<string> Unauthorized([FromQuery] string from)
         {
             _logger.LogWarning("Service AUTH: user tried accessing forbidden URL; user=\"" + User.FindFirstValue(ClaimTypes.NameIdentifier) + "\"; query=\"" + from + "\"");
             return StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to access this URL.");
@@ -156,7 +158,7 @@ namespace ScwSvc.Controllers
         /// </summary>
         /// <returns>200 always</returns>
         [HttpGet("[action]")]
-        [ProducesResponseType(typeof(string[]), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<string[]> MyRoles()
             => Ok(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray());
 
@@ -165,7 +167,7 @@ namespace ScwSvc.Controllers
         /// </summary>
         /// <returns>200 always</returns>
         [HttpGet("[action]")]
-        [ProducesResponseType(typeof(string[]), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<string[]> MyClaims()
             => Ok(User.Claims.Select(c => c.Value).ToArray());
 #endif
@@ -208,6 +210,35 @@ namespace ScwSvc.Controllers
 
             identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             return true;
+        }
+#endif
+
+#if DEBUG
+        // demo users for testing
+        [HttpPost("createDemoUsers")]
+        public async ValueTask<IActionResult> CreateDemoUsers()
+        {
+            try
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    var userId = Guid.NewGuid();
+                    await _db.Users.AddAsync(new User()
+                    {
+                        UserId = userId,
+                        Name = "test" + i,
+                        Role = (UserRole)i,
+                        PasswordHash = HashUserPassword(userId, "test")
+                    }).ConfigureAwait(false);
+                }
+
+                await _db.SaveChangesAsync();
+                return Ok();
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
 #endif
 
