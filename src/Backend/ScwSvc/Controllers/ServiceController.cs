@@ -29,7 +29,7 @@ namespace ScwSvc.Controllers
             _db = db;
         }
 
-        [HttpPost("[action]")]
+        [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async ValueTask<IActionResult> Register([FromBody] AuthenticationModel loginCredentials)
@@ -60,22 +60,13 @@ namespace ScwSvc.Controllers
         /// </summary>
         /// <param name="loginCredentials">Credentials the user wants to login with</param>
         /// <returns>200 and cookie if successful; 400 on validation fail; 503 if disabled</returns>
-        [HttpPost("[action]")]
+        [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async ValueTask<IActionResult> Login([FromBody] AuthenticationModel loginCredentials)
         {
 #if ENABLE_AD_AUTH
-            _logger.LogInformation("Service AUTH: login attempt; user=\"" + loginCredentials.Username + "\"");
-
-            if (!AuthenticateAndAuthorizeWithAD(loginCredentials.Username, loginCredentials.Password, out string? error, out ClaimsIdentity? identity))
-                return BadRequest(error);
-
-            // see https://stackoverflow.com/a/37090696
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(identity), new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
-            _logger.LogInformation("Service AUTH: login; user=\"" + loginCredentials.Username + "\"");
-            return Ok();
+            return await LoginWithAD(loginCredentials);
 #elif ENABLE_DB_AUTH
             return await LoginWithDB(loginCredentials);
 #elif DEBUG
@@ -118,6 +109,25 @@ namespace ScwSvc.Controllers
             return BadRequest("User not found.");
         }
 
+#if ENABLE_AD_AUTH
+        [HttpPost("login/ad")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async ValueTask<IActionResult> LoginWithAD(AuthenticationModel loginCredentials)
+        {
+            _logger.LogInformation("Service AUTH: login attempt; user=\"" + loginCredentials.Username + "\"");
+
+            if (!AuthenticateAndAuthorizeWithAD(loginCredentials.Username, loginCredentials.Password, out string error, out ClaimsIdentity identity))
+                return BadRequest(error);
+
+            // see https://stackoverflow.com/a/37090696
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity), new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
+            _logger.LogInformation("Service AUTH: login; user=\"" + loginCredentials.Username + "\"");
+            return Ok();
+        }
+#endif
+
         /// <summary>
         /// Performs logout for logged-in users.
         /// Does not complain if user wasn't logged in when calling.
@@ -158,7 +168,6 @@ namespace ScwSvc.Controllers
             return StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to access this URL.");
         }
 
-#if DEBUG
         /// <summary>
         /// Gets the roles of the currently logged-in user.
         /// </summary>
@@ -168,6 +177,7 @@ namespace ScwSvc.Controllers
         public ActionResult<string[]> MyRoles()
             => Ok(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray());
 
+#if DEBUG
         /// <summary>
         /// Gets the roles of the currently logged-in user.
         /// </summary>

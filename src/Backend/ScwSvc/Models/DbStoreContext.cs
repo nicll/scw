@@ -11,11 +11,12 @@ namespace ScwSvc.Models
 
         public DbStoreContext(DbContextOptions<DbStoreContext> options) : base(options)
         {
-            Database.EnsureCreated();
+            Database.Migrate();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("scw1_sys");
             modelBuilder.Entity<DataSetColumn>().HasKey(c => new { c.TableRefId, c.Position });
 
             // ToDo: change this to use HasIndex + IsUnique as soon as it works again

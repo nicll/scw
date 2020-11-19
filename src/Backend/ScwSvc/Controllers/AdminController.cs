@@ -98,7 +98,7 @@ namespace ScwSvc.Controllers
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
-            _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"name=" + dsModel.DisplayName);
+            _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
             var newDsId = Guid.NewGuid();
             await _db.TableRefs.AddAsync(new TableRef()
@@ -131,7 +131,7 @@ namespace ScwSvc.Controllers
             if (user is null)
                 return Unauthorized("You are logged in with a non-existant user.");
 
-            _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"name=" + shModel.DisplayName);
+            _logger.LogInformation("Create sheet: user=\"" + ownerInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
 
             var newShId = Guid.NewGuid();
             await _db.TableRefs.AddAsync(new TableRef()
