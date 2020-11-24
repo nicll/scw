@@ -1,106 +1,67 @@
-﻿using Microsoft.AspNet.OData;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ScwSvc.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static ScwSvc.Utils;
 
 namespace ScwSvc.Controllers
 {
-    /// <summary>
-    /// Provides administrative features for admins and managers.
-    /// Managers generally only have read-only access to everything.
-    /// </summary>
-    [Route("api/[controller]")]
-    [AuthorizeRoles(nameof(UserRole.Admin), nameof(UserRole.Manager))]
+    [Route("api/my")]
     [ApiController]
-    public class AdminController : ControllerBase
+    [Authorize]
+    public class UserController : ControllerBase
     {
-        private readonly ILogger<AdminController> _logger;
+        private readonly ILogger<UserController> _logger;
         private readonly DbStoreContext _db;
 
-        public AdminController(ILogger<AdminController> logger, DbStoreContext db)
+        /// <summary>
+        /// Maximum amount of data sets one user may own at any time.
+        /// </summary>
+        /// <remarks>
+        /// This value is bypassed if additional tables are assigned by an administrator.
+        /// </remarks>
+        public const int MaxDataSetsPerUser = 20;
+
+        /// <summary>
+        /// Maximum amount of sheets one user may own at any time.
+        /// </summary>
+        /// <remarks>
+        /// This value is bypassed if additional tables are assigned by an administrator.
+        /// </remarks>
+        public const int MaxSheetsPerUser = 20;
+
+        public UserController(ILogger<UserController> logger, DbStoreContext db)
         {
             _logger = logger;
             _db = db;
         }
 
-        [HttpGet("user")]
-        [EnableQuery]
-        public IQueryable<User> GetUsers()
-            => _db.Users;
-
-        [HttpGet("user/{userId}")]
-        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-        public async ValueTask<IActionResult> GetUser([FromRoute] Guid userId)
-        {
-            if (await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user)
-                return Ok(user);
-
-            return NotFound("User was not found.");
-        }
-
-        [HttpDelete("user/{userId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-        public async ValueTask<IActionResult> DeleteUser([FromRoute] Guid userId)
-        {
-            if (await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user)
-            {
-                await _db.TableRefs.Where(t => t.Collaborators.Contains(user)).ForEachAsync(t => t.Collaborators.Remove(user));
-                _db.TableRefs.RemoveRange(user.OwnTables);
-                _db.Users.Remove(user);
-                await _db.SaveChangesAsync();
-                return Ok();
-            }
-
-            return NotFound("User was not found.");
-        }
-
-        [HttpGet("user/{userId}/table")]
-        [ProducesResponseType(typeof(IQueryable<Guid>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-        public async ValueTask<IActionResult> GetUserTables([FromRoute] Guid userId)
-        {
-            if (!(await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user))
-                return NotFound("User was not found.");
-
-            return Ok(_db.TableRefs.Where(t => t.OwnerUserId == userId).Select(t => t.TableRefId));
-        }
-
-        [HttpGet("user/{userId}/collaboration")]
-        [ProducesResponseType(typeof(IQueryable<Guid>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-        public async ValueTask<IActionResult> GetUserCollaborations([FromRoute] Guid userId)
-        {
-            if (!(await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user))
-                return NotFound("User was not found.");
-
-            return Ok(_db.TableRefs.Where(t => t.Collaborators.Contains(user)).Select(t => t.TableRefId));
-        }
-
-        [HttpGet("table")]
-        [EnableQuery]
-        public IQueryable<TableRef> GetTables()
-            => _db.TableRefs;
-
         [HttpGet("dataset")]
-        [EnableQuery]
-        public IQueryable<TableRef> GetDataSets()
-            => _db.TableRefs.Where(t => t.Type == TableType.DataSet).Include(d => d.Columns);
+        [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MyDataSets()
+        {
+            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
 
-        [HttpGet("sheet")]
-        [EnableQuery]
-        public IQueryable<TableRef> GetSheets()
-            => _db.TableRefs.Where(t => t.Type == TableType.Sheet);
+            if (!ownerInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _db.Users.Include(u => u.OwnTables)
+                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(user.OwnTables.Where(t => t.Type == TableType.DataSet));
+        }
 
         [HttpPost("dataset")]
-        [AuthorizeRoles(nameof(UserRole.Admin))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSetModel dsModel)
@@ -114,6 +75,9 @@ namespace ScwSvc.Controllers
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
+
+            if (user.OwnTables.Count > MaxDataSetsPerUser)
+                return Forbid("You cannot own more than " + MaxDataSetsPerUser + " data sets at any time.");
 
             _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
@@ -132,8 +96,26 @@ namespace ScwSvc.Controllers
             return Ok();
         }
 
+        [HttpGet("sheet")]
+        [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MySheets()
+        {
+            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+
+            if (!ownerInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _db.Users.Include(u => u.OwnTables)
+                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(user.OwnTables.Where(t => t.Type == TableType.Sheet));
+        }
+
         [HttpPost("sheet")]
-        [AuthorizeRoles(nameof(UserRole.Admin))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheetModel shModel)
@@ -147,6 +129,9 @@ namespace ScwSvc.Controllers
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
+
+            if (user.OwnTables.Count > MaxSheetsPerUser)
+                return Forbid("You cannot own more than " + MaxSheetsPerUser + " sheets at any time.");
 
             _logger.LogInformation("Create sheet: user=\"" + ownerInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
 
@@ -164,7 +149,7 @@ namespace ScwSvc.Controllers
             return Ok();
         }
 
-        // ToDo: move to helper class
+        // ToDo: copied from AdminController, move to separate helper class to avoid duplication
         private static DataSetColumn[] ConvertColumns(CreateDataSetModel.ColumnDefinition[] definition, Guid tableRefId)
         {
             var result = new DataSetColumn[definition.Length];

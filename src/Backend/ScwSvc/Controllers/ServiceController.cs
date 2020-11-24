@@ -20,10 +20,10 @@ namespace ScwSvc.Controllers
     {
         private const string Pepper = "scw-";
 
-        private readonly ILogger<DataSetController> _logger;
+        private readonly ILogger<ServiceController> _logger;
         private readonly DbStoreContext _db;
 
-        public ServiceController(ILogger<DataSetController> logger, DbStoreContext db)
+        public ServiceController(ILogger<ServiceController> logger, DbStoreContext db)
         {
             _logger = logger;
             _db = db;
@@ -83,7 +83,7 @@ namespace ScwSvc.Controllers
         [HttpPost("login/db")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async ValueTask<IActionResult> LoginWithDB(AuthenticationModel loginCredentials)
+        public async ValueTask<IActionResult> LoginWithDB([FromBody] AuthenticationModel loginCredentials)
         {
             _logger.LogInformation("Login attempt: user=\"" + loginCredentials.Username + "\"");
 
@@ -113,7 +113,7 @@ namespace ScwSvc.Controllers
         [HttpPost("login/ad")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async ValueTask<IActionResult> LoginWithAD(AuthenticationModel loginCredentials)
+        public async ValueTask<IActionResult> LoginWithAD([FromBody] AuthenticationModel loginCredentials)
         {
             _logger.LogInformation("Service AUTH: login attempt; user=\"" + loginCredentials.Username + "\"");
 
@@ -135,7 +135,7 @@ namespace ScwSvc.Controllers
         /// <returns>200 always</returns>
         [HttpPost("[action]")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> Logout()
+        public async ValueTask<ActionResult> Logout()
         {
             await HttpContext.SignOutAsync().ConfigureAwait(false);
             return Ok();

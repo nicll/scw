@@ -6,7 +6,11 @@ namespace ScwSvc.Controllers
     [ApiController]
     public class ErrorController : ControllerBase
     {
-        [Route("/error")]
+        [HttpGet("/error")]
+        [HttpPost("/error")]
+        [HttpPut("/error")]
+        [HttpPatch("/error")]
+        [HttpDelete("/error")]
         public IActionResult Error() => Problem();
     }
 }

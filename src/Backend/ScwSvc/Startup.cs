@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Net.Http.Headers;
 using ScwSvc.Models;
 using static ScwSvc.Globals.DbConnectionString;
 
@@ -27,6 +30,7 @@ namespace ScwSvc
             services.AddControllers()
                 .AddNewtonsoftJson();
             services.AddDbContextPool<DbStoreContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={Globals.DbConnectionString.User}; Password={Pass}"));
+
             services.AddOData();
             //services.AddODataQueryFilter();
 
@@ -45,6 +49,12 @@ namespace ScwSvc
                     opts.ExpireTimeSpan = TimeSpan.FromDays(1); // extend this later
                 });
             services.AddAuthorization();
+
+#if DEBUG
+            services.AddSwaggerGen(opts => opts.SwaggerDoc("v0", new Microsoft.OpenApi.Models.OpenApiInfo() { Title = "Spreadsheet Components for Web-Based Projects API", Version = "v0" }));
+            services.AddSwaggerGenNewtonsoftSupport();
+            SetOutputFormatters(services);
+#endif
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,6 +78,11 @@ namespace ScwSvc
             app.UseAuthentication();
             app.UseAuthorization();
 
+#if DEBUG
+            app.UseSwagger();
+            app.UseSwaggerUI(opts => opts.SwaggerEndpoint("/swagger/v0/swagger.json", "Spreadsheet Components for Web-Based Projects API"));
+#endif
+
             app.UseEndpoints(endpoints =>
             {
                 //var defaultConventions = ODataRoutingConventions.CreateDefault();
@@ -87,5 +102,32 @@ namespace ScwSvc
             return builder.GetEdmModel();
         }
         */
+
+        // Hack: works around compatibility issue between OData and Swagger until officially fixed
+        private static void SetOutputFormatters(IServiceCollection services)
+        {
+            services.AddMvcCore(options =>
+            {
+                IEnumerable<ODataOutputFormatter> outputFormatters =
+                    options.OutputFormatters.OfType<ODataOutputFormatter>()
+                        .Where(formatter => formatter.SupportedMediaTypes.Count == 0);
+
+                IEnumerable<ODataInputFormatter> inputFormatters =
+                    options.InputFormatters.OfType<ODataInputFormatter>()
+                        .Where(formatter => formatter.SupportedMediaTypes.Count == 0);
+
+                foreach (var outputFormatter in outputFormatters)
+                {
+                    outputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/odata"));
+                    outputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/json"));
+                }
+
+                foreach (var inputFormatter in inputFormatters)
+                {
+                    inputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/odata"));
+                    inputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/json"));
+                }
+            });
+        }
     }
 }
