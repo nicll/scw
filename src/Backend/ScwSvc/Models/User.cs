@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -55,6 +56,7 @@ namespace ScwSvc.Models
     /// <summary>
     /// Lists different roles users can have.
     /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum UserRole
     {
         /// <summary>
