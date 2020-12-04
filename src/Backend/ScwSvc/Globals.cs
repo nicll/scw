@@ -17,11 +17,11 @@ namespace ScwSvc
 
             public static readonly string Port = GetEnvironmentVariableOrNull("SCW1_DBPORT") ?? "5432";
 
-            public static readonly string SysUser = GetEnvironmentVariableOrFail("SCW1_DBUSER_SYS");
+            public static readonly string SysUser = GetEnvironmentVariableOrNull("SCW1_DBUSER_SYS") ?? "scw1_user_sys";
 
             public static readonly string SysPass = GetEnvironmentVariableOrFail("SCW1_DBPASS_SYS");
 
-            public static readonly string DynUser = GetEnvironmentVariableOrFail("SCW1_DBUSER_DYN");
+            public static readonly string DynUser = GetEnvironmentVariableOrNull("SCW1_DBUSER_DYN") ?? "scw1_user_dyn";
 
             public static readonly string DynPass = GetEnvironmentVariableOrFail("SCW1_DBPASS_DYN");
         }

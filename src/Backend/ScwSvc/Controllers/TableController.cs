@@ -25,8 +25,11 @@ namespace ScwSvc.Controllers
             _db = db;
         }
 
-        [HttpGet("1/{tableRefId}")]
-        public async ValueTask<IActionResult> GetTable1([FromRoute] Guid tableRefId)
+        [HttpGet("{tableRefId}")]
+        [HttpPost("{tableRefId}")]
+        [HttpPatch("{tableRefId}")]
+        [HttpDelete("{tableRefId}")]
+        public async ValueTask<IActionResult> GetTable([FromRoute] Guid tableRefId)
         {
             var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
 
@@ -45,7 +48,7 @@ namespace ScwSvc.Controllers
             if (tableRef is null)
                 return Forbid("You are not authorized to view this table or it does not exist.");
 
-            return Redirect(PostgrestBaseUrl + tableRef.LookupName.ToString("N") + "?" + HttpContext.Request.QueryString);
+            return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToString("N") + "?" + HttpContext.Request.QueryString);
         }
 
         [HttpGet("2/{tableRefId}")]

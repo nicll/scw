@@ -20,10 +20,13 @@ namespace ScwSvc.Models
 
         public class ColumnDefinition
         {
+            [Required]
             public ColumnType Type { get; set; }
 
+            [Required]
             public string Name { get; set; }
 
+            [Required]
             public bool Nullable { get; set; }
         }
     }

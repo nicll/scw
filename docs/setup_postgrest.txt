@@ -1,12 +1,12 @@
-Konfigurationsdatei für PostgREST anlegen:
+Konfigurationsdatei für PostgREST anlegen, beispielsweise:
 db-uri = "postgres://scw1_user_dyn:<Passwort>@localhost:5432/scw"
 db-schema = "scw1_dyn"
 db-anon-role = "scw1_user_dyn"
 
 Benutzer anlegen:
 "scw1_user_dyn"
-	USAGE für Schema "scw1_dyn"
-	SELECT für alle Tables in Schema "scw1_dyn"
+	USAGE und CREATE für Schema "scw1_dyn"
+	SELECT, INSERT, UPDATE, DELETE für alle Tables in Schema "scw1_dyn"
 	Passwort mit dem in Konfigurationsdatei abgleichen
 
 Zum Starten:

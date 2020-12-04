@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -28,6 +29,7 @@ namespace ScwSvc.Models
         public bool Nullable { get; set; }
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum ColumnType
     {
         Integer,
