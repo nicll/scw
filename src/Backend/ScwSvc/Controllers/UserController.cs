@@ -18,7 +18,8 @@ namespace ScwSvc.Controllers
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly DbStoreContext _db;
+        private readonly DbSysContext _sysDb;
+        private readonly DbDynContext _dynDb;
 
         /// <summary>
         /// Maximum amount of data sets one user may own at any time.
@@ -36,10 +37,11 @@ namespace ScwSvc.Controllers
         /// </remarks>
         public const int MaxSheetsPerUser = 20;
 
-        public UserController(ILogger<UserController> logger, DbStoreContext db)
+        public UserController(ILogger<UserController> logger, DbSysContext sysDb, DbDynContext dynDb)
         {
             _logger = logger;
-            _db = db;
+            _sysDb = sysDb;
+            _dynDb = dynDb;
         }
 
         [HttpGet("dataset")]
@@ -52,7 +54,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.Include(u => u.OwnTables)
+            var user = await _sysDb.Users.Include(u => u.OwnTables)
                 .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
@@ -71,7 +73,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -82,7 +84,7 @@ namespace ScwSvc.Controllers
             _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
             var newDsId = Guid.NewGuid();
-            await _db.TableRefs.AddAsync(new TableRef()
+            var newTable = new TableRef()
             {
                 TableRefId = newDsId,
                 Type = TableType.DataSet,
@@ -90,9 +92,12 @@ namespace ScwSvc.Controllers
                 Owner = user,
                 LookupName = Guid.NewGuid(),
                 Columns = ConvertColumns(dsModel.Columns, newDsId)
-            });
+            };
 
-            await _db.SaveChangesAsync();
+            await _sysDb.TableRefs.AddAsync(newTable);
+            await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
+
+            await _sysDb.SaveChangesAsync();
             return Ok();
         }
 
@@ -106,7 +111,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.Include(u => u.OwnTables)
+            var user = await _sysDb.Users.Include(u => u.OwnTables)
                 .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
@@ -125,7 +130,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -136,16 +141,19 @@ namespace ScwSvc.Controllers
             _logger.LogInformation("Create sheet: user=\"" + ownerInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
 
             var newShId = Guid.NewGuid();
-            await _db.TableRefs.AddAsync(new TableRef()
+            var newTable = new TableRef()
             {
                 TableRefId = newShId,
                 Type = TableType.Sheet,
                 DisplayName = shModel.DisplayName,
                 Owner = user,
                 LookupName = Guid.NewGuid()
-            });
+            };
 
-            await _db.SaveChangesAsync();
+            await _sysDb.TableRefs.AddAsync(newTable);
+            await Interactors.DynDbInteractor.CreateSheet(newTable, _dynDb);
+
+            await _sysDb.SaveChangesAsync();
             return Ok();
         }
 

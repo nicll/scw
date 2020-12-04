@@ -31,8 +31,8 @@ namespace ScwSvc.Models
     public enum ColumnType
     {
         Integer,
-        Float,
-        Date,
+        Real,
+        Timestamp,
         String
     }
 }

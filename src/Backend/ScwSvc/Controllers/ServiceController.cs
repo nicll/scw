@@ -21,9 +21,9 @@ namespace ScwSvc.Controllers
         private const string Pepper = "scw-";
 
         private readonly ILogger<ServiceController> _logger;
-        private readonly DbStoreContext _db;
+        private readonly DbSysContext _db;
 
-        public ServiceController(ILogger<ServiceController> logger, DbStoreContext db)
+        public ServiceController(ILogger<ServiceController> logger, DbSysContext db)
         {
             _logger = logger;
             _db = db;

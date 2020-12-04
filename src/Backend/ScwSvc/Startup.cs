@@ -29,7 +29,8 @@ namespace ScwSvc
         {
             services.AddControllers()
                 .AddNewtonsoftJson();
-            services.AddDbContextPool<DbStoreContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={Globals.DbConnectionString.User}; Password={Pass}"));
+            services.AddDbContextPool<DbSysContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={SysUser}; Password={SysPass}; SearchPath=scw1_sys,public"));
+            services.AddDbContextPool<DbDynContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={DynUser}; Password={DynPass}; SearchPath=scw1_dyn"));
 
             services.AddOData();
             //services.AddODataQueryFilter();

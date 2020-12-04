@@ -21,25 +21,27 @@ namespace ScwSvc.Controllers
     public class AdminController : ControllerBase
     {
         private readonly ILogger<AdminController> _logger;
-        private readonly DbStoreContext _db;
+        private readonly DbSysContext _sysDb;
+        private readonly DbDynContext _dynDb;
 
-        public AdminController(ILogger<AdminController> logger, DbStoreContext db)
+        public AdminController(ILogger<AdminController> logger, DbSysContext sysDb, DbDynContext dynDb)
         {
             _logger = logger;
-            _db = db;
+            _sysDb = sysDb;
+            _dynDb = dynDb;
         }
 
         [HttpGet("user")]
         [EnableQuery]
         public IQueryable<User> GetUsers()
-            => _db.Users;
+            => _sysDb.Users;
 
         [HttpGet("user/{userId}")]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> GetUser([FromRoute] Guid userId)
         {
-            if (await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user)
+            if (await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user)
                 return Ok(user);
 
             return NotFound("User was not found.");
@@ -50,12 +52,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> DeleteUser([FromRoute] Guid userId)
         {
-            if (await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user)
+            if (await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user)
             {
-                await _db.TableRefs.Where(t => t.Collaborators.Contains(user)).ForEachAsync(t => t.Collaborators.Remove(user));
-                _db.TableRefs.RemoveRange(user.OwnTables);
-                _db.Users.Remove(user);
-                await _db.SaveChangesAsync();
+                await _sysDb.TableRefs.Where(t => t.Collaborators.Contains(user)).ForEachAsync(t => t.Collaborators.Remove(user));
+                _sysDb.TableRefs.RemoveRange(user.OwnTables);
+                _sysDb.Users.Remove(user);
+                await _sysDb.SaveChangesAsync();
                 return Ok();
             }
 
@@ -67,10 +69,10 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> GetUserTables([FromRoute] Guid userId)
         {
-            if (!(await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user))
+            if (!(await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user))
                 return NotFound("User was not found.");
 
-            return Ok(_db.TableRefs.Where(t => t.OwnerUserId == userId).Select(t => t.TableRefId));
+            return Ok(_sysDb.TableRefs.Where(t => t.OwnerUserId == userId).Select(t => t.TableRefId));
         }
 
         [HttpGet("user/{userId}/collaboration")]
@@ -78,26 +80,26 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> GetUserCollaborations([FromRoute] Guid userId)
         {
-            if (!(await _db.Users.FindAsync(userId).ConfigureAwait(false) is User user))
+            if (!(await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user))
                 return NotFound("User was not found.");
 
-            return Ok(_db.TableRefs.Where(t => t.Collaborators.Contains(user)).Select(t => t.TableRefId));
+            return Ok(_sysDb.TableRefs.Where(t => t.Collaborators.Contains(user)).Select(t => t.TableRefId));
         }
 
         [HttpGet("table")]
         [EnableQuery]
         public IQueryable<TableRef> GetTables()
-            => _db.TableRefs;
+            => _sysDb.TableRefs;
 
         [HttpGet("dataset")]
         [EnableQuery]
         public IQueryable<TableRef> GetDataSets()
-            => _db.TableRefs.Where(t => t.Type == TableType.DataSet).Include(d => d.Columns);
+            => _sysDb.TableRefs.Where(t => t.Type == TableType.DataSet).Include(d => d.Columns);
 
         [HttpGet("sheet")]
         [EnableQuery]
         public IQueryable<TableRef> GetSheets()
-            => _db.TableRefs.Where(t => t.Type == TableType.Sheet);
+            => _sysDb.TableRefs.Where(t => t.Type == TableType.Sheet);
 
         [HttpPost("dataset")]
         [AuthorizeRoles(nameof(UserRole.Admin))]
@@ -110,7 +112,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -118,7 +120,7 @@ namespace ScwSvc.Controllers
             _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
             var newDsId = Guid.NewGuid();
-            await _db.TableRefs.AddAsync(new TableRef()
+            var newTable = new TableRef()
             {
                 TableRefId = newDsId,
                 Type = TableType.DataSet,
@@ -126,9 +128,12 @@ namespace ScwSvc.Controllers
                 Owner = user,
                 LookupName = Guid.NewGuid(),
                 Columns = ConvertColumns(dsModel.Columns, newDsId)
-            });
+            };
 
-            await _db.SaveChangesAsync();
+            await _sysDb.TableRefs.AddAsync(newTable);
+            await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
+
+            await _sysDb.SaveChangesAsync();
             return Ok();
         }
 
@@ -143,7 +148,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -151,16 +156,19 @@ namespace ScwSvc.Controllers
             _logger.LogInformation("Create sheet: user=\"" + ownerInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
 
             var newShId = Guid.NewGuid();
-            await _db.TableRefs.AddAsync(new TableRef()
+            var newTable = new TableRef()
             {
                 TableRefId = newShId,
                 Type = TableType.Sheet,
                 DisplayName = shModel.DisplayName,
                 Owner = user,
                 LookupName = Guid.NewGuid()
-            });
+            };
 
-            await _db.SaveChangesAsync();
+            await _sysDb.TableRefs.AddAsync(newTable);
+            await Interactors.DynDbInteractor.CreateSheet(newTable, _dynDb);
+
+            await _sysDb.SaveChangesAsync();
             return Ok();
         }
 
