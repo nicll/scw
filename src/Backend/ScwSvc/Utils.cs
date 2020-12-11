@@ -41,5 +41,8 @@ namespace ScwSvc
                 return null;
             }
         }
+
+        internal static string ToNameString(this Guid guid)
+            => guid.ToString("N");
     }
 }

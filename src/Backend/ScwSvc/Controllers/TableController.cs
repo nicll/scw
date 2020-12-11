@@ -48,7 +48,7 @@ namespace ScwSvc.Controllers
             if (tableRef is null)
                 return Forbid("You are not authorized to view this table or it does not exist.");
 
-            return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToString("N") + "?" + HttpContext.Request.QueryString);
+            return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
         }
 
         [HttpGet("2/{tableRefId}")]

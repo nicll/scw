@@ -117,6 +117,9 @@ namespace ScwSvc.Controllers
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
+            if (dsModel.Columns.Length < 1)
+                return BadRequest("No columns specified.");
+
             _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
             var newDsId = Guid.NewGuid();
@@ -133,6 +136,40 @@ namespace ScwSvc.Controllers
             await _sysDb.TableRefs.AddAsync(newTable);
             await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
 
+            await _sysDb.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpDelete("dataset/{tableRefId}")]
+        [AuthorizeRoles(nameof(UserRole.Admin))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        public async ValueTask<IActionResult> RemoveDataSet([FromRoute] Guid tableRefId)
+        {
+            var userInfo = GetUserIdAsGuidAndStringOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.Users.FindAsync(userInfo.Value.id).ConfigureAwait(false);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var table = await _sysDb.TableRefs.FindAsync(tableRefId);
+
+            if (table is null)
+                return NotFound("This data set does not exist.");
+
+            if (table.Type != TableType.DataSet)
+                return BadRequest("Incorrect table type.");
+
+            _logger.LogInformation("Remove dataset: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
+
+            _sysDb.Remove(table);
+            await Interactors.DynDbInteractor.RemoveDataSet(table, _dynDb);
             await _sysDb.SaveChangesAsync();
             return Ok();
         }
@@ -168,6 +205,40 @@ namespace ScwSvc.Controllers
             await _sysDb.TableRefs.AddAsync(newTable);
             await Interactors.DynDbInteractor.CreateSheet(newTable, _dynDb);
 
+            await _sysDb.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpDelete("sheet/{tableRefId}")]
+        [AuthorizeRoles(nameof(UserRole.Admin))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        public async ValueTask<IActionResult> RemoveSheet([FromRoute] Guid tableRefId)
+        {
+            var userInfo = GetUserIdAsGuidAndStringOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.Users.FindAsync(userInfo.Value.id).ConfigureAwait(false);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var table = await _sysDb.TableRefs.FindAsync(tableRefId);
+
+            if (table is null)
+                return NotFound("This sheet does not exist.");
+
+            if (table.Type != TableType.Sheet)
+                return BadRequest("Incorrect table type.");
+
+            _logger.LogInformation("Remove sheet: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
+
+            _sysDb.Remove(table);
+            await Interactors.DynDbInteractor.RemoveSheet(table, _dynDb);
             await _sysDb.SaveChangesAsync();
             return Ok();
         }

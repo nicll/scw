@@ -9,10 +9,13 @@ namespace ScwSvc.Interactors
 {
     public static class DynDbInteractor // ToDo: this will be refactored to something nice later on...
     {
-        public static async Task CreateDataSet(TableRef table, DbDynContext db)
+        public static async ValueTask CreateDataSet(TableRef table, DbDynContext db)
         {
             if (table.Columns.Count < 1)
                 throw new InvalidTableException("No columns were specified.");
+
+            if (table.Type != TableType.DataSet)
+                throw new InvalidTableException("Not the correct table type.");
 
             using var conn = db.Database.GetDbConnection();
             await conn.OpenAsync();
@@ -21,8 +24,23 @@ namespace ScwSvc.Interactors
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public static async Task CreateSheet(TableRef table, DbDynContext db)
+        public static async ValueTask RemoveDataSet(TableRef table, DbDynContext db)
         {
+            if (table.Type != TableType.DataSet)
+                throw new InvalidTableException("Not the correct table type.");
+
+            using var conn = db.Database.GetDbConnection();
+            await conn.OpenAsync();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DROP TABLE " + table.LookupName.ToNameString();
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        public static async ValueTask CreateSheet(TableRef table, DbDynContext db)
+        {
+            if (table.Type != TableType.Sheet)
+                throw new InvalidTableException("Not the correct table type.");
+
             using var conn = db.Database.GetDbConnection();
             await conn.OpenAsync();
             using var cmd = conn.CreateCommand();
@@ -30,11 +48,23 @@ namespace ScwSvc.Interactors
             await cmd.ExecuteNonQueryAsync();
         }
 
+        public static async ValueTask RemoveSheet(TableRef table, DbDynContext db)
+        {
+            if (table.Type != TableType.Sheet)
+                throw new InvalidTableException("Not the correct table type.");
+
+            using var conn = db.Database.GetDbConnection();
+            await conn.OpenAsync();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DROP TABLE " + table.LookupName.ToNameString();
+            await cmd.ExecuteNonQueryAsync();
+        }
+
         private static string ConvertTableRefToCreateTable(TableRef table)
         {
             var create = new StringBuilder();
             create.Append("CREATE TABLE \"")
-                .Append(table.LookupName.ToString("N"))
+                .Append(table.LookupName.ToNameString())
                 .Append("\" (");
 
             foreach (var column in table.Columns)

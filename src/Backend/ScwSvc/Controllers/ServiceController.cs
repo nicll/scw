@@ -94,7 +94,7 @@ namespace ScwSvc.Controllers
                 if (enteredPassword.SequenceEqual(user.PasswordHash))
                 {
                     var cp = new ClaimsPrincipal(new ClaimsIdentity(
-                            new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString("N")), new Claim(ClaimTypes.Name, user.Name) },
+                            new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToNameString()), new Claim(ClaimTypes.Name, user.Name) },
                         CookieAuthenticationDefaults.AuthenticationScheme));
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
                     _logger.LogInformation("Login: user=\"" + loginCredentials.Username + "\"");
@@ -267,7 +267,7 @@ namespace ScwSvc.Controllers
         private static byte[] HashUserPassword(Guid userId, in string pass)
         {
             var hasher = SHA256.Create();
-            var combination = Encoding.UTF8.GetBytes(Pepper + userId.ToString("N") + pass);
+            var combination = Encoding.UTF8.GetBytes(Pepper + userId.ToNameString() + pass);
             return hasher.ComputeHash(combination);
         }
 
