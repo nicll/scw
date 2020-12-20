@@ -51,6 +51,8 @@ namespace ScwSvc
                 });
             services.AddAuthorization();
 
+            services.AddCors();
+
 #if DEBUG
             services.AddSwaggerGen(opts => opts.SwaggerDoc("v0", new Microsoft.OpenApi.Models.OpenApiInfo() { Title = "Spreadsheet Components for Web-Based Projects API", Version = "v0" }));
             services.AddSwaggerGenNewtonsoftSupport();
@@ -75,6 +77,7 @@ namespace ScwSvc
             }
 
             app.UseRouting();
+            app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseAuthorization();
