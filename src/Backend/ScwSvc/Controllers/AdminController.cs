@@ -103,7 +103,7 @@ namespace ScwSvc.Controllers
 
         [HttpPost("dataset")]
         [AuthorizeRoles(nameof(UserRole.Admin))]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSetModel dsModel)
         {
@@ -137,7 +137,7 @@ namespace ScwSvc.Controllers
             await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
 
             await _sysDb.SaveChangesAsync();
-            return Ok();
+            return Created("/api/data/dataset/" + newDsId, newTable);
         }
 
         [HttpDelete("dataset/{tableRefId}")]
@@ -176,7 +176,7 @@ namespace ScwSvc.Controllers
 
         [HttpPost("sheet")]
         [AuthorizeRoles(nameof(UserRole.Admin))]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheetModel shModel)
         {
@@ -206,7 +206,7 @@ namespace ScwSvc.Controllers
             await Interactors.DynDbInteractor.CreateSheet(newTable, _dynDb);
 
             await _sysDb.SaveChangesAsync();
-            return Ok();
+            return Created("/api/data/sheet/" + newShId, newTable);
         }
 
         [HttpDelete("sheet/{tableRefId}")]

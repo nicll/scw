@@ -64,7 +64,7 @@ namespace ScwSvc.Controllers
         }
 
         [HttpPost("dataset")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSetModel dsModel)
         {
@@ -98,7 +98,7 @@ namespace ScwSvc.Controllers
             await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
 
             await _sysDb.SaveChangesAsync();
-            return Ok();
+            return Created("/api/data/dataset/" + newDsId, newTable);
         }
 
         [HttpGet("sheet")]
@@ -121,7 +121,7 @@ namespace ScwSvc.Controllers
         }
 
         [HttpPost("sheet")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheetModel shModel)
         {
@@ -154,7 +154,7 @@ namespace ScwSvc.Controllers
             await Interactors.DynDbInteractor.CreateSheet(newTable, _dynDb);
 
             await _sysDb.SaveChangesAsync();
-            return Ok();
+            return Created("/api/data/sheet/" + newShId, newTable);
         }
 
         // ToDo: copied from AdminController, move to separate helper class to avoid duplication

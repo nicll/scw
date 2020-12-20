@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,7 +12,7 @@ using static ScwSvc.Utils;
 
 namespace ScwSvc.Controllers
 {
-    [Route("api/table")]
+    [Route("api/data")]
     [ApiController]
     [Authorize]
     public class TableController : ControllerBase
@@ -25,11 +26,15 @@ namespace ScwSvc.Controllers
             _db = db;
         }
 
-        [HttpGet("{tableRefId}")]
-        [HttpPost("{tableRefId}")]
-        [HttpPatch("{tableRefId}")]
-        [HttpDelete("{tableRefId}")]
-        public async ValueTask<IActionResult> GetTable([FromRoute] Guid tableRefId)
+        [HttpGet("dataset/{tableRefId}")]
+        [HttpPost("dataset/{tableRefId}")]
+        [HttpPatch("dataset/{tableRefId}")]
+        [HttpDelete("dataset/{tableRefId}")]
+        [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+        public async ValueTask<IActionResult> GetDataSet([FromRoute] Guid tableRefId)
         {
             var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
 
@@ -48,10 +53,47 @@ namespace ScwSvc.Controllers
             if (tableRef is null)
                 return Forbid("You are not authorized to view this table or it does not exist.");
 
+            if (tableRef.Type != TableType.DataSet)
+                return BadRequest("Tried to access a " + tableRef.Type + " as a data set.");
+
             return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
         }
 
-        [HttpGet("2/{tableRefId}")]
+        [HttpGet("sheet/{tableRefId}")]
+        [HttpPost("sheet/{tableRefId}")]
+        [HttpPatch("sheet/{tableRefId}")]
+        [HttpDelete("sheet/{tableRefId}")]
+        [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+        public async ValueTask<IActionResult> GetSheet([FromRoute] Guid tableRefId)
+        {
+            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+
+            if (!ownerInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _db.Users.Include(u => u.OwnTables).Include(u => u.Collaborations)
+                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId)
+                ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return Forbid("You are not authorized to view this table or it does not exist.");
+
+            if (tableRef.Type != TableType.Sheet)
+                return BadRequest("Tried to access a " + tableRef.Type + " as a sheet.");
+
+            return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
+        }
+
+#if DEBUG
+        [HttpGet("test/{tableRefId}")]
         public async ValueTask<IActionResult> GetTable2([FromRoute] Guid tableRefId)
         {
             var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
@@ -73,5 +115,6 @@ namespace ScwSvc.Controllers
 
             throw null;
         }
+#endif
     }
 }
