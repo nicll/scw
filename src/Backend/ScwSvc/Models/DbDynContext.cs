@@ -7,7 +7,6 @@ namespace ScwSvc.Models
     {
         public DbDynContext(DbContextOptions<DbDynContext> options) : base(options)
         {
-            Database.Migrate();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
