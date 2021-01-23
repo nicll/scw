@@ -151,7 +151,10 @@ namespace ScwSvc.Controllers
         [HttpPost("[action]")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<string> Unauthenticated([FromQuery] string from)
-            => StatusCode(StatusCodes.Status401Unauthorized, "You are currently not logged in.");
+        {
+            _logger.LogWarning("Service AUTH: unauthenticated user tried accessing URL; remote=\"" + HttpContext.Connection.RemoteIpAddress + "\"; query=\"" + from + "\"");
+            return StatusCode(StatusCodes.Status401Unauthorized, "You are currently not logged in.");
+        }
 
         /// <summary>
         /// Users get redirected to this URL when calling a privileged function without the necessary rights.
