@@ -32,7 +32,7 @@ namespace ScwSvc.Interactors
             using var conn = db.Database.GetDbConnection();
             await conn.OpenAsync();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "DROP TABLE " + table.LookupName.ToNameString();
+            cmd.CommandText = "DROP TABLE \"" + table.LookupName.ToNameString() + '\"';
             await cmd.ExecuteNonQueryAsync();
         }
 
@@ -56,7 +56,7 @@ namespace ScwSvc.Interactors
             using var conn = db.Database.GetDbConnection();
             await conn.OpenAsync();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "DROP TABLE " + table.LookupName.ToNameString();
+            cmd.CommandText = "DROP TABLE \"" + table.LookupName.ToNameString() + '\"';
             await cmd.ExecuteNonQueryAsync();
         }
 
