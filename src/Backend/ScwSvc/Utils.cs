@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Security.Claims;
 
 namespace ScwSvc
@@ -44,5 +46,9 @@ namespace ScwSvc
 
         internal static string ToNameString(this Guid guid)
             => guid.ToString("N");
+
+        internal static ActionResult Forbidden(this ControllerBase controller, object value)
+            => controller.Forbid(CookieAuthenticationDefaults.AuthenticationScheme);
+            //=> controller.StatusCode(StatusCodes.Status403Forbidden, value);
     }
 }
