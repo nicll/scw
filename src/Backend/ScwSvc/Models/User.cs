@@ -38,13 +38,13 @@ namespace ScwSvc.Models
         /// Tables that this user owns.
         /// </summary>
         [JsonIgnore]
-        public ICollection<TableRef> OwnTables { get; set; }
+        public virtual ICollection<TableRef> OwnTables { get; set; }
 
         /// <summary>
         /// Tables that this user may edit.
         /// </summary>
         [JsonIgnore]
-        public ICollection<TableRef> Collaborations { get; set; }
+        public virtual ICollection<TableRef> Collaborations { get; set; }
 
         /// <summary>
         /// The role of this user.

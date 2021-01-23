@@ -94,12 +94,12 @@ namespace ScwSvc.Controllers
         [HttpGet("dataset")]
         [EnableQuery]
         public IQueryable<TableRef> GetDataSets()
-            => _sysDb.TableRefs.Where(t => t.Type == TableType.DataSet).Include(d => d.Columns);
+            => _sysDb.TableRefs.Where(t => t.TableType == TableType.DataSet);
 
         [HttpGet("sheet")]
         [EnableQuery]
         public IQueryable<TableRef> GetSheets()
-            => _sysDb.TableRefs.Where(t => t.Type == TableType.Sheet);
+            => _sysDb.TableRefs.Where(t => t.TableType == TableType.Sheet);
 
         [HttpPost("dataset")]
         [AuthorizeRoles(nameof(UserRole.Admin))]
@@ -126,7 +126,7 @@ namespace ScwSvc.Controllers
             var newTable = new TableRef()
             {
                 TableRefId = newDsId,
-                Type = TableType.DataSet,
+                TableType = TableType.DataSet,
                 DisplayName = dsModel.DisplayName,
                 Owner = user,
                 LookupName = Guid.NewGuid(),
@@ -163,7 +163,7 @@ namespace ScwSvc.Controllers
             if (table is null)
                 return NotFound("This data set does not exist.");
 
-            if (table.Type != TableType.DataSet)
+            if (table.TableType != TableType.DataSet)
                 return BadRequest("Incorrect table type.");
 
             _logger.LogInformation("Remove dataset: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
@@ -196,7 +196,7 @@ namespace ScwSvc.Controllers
             var newTable = new TableRef()
             {
                 TableRefId = newShId,
-                Type = TableType.Sheet,
+                TableType = TableType.Sheet,
                 DisplayName = shModel.DisplayName,
                 Owner = user,
                 LookupName = Guid.NewGuid()
@@ -232,7 +232,7 @@ namespace ScwSvc.Controllers
             if (table is null)
                 return NotFound("This sheet does not exist.");
 
-            if (table.Type != TableType.Sheet)
+            if (table.TableType != TableType.Sheet)
                 return BadRequest("Incorrect table type.");
 
             _logger.LogInformation("Remove sheet: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);

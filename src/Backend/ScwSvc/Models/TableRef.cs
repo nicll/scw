@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -29,7 +30,7 @@ namespace ScwSvc.Models
         /// Whether this table is a data set or a spreadsheet.
         /// </summary>
         [Required]
-        public TableType Type { get; set; }
+        public TableType TableType { get; set; }
 
         /// <summary>
         /// The table's name in the database.
@@ -55,26 +56,27 @@ namespace ScwSvc.Models
         /// </remarks>
         [Required]
         [JsonIgnore]
-        public User Owner { get; set; }
+        public virtual User Owner { get; set; }
 
         /// <summary>
         /// Users that are allowed to edit this table's content.
         /// </summary>
         [Required]
         [JsonIgnore]
-        public ICollection<User> Collaborators { get; set; }
+        public virtual ICollection<User> Collaborators { get; set; }
 
         /// <summary>
         /// The columns that this table consists of.
-        /// This is ignored if <see cref="Type"/> is <see cref="TableType.Sheet"/>.
+        /// This is ignored if <see cref="TableType"/> is <see cref="TableType.Sheet"/>.
         /// </summary>
         [Required]
-        public ICollection<DataSetColumn> Columns { get; set; }
+        public virtual ICollection<DataSetColumn> Columns { get; set; }
     }
 
     /// <summary>
     /// Lists the different kinds of tables.
     /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum TableType
     {
         /// <summary>

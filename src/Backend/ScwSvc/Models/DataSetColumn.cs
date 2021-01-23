@@ -13,7 +13,7 @@ namespace ScwSvc.Models
 
         [Required]
         [JsonIgnore]
-        public TableRef TableRef { get; set; }
+        public virtual TableRef TableRef { get; set; }
 
         [Required]
         public byte Position { get; set; }

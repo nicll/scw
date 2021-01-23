@@ -54,13 +54,41 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.Include(u => u.OwnTables)
+            var user = await _sysDb.Users
                 .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
-            return Ok(user.OwnTables.Where(t => t.Type == TableType.DataSet));
+            return Ok(user.OwnTables.Where(t => t.TableType == TableType.DataSet));
+        }
+
+        [HttpGet("dataset/{tableRefId}")]
+        [ProducesResponseType(typeof(TableRef), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MyDataSet([FromRoute] Guid tableRefId)
+        {
+            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+
+            if (!ownerInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.Users
+                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId)
+                ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return this.Forbidden("You are not allowed to access this table or it does not exist.");
+
+            if (tableRef.TableType != TableType.DataSet)
+                return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
+
+            return Ok(tableRef);
         }
 
         [HttpPost("dataset")]
@@ -73,13 +101,14 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.Users
+                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
             if (user.OwnTables.Count > MaxDataSetsPerUser)
-                return Forbid("You cannot own more than " + MaxDataSetsPerUser + " data sets at any time.");
+                return this.Forbidden("You cannot own more than " + MaxDataSetsPerUser + " data sets at any time.");
 
             _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
@@ -87,7 +116,7 @@ namespace ScwSvc.Controllers
             var newTable = new TableRef()
             {
                 TableRefId = newDsId,
-                Type = TableType.DataSet,
+                TableType = TableType.DataSet,
                 DisplayName = dsModel.DisplayName,
                 Owner = user,
                 LookupName = Guid.NewGuid(),
@@ -101,6 +130,41 @@ namespace ScwSvc.Controllers
             return Created("/api/data/dataset/" + newDsId, newTable);
         }
 
+        [HttpDelete("dataset/{tableRefId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+        public async ValueTask<IActionResult> DeleteDataSet([FromRoute] Guid tableRefId)
+        {
+            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+
+            if (!ownerInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.Users
+                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
+
+            if (tableRef.TableType != TableType.DataSet)
+                return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
+
+            await Interactors.DynDbInteractor.RemoveDataSet(tableRef, _dynDb);
+            user.OwnTables.Remove(tableRef);
+
+            foreach (var collaborator in _sysDb.Users.Where(u => u.Collaborations.Contains(tableRef)))
+                collaborator.Collaborations.Remove(tableRef);
+
+            await _sysDb.SaveChangesAsync().ConfigureAwait(false);
+            return Ok();
+        }
+
         [HttpGet("sheet")]
         [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
@@ -111,13 +175,41 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.Include(u => u.OwnTables)
+            var user = await _sysDb.Users
                 .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
-            return Ok(user.OwnTables.Where(t => t.Type == TableType.Sheet));
+            return Ok(user.OwnTables.Where(t => t.TableType == TableType.Sheet));
+        }
+
+        [HttpGet("sheet/{tableRefId}")]
+        [ProducesResponseType(typeof(TableRef), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MySheet([FromRoute] Guid tableRefId)
+        {
+            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+
+            if (!ownerInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.Users
+                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId)
+                ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return this.Forbidden("You are not allowed to access this table or it does not exist.");
+
+            if (tableRef.TableType != TableType.Sheet)
+                return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
+
+            return Ok(tableRef);
         }
 
         [HttpPost("sheet")]
@@ -130,13 +222,14 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.Users
+                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
             if (user.OwnTables.Count > MaxSheetsPerUser)
-                return Forbid("You cannot own more than " + MaxSheetsPerUser + " sheets at any time.");
+                return this.Forbidden("You cannot own more than " + MaxSheetsPerUser + " sheets at any time.");
 
             _logger.LogInformation("Create sheet: user=\"" + ownerInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
 
@@ -144,7 +237,7 @@ namespace ScwSvc.Controllers
             var newTable = new TableRef()
             {
                 TableRefId = newShId,
-                Type = TableType.Sheet,
+                TableType = TableType.Sheet,
                 DisplayName = shModel.DisplayName,
                 Owner = user,
                 LookupName = Guid.NewGuid()
@@ -155,6 +248,41 @@ namespace ScwSvc.Controllers
 
             await _sysDb.SaveChangesAsync();
             return Created("/api/data/sheet/" + newShId, newTable);
+        }
+
+        [HttpDelete("sheet/{tableRefId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+        public async ValueTask<IActionResult> DeleteSheet([FromRoute] Guid tableRefId)
+        {
+            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+
+            if (!ownerInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.Users
+                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
+
+            if (tableRef.TableType != TableType.Sheet)
+                return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
+
+            await Interactors.DynDbInteractor.RemoveSheet(tableRef, _dynDb);
+            user.OwnTables.Remove(tableRef);
+
+            foreach (var collaborator in _sysDb.Users.Where(u => u.Collaborations.Contains(tableRef)))
+                collaborator.Collaborations.Remove(tableRef);
+
+            await _sysDb.SaveChangesAsync().ConfigureAwait(false);
+            return Ok();
         }
 
         // ToDo: copied from AdminController, move to separate helper class to avoid duplication

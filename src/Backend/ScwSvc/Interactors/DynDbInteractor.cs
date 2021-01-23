@@ -14,7 +14,7 @@ namespace ScwSvc.Interactors
             if (table.Columns.Count < 1)
                 throw new InvalidTableException("No columns were specified.");
 
-            if (table.Type != TableType.DataSet)
+            if (table.TableType != TableType.DataSet)
                 throw new InvalidTableException("Not the correct table type.");
 
             using var conn = db.Database.GetDbConnection();
@@ -26,7 +26,7 @@ namespace ScwSvc.Interactors
 
         public static async ValueTask RemoveDataSet(TableRef table, DbDynContext db)
         {
-            if (table.Type != TableType.DataSet)
+            if (table.TableType != TableType.DataSet)
                 throw new InvalidTableException("Not the correct table type.");
 
             using var conn = db.Database.GetDbConnection();
@@ -38,7 +38,7 @@ namespace ScwSvc.Interactors
 
         public static async ValueTask CreateSheet(TableRef table, DbDynContext db)
         {
-            if (table.Type != TableType.Sheet)
+            if (table.TableType != TableType.Sheet)
                 throw new InvalidTableException("Not the correct table type.");
 
             using var conn = db.Database.GetDbConnection();
@@ -50,7 +50,7 @@ namespace ScwSvc.Interactors
 
         public static async ValueTask RemoveSheet(TableRef table, DbDynContext db)
         {
-            if (table.Type != TableType.Sheet)
+            if (table.TableType != TableType.Sheet)
                 throw new InvalidTableException("Not the correct table type.");
 
             using var conn = db.Database.GetDbConnection();

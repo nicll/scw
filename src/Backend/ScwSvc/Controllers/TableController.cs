@@ -41,7 +41,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.Include(u => u.OwnTables).Include(u => u.Collaborations)
+            var user = await _db.Users
                 .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
@@ -51,10 +51,10 @@ namespace ScwSvc.Controllers
                 ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
 
             if (tableRef is null)
-                return Forbid("You are not authorized to view this table or it does not exist.");
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
 
-            if (tableRef.Type != TableType.DataSet)
-                return BadRequest("Tried to access a " + tableRef.Type + " as a data set.");
+            if (tableRef.TableType != TableType.DataSet)
+                return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
 
             return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
         }
@@ -74,7 +74,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.Include(u => u.OwnTables).Include(u => u.Collaborations)
+            var user = await _db.Users
                 .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
@@ -84,10 +84,10 @@ namespace ScwSvc.Controllers
                 ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
 
             if (tableRef is null)
-                return Forbid("You are not authorized to view this table or it does not exist.");
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
 
-            if (tableRef.Type != TableType.Sheet)
-                return BadRequest("Tried to access a " + tableRef.Type + " as a sheet.");
+            if (tableRef.TableType != TableType.Sheet)
+                return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
 
             return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
         }
@@ -101,7 +101,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.Include(u => u.OwnTables).Include(u => u.Collaborations)
+            var user = await _db.Users
                 .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
@@ -111,7 +111,7 @@ namespace ScwSvc.Controllers
                 ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
 
             if (tableRef is null)
-                return Forbid("You are not authorized to view this table or it does not exist.");
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
 
             throw null;
         }
