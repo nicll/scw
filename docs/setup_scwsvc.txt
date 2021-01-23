@@ -34,4 +34,11 @@ entsprechende Berechtigungen besitzen, damit die Tables angelegt und befüllt we
 Sofern die Schemas bereits erstellt sind, muss sichergestellt werden, dass SCW1_DBUSER_SYS alle notwendigen
 Berechtigungen für die Schemas "scw1_sys" und "scw1_dyn" besitzt (USAGE, CREATE, DROP; SELECT; INSERT; UPDATE; DELETE, ...),
 SCW1_DBUSER_DYN benötigt selbige Berechtiungen für das Schema "scw1_dyn".
+Sollte das Schema "scw1_dyn" nicht automatisch angelegt werden, so muss dies händisch gemacht werden.
 Um Migrations verwenden zu können sind außerdem Berechtiungen für das Schema "PUBLIC" nötig.
+
+Struktur der DB - Kurzgefasst:
+Database "scw" mit CREATE und CONNECT Berechtigungen für beide DBUSER Accounts
+Schema "scw1_sys" mit SCW1_DBUSER_SYS als Owner
+Schema "scw1_dyn" mit SCW1_DBUSER_SYS als Owner und USAGE und CREATE Berechtigungen für beide DBUSER
+Schema "public" für EF Core Migrations
