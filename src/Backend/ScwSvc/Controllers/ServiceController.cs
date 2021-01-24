@@ -8,9 +8,8 @@ using ScwSvc.Models;
 using System;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
+using static ScwSvc.Utils;
 
 namespace ScwSvc.Controllers
 {
@@ -18,8 +17,6 @@ namespace ScwSvc.Controllers
     [ApiController]
     public class ServiceController : ControllerBase
     {
-        private const string Pepper = "scw-";
-
         private readonly ILogger<ServiceController> _logger;
         private readonly DbSysContext _db;
 
@@ -91,7 +88,7 @@ namespace ScwSvc.Controllers
             {
                 var enteredPassword = HashUserPassword(user.UserId, loginCredentials.Password);
 
-                if (enteredPassword.SequenceEqual(user.PasswordHash))
+                if (CompareHashes(enteredPassword, user.PasswordHash))
                 {
                     var cp = new ClaimsPrincipal(new ClaimsIdentity(
                             new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToNameString()), new Claim(ClaimTypes.Name, user.Name) },
@@ -260,28 +257,5 @@ namespace ScwSvc.Controllers
             }
         }
 #endif
-
-        /// <summary>
-        /// Hashes a users's password.
-        /// </summary>
-        /// <param name="userId">ID of the user.</param>
-        /// <param name="pass">Password of the user.</param>
-        /// <returns>Hashed password of the user.</returns>
-        private static byte[] HashUserPassword(Guid userId, in string pass)
-        {
-            var hasher = SHA256.Create();
-            var combination = Encoding.UTF8.GetBytes(Pepper + userId.ToNameString() + pass);
-            return hasher.ComputeHash(combination);
-        }
-
-        /// <summary>
-        /// Compare two memory areas for equal content.
-        /// Basically like memcmp().
-        /// </summary>
-        /// <param name="left">First memory area.</param>
-        /// <param name="right">Second memory area.</param>
-        /// <returns>Whether or not the two areas contain the same content.</returns>
-        private static bool CompareHashes(in ReadOnlySpan<byte> left, in ReadOnlySpan<byte> right)
-            => left.SequenceEqual(right);
     }
 }
