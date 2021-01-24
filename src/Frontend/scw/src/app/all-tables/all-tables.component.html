@@ -1,4 +1,4 @@
-<mat-tab-group *ngFor="let tab of tabs" mat-align-tabs="start">
-    <mat-tab label="First">{{tab.displayname}}</mat-tab>
+<mat-tab-group  mat-align-tabs="start">
+    <mat-tab *ngFor="let tab of tabs" [label]="tab.displayName"></mat-tab>
 </mat-tab-group>
 

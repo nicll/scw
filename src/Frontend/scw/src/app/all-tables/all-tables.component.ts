@@ -12,7 +12,9 @@ export class AllTablesComponent implements OnInit {
   constructor(private http:HttpService) { }
 
   ngOnInit(): void {
-    this.http.GetDataSet().subscribe(tables=>this.tabs=tables);
+    //this.http.GetDataSet().subscribe(tables=>this.tabs=tables);//For test purposes
+    this.tabs=[{displayName:"1"},{displayName:"2"}];
+    console.log(this.tabs);
   }
 
 }
