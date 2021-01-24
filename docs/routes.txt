@@ -1,0 +1,4 @@
+Alle Informationen zu derzeit verfügbaren Routen sind über folgende URL einsehbar:
+https://<HOST>:<PORT>/swagger/index.html
+
+Die URL ist derzeit nur in Dev-Versionen aktiv.

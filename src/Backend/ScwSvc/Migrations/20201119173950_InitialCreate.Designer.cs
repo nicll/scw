@@ -9,7 +9,7 @@ using ScwSvc.Models;
 
 namespace ScwSvc.Migrations
 {
-    [DbContext(typeof(DbStoreContext))]
+    [DbContext(typeof(DbSysContext))]
     [Migration("20201119173950_InitialCreate")]
     partial class InitialCreate
     {

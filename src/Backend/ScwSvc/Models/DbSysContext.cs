@@ -3,13 +3,13 @@ using System;
 
 namespace ScwSvc.Models
 {
-    public class DbStoreContext : DbContext
+    public class DbSysContext : DbContext
     {
         public DbSet<User> Users { get; set; }
 
         public DbSet<TableRef> TableRefs { get; set; }
 
-        public DbStoreContext(DbContextOptions<DbStoreContext> options) : base(options)
+        public DbSysContext(DbContextOptions<DbSysContext> options) : base(options)
         {
             Database.Migrate();
         }

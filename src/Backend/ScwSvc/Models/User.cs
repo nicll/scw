@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -37,13 +38,13 @@ namespace ScwSvc.Models
         /// Tables that this user owns.
         /// </summary>
         [JsonIgnore]
-        public ICollection<TableRef> OwnTables { get; set; }
+        public virtual ICollection<TableRef> OwnTables { get; set; }
 
         /// <summary>
         /// Tables that this user may edit.
         /// </summary>
         [JsonIgnore]
-        public ICollection<TableRef> Collaborations { get; set; }
+        public virtual ICollection<TableRef> Collaborations { get; set; }
 
         /// <summary>
         /// The role of this user.
@@ -55,6 +56,7 @@ namespace ScwSvc.Models
     /// <summary>
     /// Lists different roles users can have.
     /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum UserRole
     {
         /// <summary>

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScwSvc.Models;
@@ -9,9 +10,10 @@ using ScwSvc.Models;
 namespace ScwSvc.Migrations
 {
     [DbContext(typeof(DbSysContext))]
-    partial class DbStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20201204001355_RenameDbStoreContext")]
+    partial class RenameDbStoreContext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,7 +67,7 @@ namespace ScwSvc.Migrations
                     b.Property<Guid>("OwnerUserId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("TableType")
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("TableRefId");
