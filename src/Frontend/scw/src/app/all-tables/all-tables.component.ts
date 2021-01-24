@@ -15,6 +15,7 @@ export class AllTablesComponent implements OnInit {
     //this.http.GetDataSet().subscribe(tables=>this.tabs=tables);//For test purposes
     this.tabs=[{displayName:"1"},{displayName:"2"}];
     console.log(this.tabs);
+    this.http.GetSheet("7cc78b45-9489-4610-9567-e795374dfa04").subscribe(v=>console.log(v));
   }
 
 }

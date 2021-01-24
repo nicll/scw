@@ -4,7 +4,17 @@
         <button mat-raised-button color="primary" (click)="Login()">Login</button>
     </div>
     <div *ngIf="username" class="User" >
-        {{username}}
+        <button mat-raised-button [matMenuTriggerFor]="menu">
+            {{username}}
+        </button>
+        <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="ClickAllTables()">
+              <span>All Tables</span>
+            </button>
+            <button mat-menu-item (click)="Logout()">
+                <span>Logout</span>
+            </button>
+        </mat-menu>
     </div>    
 </mat-toolbar>
 

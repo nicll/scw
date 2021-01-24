@@ -1,4 +1,14 @@
 <mat-tab-group  mat-align-tabs="start">
-    <mat-tab *ngFor="let tab of tabs" [label]="tab.displayName"></mat-tab>
+    <mat-tab *ngFor="let tab of tabs" [label]="tab.displayName">
+        <ng-template matTabContent>
+            <app-handsontest></app-handsontest>    
+        </ng-template>
+    </mat-tab>
+    <button mat-button>
+        Add DataSet
+    </button>
+    <button mat-button>
+        Add Sheet
+    </button>
 </mat-tab-group>
 

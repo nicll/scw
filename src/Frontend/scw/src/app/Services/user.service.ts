@@ -20,14 +20,17 @@ export class UserService {
   }
   public Login(username:string,password:string):Observable<User>{ 
     let us=new User(username,"",Roles.Common,password);
-    console.log("hagsdhasdhijadhs: "+us);
     const Observable=this.http.Login(us);
-    Observable.subscribe(user=>{console.log("User: "+user);this.user=user;});
+    Observable.subscribe(user=>{this.user=user;});
     return Observable;
   }
   public Signup(username:string,password:string):Observable<User>{
     const Observable=this.http.Signup(new User(username,"",Roles.Common,password));
     Observable.subscribe(user=>{this.user=user;});
     return Observable;
+  }
+  public Logout(){
+    this.http.Logout().subscribe();
+    this.user=undefined;
   }
 }

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { LogInSignUpDialogComponent } from './log-in-sign-up-dialog/log-in-sign-up-dialog.component';
 import { UserService } from './Services/user.service';
 @Component({
@@ -11,7 +12,7 @@ export class AppComponent {
   title = 'scw';
   username:string|undefined;
   tables:any=["test","test2"];
-  constructor(public dialog: MatDialog, private user: UserService){}
+  constructor(public dialog: MatDialog, private user: UserService,private router: Router){}
   public Login(){
     const dialogRef = this.dialog.open(LogInSignUpDialogComponent, {
       data: "login"
@@ -38,5 +39,12 @@ export class AppComponent {
         this.username=usern.username;
       }
     });
+  }
+  public ClickAllTables(){
+    this.router.navigate(['/tables']);
+  }
+  public Logout(){
+    this.user.Logout();
+    this.username=undefined;
   }
 }
