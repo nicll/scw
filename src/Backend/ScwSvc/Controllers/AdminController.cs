@@ -105,6 +105,7 @@ namespace ScwSvc.Controllers
         [HttpPost("dataset")]
         [AuthorizeRoles(nameof(UserRole.Admin))]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSetModel dsModel)
         {
@@ -123,22 +124,29 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
-            var newDsId = Guid.NewGuid();
-            var newTable = new TableRef()
+            try
             {
-                TableRefId = newDsId,
-                TableType = TableType.DataSet,
-                DisplayName = dsModel.DisplayName,
-                Owner = user,
-                LookupName = Guid.NewGuid(),
-                Columns = ConvertColumns(dsModel.Columns, newDsId)
-            };
+                var newDsId = Guid.NewGuid();
+                var newTable = new TableRef()
+                {
+                    TableRefId = newDsId,
+                    TableType = TableType.DataSet,
+                    DisplayName = dsModel.DisplayName,
+                    Owner = user,
+                    LookupName = Guid.NewGuid(),
+                    Columns = ConvertColumns(dsModel.Columns, newDsId)
+                };
 
-            await _sysDb.TableRefs.AddAsync(newTable);
-            await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
+                await _sysDb.TableRefs.AddAsync(newTable);
+                await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
 
-            await _sysDb.SaveChangesAsync();
-            return Created("/api/data/dataset/" + newDsId, newTable);
+                await _sysDb.SaveChangesAsync();
+                return Created("/api/data/dataset/" + newDsId, newTable);
+            }
+            catch (InvalidTableException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpDelete("dataset/{tableRefId}")]

@@ -111,6 +111,11 @@ namespace ScwSvc.Controllers
             return Ok(user.Collaborations.Where(t => t.TableType == TableType.DataSet));
         }
 
+        /// <summary>
+        /// Queries a single data set that a user may access.
+        /// </summary>
+        /// <param name="tableRefId">The table reference ID.</param>
+        /// <returns>The table reference of the data set.</returns>
         [HttpGet("dataset/{tableRefId}")]
         [ProducesResponseType(typeof(TableRef), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
@@ -138,8 +143,14 @@ namespace ScwSvc.Controllers
             return Ok(tableRef);
         }
 
+        /// <summary>
+        /// Creates a new data set for a user.
+        /// </summary>
+        /// <param name="dsModel">The definition of the data set.</param>
+        /// <returns>The table reference for the new data set.</returns>
         [HttpPost("dataset")]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSetModel dsModel)
         {
@@ -158,24 +169,35 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
-            var newDsId = Guid.NewGuid();
-            var newTable = new TableRef()
+            try
             {
-                TableRefId = newDsId,
-                TableType = TableType.DataSet,
-                DisplayName = dsModel.DisplayName,
-                Owner = user,
-                LookupName = Guid.NewGuid(),
-                Columns = ConvertColumns(dsModel.Columns, newDsId)
-            };
+                var newDsId = Guid.NewGuid();
+                var newTable = new TableRef()
+                {
+                    TableRefId = newDsId,
+                    TableType = TableType.DataSet,
+                    DisplayName = dsModel.DisplayName,
+                    Owner = user,
+                    LookupName = Guid.NewGuid(),
+                    Columns = ConvertColumns(dsModel.Columns, newDsId)
+                };
 
-            await _sysDb.TableRefs.AddAsync(newTable);
-            await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
+                await _sysDb.TableRefs.AddAsync(newTable);
+                await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
 
-            await _sysDb.SaveChangesAsync();
-            return Created("/api/data/dataset/" + newDsId, newTable);
+                await _sysDb.SaveChangesAsync();
+                return Created("/api/data/dataset/" + newDsId, newTable);
+            }
+            catch (InvalidTableException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
+        /// <summary>
+        /// Deletes the data set of a user.
+        /// </summary>
+        /// <param name="tableRefId">The table reference ID.</param>
         [HttpDelete("dataset/{tableRefId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
@@ -276,6 +298,11 @@ namespace ScwSvc.Controllers
             return Ok(user.Collaborations.Where(t => t.TableType == TableType.Sheet));
         }
 
+        /// <summary>
+        /// Queries a single sheet that a user may access.
+        /// </summary>
+        /// <param name="tableRefId">The table reference ID.</param>
+        /// <returns>The table reference of the sheet.</returns>
         [HttpGet("sheet/{tableRefId}")]
         [ProducesResponseType(typeof(TableRef), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
@@ -303,6 +330,11 @@ namespace ScwSvc.Controllers
             return Ok(tableRef);
         }
 
+        /// <summary>
+        /// Creates a new sheet for a user.
+        /// </summary>
+        /// <param name="shModel">The definition of the sheet.</param>
+        /// <returns>The table reference for the new sheet.</returns>
         [HttpPost("sheet")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
@@ -340,6 +372,10 @@ namespace ScwSvc.Controllers
             return Created("/api/data/sheet/" + newShId, newTable);
         }
 
+        /// <summary>
+        /// Deletes the sheet of a user.
+        /// </summary>
+        /// <param name="tableRefId">The table reference ID.</param>
         [HttpDelete("sheet/{tableRefId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
