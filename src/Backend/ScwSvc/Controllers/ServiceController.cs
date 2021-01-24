@@ -149,7 +149,7 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<string> Unauthenticated([FromQuery] string from)
         {
-            _logger.LogWarning("Service AUTH: unauthenticated user tried accessing URL; remote=\"" + HttpContext.Connection.RemoteIpAddress + "\"; query=\"" + from + "\"");
+            _logger.LogWarning("Unauthenticated: unauthenticated user tried accessing URL; remote=\"" + HttpContext.Connection.RemoteIpAddress + "\"; query=\"" + from + "\"");
             return StatusCode(StatusCodes.Status401Unauthorized, "You are currently not logged in.");
         }
 
@@ -164,7 +164,7 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public ActionResult<string> Unauthorized([FromQuery] string from)
         {
-            _logger.LogWarning("Service AUTH: user tried accessing forbidden URL; user=\"" + User.FindFirstValue(ClaimTypes.NameIdentifier) + "\"; query=\"" + from + "\"");
+            _logger.LogWarning("Unauthorized: user tried accessing forbidden URL; user=\"" + User.FindFirstValue(ClaimTypes.NameIdentifier) + "\"; query=\"" + from + "\"");
             return StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to access this URL.");
         }
 

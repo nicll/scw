@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ScwSvc.Models;
 using System;
@@ -26,6 +25,11 @@ namespace ScwSvc.Controllers
             _db = db;
         }
 
+        /// <summary>
+        /// Redirect to the specified PostgREST endpoint for this data set.
+        /// </summary>
+        /// <param name="tableRefId">The ID of the table reference.</param>
+        /// <returns>Redirect to PostgREST server.</returns>
         [HttpGet("dataset/{tableRefId}")]
         [HttpPost("dataset/{tableRefId}")]
         [HttpPatch("dataset/{tableRefId}")]
@@ -41,8 +45,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users
-                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -56,9 +59,16 @@ namespace ScwSvc.Controllers
             if (tableRef.TableType != TableType.DataSet)
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
 
+            _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRedId=\"" + tableRef.TableRefId + "\"");
+
             return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
         }
 
+        /// <summary>
+        /// Redirect to the specified PostgREST endpoint for this sheet.
+        /// </summary>
+        /// <param name="tableRefId">The ID of the table reference.</param>
+        /// <returns>Redirect to PostgREST server.</returns>
         [HttpGet("sheet/{tableRefId}")]
         [HttpPost("sheet/{tableRefId}")]
         [HttpPatch("sheet/{tableRefId}")]
@@ -74,8 +84,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users
-                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -89,6 +98,8 @@ namespace ScwSvc.Controllers
             if (tableRef.TableType != TableType.Sheet)
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
 
+            _logger.LogInformation("Sheet access: user=\"" + user.UserId + "\"; tableRedId=\"" + tableRef.TableRefId + "\"");
+
             return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
         }
 
@@ -101,8 +112,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users
-                .FirstOrDefaultAsync(u => u.UserId == ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
