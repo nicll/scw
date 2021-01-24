@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using ScwSvc.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -123,6 +125,14 @@ namespace ScwSvc
             /// <returns>The converted definitions.</returns>
             internal static DataSetColumn[] ConvertColumns(CreateDataSetModel.ColumnDefinition[] definition, Guid tableRefId)
             {
+                if (definition.Length > Byte.MaxValue)
+                    throw new InvalidTableException("Too many columns in table.");
+
+                var hs = new HashSet<string>();
+
+                if (!definition.Select(c => c.Name).AllUnique())
+                    throw new InvalidTableException("Column names not unique.");
+
                 var result = new DataSetColumn[definition.Length];
 
                 for (int i = 0; i < definition.Length; ++i)
@@ -139,6 +149,12 @@ namespace ScwSvc
 
                 return result;
             }
+        }
+
+        internal static bool AllUnique<T>(this IEnumerable<T> source)
+        {
+            var hs = new HashSet<T>();
+            return source.All(hs.Add);
         }
 
         /// <summary>
