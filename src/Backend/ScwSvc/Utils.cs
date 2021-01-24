@@ -9,11 +9,27 @@ namespace ScwSvc
 {
     internal static class Utils
     {
+        /// <summary>
+        /// The pepper used by the backend.
+        /// </summary>
         private const string Pepper = "scw-";
 
+        /// <summary>
+        /// Tries to get an environment variable.
+        /// If the environment variable cannot be found an <see cref="ArgumentException"/> is thrown.
+        /// </summary>
+        /// <param name="name">Name of the environment variable.</param>
+        /// <returns>The value of the variable or an exception.</returns>
+        /// <exception cref="ArgumentException">Thrown if the variable is not set.</exception>
         internal static string GetEnvironmentVariableOrFail(string name)
             => Environment.GetEnvironmentVariable(name) ?? throw new ArgumentException("Environment variable '" + name + "' not set.");
 
+        /// <summary>
+        /// Tries to get an environment variable.
+        /// If the environment variable cannot be found <see langword="null"/> is returned.
+        /// </summary>
+        /// <param name="name">Name of the environment variable.</param>
+        /// <returns>The value of the variable or <see langword="null"/>.</returns>
         internal static string GetEnvironmentVariableOrNull(string name)
             => Environment.GetEnvironmentVariable(name);
 
