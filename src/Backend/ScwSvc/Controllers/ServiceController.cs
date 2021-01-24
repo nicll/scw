@@ -9,7 +9,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using static ScwSvc.Utils;
+using static ScwSvc.Utils.Authentication;
 
 namespace ScwSvc.Controllers
 {

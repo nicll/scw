@@ -7,7 +7,8 @@ using ScwSvc.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using static ScwSvc.Utils;
+using static ScwSvc.Utils.Authentication;
+using static ScwSvc.Utils.DataConversion;
 
 namespace ScwSvc.Controllers
 {
@@ -241,26 +242,6 @@ namespace ScwSvc.Controllers
             await Interactors.DynDbInteractor.RemoveSheet(table, _dynDb);
             await _sysDb.SaveChangesAsync();
             return Ok();
-        }
-
-        // ToDo: move to helper class
-        private static DataSetColumn[] ConvertColumns(CreateDataSetModel.ColumnDefinition[] definition, Guid tableRefId)
-        {
-            var result = new DataSetColumn[definition.Length];
-
-            for (int i = 0; i < definition.Length; ++i)
-            {
-                result[i] = new DataSetColumn()
-                {
-                    TableRefId = tableRefId,
-                    Position = (byte)i,
-                    Name = definition[i].Name,
-                    Nullable = definition[i].Nullable,
-                    Type = definition[i].Type
-                };
-            }
-
-            return result;
         }
     }
 }

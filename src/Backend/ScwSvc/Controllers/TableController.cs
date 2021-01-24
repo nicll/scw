@@ -8,7 +8,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using static ScwSvc.Globals;
-using static ScwSvc.Utils;
+using static ScwSvc.Utils.Authentication;
 
 namespace ScwSvc.Controllers
 {
