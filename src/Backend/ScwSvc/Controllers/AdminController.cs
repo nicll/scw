@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ScwSvc.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static ScwSvc.Utils.Authentication;
@@ -58,6 +59,10 @@ namespace ScwSvc.Controllers
                 await _sysDb.TableRefs.Where(t => t.Collaborators.Contains(user)).ForEachAsync(t => t.Collaborators.Remove(user));
                 _sysDb.TableRefs.RemoveRange(user.OwnTables);
                 _sysDb.Users.Remove(user);
+
+                foreach (var tableRef in user.OwnTables)
+                    await Interactors.DynDbInteractor.RemoveTable(tableRef, _dynDb);
+
                 await _sysDb.SaveChangesAsync();
                 return Ok();
             }
@@ -66,25 +71,25 @@ namespace ScwSvc.Controllers
         }
 
         [HttpGet("user/{userId}/table")]
-        [ProducesResponseType(typeof(IQueryable<Guid>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ICollection<TableRef>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> GetUserTables([FromRoute] Guid userId)
         {
             if (!(await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user))
                 return NotFound("User was not found.");
 
-            return Ok(_sysDb.TableRefs.Where(t => t.OwnerUserId == userId).Select(t => t.TableRefId));
+            return Ok(user.OwnTables);
         }
 
         [HttpGet("user/{userId}/collaboration")]
-        [ProducesResponseType(typeof(IQueryable<Guid>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ICollection<TableRef>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> GetUserCollaborations([FromRoute] Guid userId)
         {
             if (!(await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user))
                 return NotFound("User was not found.");
 
-            return Ok(_sysDb.TableRefs.Where(t => t.Collaborators.Contains(user)).Select(t => t.TableRefId));
+            return Ok(user.Collaborations);
         }
 
         [HttpGet("table")]
@@ -177,7 +182,9 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Remove dataset: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
 
-            _sysDb.Remove(table);
+            await _sysDb.Users.ForEachAsync(u => u.Collaborations.Remove(table));
+            await _sysDb.Users.ForEachAsync(u => u.OwnTables.Remove(table));
+            _sysDb.TableRefs.Remove(table);
             await Interactors.DynDbInteractor.RemoveDataSet(table, _dynDb);
             await _sysDb.SaveChangesAsync();
             return Ok();
@@ -246,7 +253,9 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Remove sheet: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
 
-            _sysDb.Remove(table);
+            await _sysDb.Users.ForEachAsync(u => u.Collaborations.Remove(table));
+            await _sysDb.Users.ForEachAsync(u => u.OwnTables.Remove(table));
+            _sysDb.TableRefs.Remove(table);
             await Interactors.DynDbInteractor.RemoveSheet(table, _dynDb);
             await _sysDb.SaveChangesAsync();
             return Ok();
