@@ -46,6 +46,11 @@ namespace ScwSvc.Controllers
             });
             await _db.SaveChangesAsync().ConfigureAwait(false);
 
+            var cp = new ClaimsPrincipal(new ClaimsIdentity(
+                    new[] { new Claim(ClaimTypes.Role, nameof(UserRole.Common)), new Claim(ClaimTypes.NameIdentifier, newUserId.ToNameString()) },
+                CookieAuthenticationDefaults.AuthenticationScheme));
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
+
             _logger.LogInformation("Register: user=\"" + loginCredentials.Username + "\"");
             return Ok();
         }
@@ -94,7 +99,7 @@ namespace ScwSvc.Controllers
             if (CompareHashes(enteredPassword, user.PasswordHash))
             {
                 var cp = new ClaimsPrincipal(new ClaimsIdentity(
-                        new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToNameString()), new Claim(ClaimTypes.Name, user.Name) },
+                        new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToNameString()) },
                     CookieAuthenticationDefaults.AuthenticationScheme));
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
                 _logger.LogInformation("Login: user=\"" + loginCredentials.Username + "\"");
