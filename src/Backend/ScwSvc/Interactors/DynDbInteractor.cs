@@ -9,7 +9,7 @@ namespace ScwSvc.Interactors
 {
     public static class DynDbInteractor // ToDo: this will be refactored to something nice later on...
     {
-        public static async ValueTask CreateDataSet(TableRef table, DbDynContext db)
+        public static async ValueTask CreateDataSet(this DbDynContext db, TableRef table)
         {
             if (table.Columns.Count < 1)
                 throw new InvalidTableException("No columns were specified.");
@@ -24,19 +24,15 @@ namespace ScwSvc.Interactors
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public static async ValueTask RemoveDataSet(TableRef table, DbDynContext db)
+        public static async ValueTask RemoveDataSet(this DbDynContext db, TableRef table)
         {
             if (table.TableType != TableType.DataSet)
                 throw new InvalidTableException("Not the correct table type.");
 
-            using var conn = db.Database.GetDbConnection();
-            await conn.OpenAsync().ConfigureAwait(false);
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = "DROP TABLE \"" + table.LookupName.ToNameString() + '\"';
-            await cmd.ExecuteNonQueryAsync();
+            await RemoveTable(db, table);
         }
 
-        public static async ValueTask CreateSheet(TableRef table, DbDynContext db)
+        public static async ValueTask CreateSheet(this DbDynContext db, TableRef table)
         {
             if (table.TableType != TableType.Sheet)
                 throw new InvalidTableException("Not the correct table type.");
@@ -48,19 +44,15 @@ namespace ScwSvc.Interactors
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public static async ValueTask RemoveSheet(TableRef table, DbDynContext db)
+        public static async ValueTask RemoveSheet(this DbDynContext db, TableRef table)
         {
             if (table.TableType != TableType.Sheet)
                 throw new InvalidTableException("Not the correct table type.");
 
-            using var conn = db.Database.GetDbConnection();
-            await conn.OpenAsync().ConfigureAwait(false);
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = "DROP TABLE \"" + table.LookupName.ToNameString() + '\"';
-            await cmd.ExecuteNonQueryAsync();
+            await RemoveTable(db, table);
         }
 
-        public static async ValueTask RemoveTable(TableRef table, DbDynContext db)
+        public static async ValueTask RemoveTable(this DbDynContext db, TableRef table)
         {
             using var conn = db.Database.GetDbConnection();
             await conn.OpenAsync().ConfigureAwait(false);
