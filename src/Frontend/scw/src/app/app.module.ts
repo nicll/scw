@@ -25,14 +25,17 @@ import {HttpClientModule} from '@angular/common/http'
 import {CommonModule} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MatTabsModule} from '@angular/material/tabs';
+import { SheetComponent } from './sheet/sheet.component';
+import { DatasetComponent } from './dataset/dataset.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HandsontestComponent,
     LogInSignUpDialogComponent,
-    AllTablesComponent
-  ],
+    AllTablesComponent,
+    SheetComponent,
+    DatasetComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
