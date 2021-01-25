@@ -64,7 +64,7 @@ namespace ScwSvc.Controllers
             await _sysDb.RemoveUser(user);
 
             foreach (var tableRef in user.OwnTables)
-                await DynDbInteractor.RemoveTable(tableRef, _dynDb);
+                await _dynDb.RemoveTable(tableRef);
 
             await _sysDb.SaveChangesAsync();
             return Ok();
@@ -147,7 +147,7 @@ namespace ScwSvc.Controllers
                 };
 
                 await _sysDb.TableRefs.AddAsync(newTable);
-                await DynDbInteractor.CreateDataSet(newTable, _dynDb);
+                await _dynDb.CreateDataSet(newTable);
                 await _sysDb.SaveChangesAsync();
 
                 return Created("/api/data/dataset/" + newDsId, newTable);
@@ -187,7 +187,7 @@ namespace ScwSvc.Controllers
             _logger.LogInformation("Remove dataset: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
 
             await _sysDb.RemoveTable(table);
-            await DynDbInteractor.RemoveDataSet(table, _dynDb);
+            await _dynDb.RemoveDataSet(table);
             await _sysDb.SaveChangesAsync();
 
             return Ok();
@@ -222,7 +222,7 @@ namespace ScwSvc.Controllers
             };
 
             await _sysDb.TableRefs.AddAsync(newTable);
-            await DynDbInteractor.CreateSheet(newTable, _dynDb);
+            await _dynDb.CreateSheet(newTable);
             await _sysDb.SaveChangesAsync();
 
             return Created("/api/data/sheet/" + newShId, newTable);
@@ -257,7 +257,7 @@ namespace ScwSvc.Controllers
             _logger.LogInformation("Remove sheet: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
 
             await _sysDb.RemoveTable(table);
-            await DynDbInteractor.RemoveSheet(table, _dynDb);
+            await _dynDb.RemoveSheet(table);
             await _sysDb.SaveChangesAsync();
 
             return Ok();

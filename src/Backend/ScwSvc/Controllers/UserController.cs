@@ -201,7 +201,7 @@ namespace ScwSvc.Controllers
                 };
 
                 await _sysDb.TableRefs.AddAsync(newTable);
-                await DynDbInteractor.CreateDataSet(newTable, _dynDb);
+                await _dynDb.CreateDataSet(newTable);
                 await _sysDb.SaveChangesAsync();
 
                 return Created("/api/data/dataset/" + newDsId, newTable);
@@ -241,7 +241,7 @@ namespace ScwSvc.Controllers
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
 
             await _sysDb.RemoveTable(tableRef);
-            await DynDbInteractor.RemoveDataSet(tableRef, _dynDb);
+            await _dynDb.RemoveDataSet(tableRef);
             await _sysDb.SaveChangesAsync();
 
             return Ok();
@@ -381,7 +381,7 @@ namespace ScwSvc.Controllers
             };
 
             await _sysDb.TableRefs.AddAsync(newTable);
-            await DynDbInteractor.CreateSheet(newTable, _dynDb);
+            await _dynDb.CreateSheet(newTable);
             await _sysDb.SaveChangesAsync();
 
             return Created("/api/data/sheet/" + newShId, newTable);
@@ -416,7 +416,7 @@ namespace ScwSvc.Controllers
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
 
             await _sysDb.RemoveTable(tableRef);
-            await DynDbInteractor.RemoveSheet(tableRef, _dynDb);
+            await _dynDb.RemoveSheet(tableRef);
             await _sysDb.SaveChangesAsync();
 
             return Ok();
