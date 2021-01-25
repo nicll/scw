@@ -18,7 +18,7 @@ namespace ScwSvc.Interactors
                 throw new InvalidTableException("Not the correct table type.");
 
             using var conn = db.Database.GetDbConnection();
-            await conn.OpenAsync();
+            await conn.OpenAsync().ConfigureAwait(false);
             using var cmd = conn.CreateCommand();
             cmd.CommandText = ConvertTableRefToCreateTable(table);
             await cmd.ExecuteNonQueryAsync();
@@ -30,7 +30,7 @@ namespace ScwSvc.Interactors
                 throw new InvalidTableException("Not the correct table type.");
 
             using var conn = db.Database.GetDbConnection();
-            await conn.OpenAsync();
+            await conn.OpenAsync().ConfigureAwait(false);
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "DROP TABLE \"" + table.LookupName.ToNameString() + '\"';
             await cmd.ExecuteNonQueryAsync();
@@ -42,7 +42,7 @@ namespace ScwSvc.Interactors
                 throw new InvalidTableException("Not the correct table type.");
 
             using var conn = db.Database.GetDbConnection();
-            await conn.OpenAsync();
+            await conn.OpenAsync().ConfigureAwait(false);
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "CREATE TABLE (A varchar(200), B varchar(200), B varchar(200), D varchar(200), E varchar(200), F varchar(200), G varchar(200), H varchar(200))";
             await cmd.ExecuteNonQueryAsync();
@@ -54,7 +54,16 @@ namespace ScwSvc.Interactors
                 throw new InvalidTableException("Not the correct table type.");
 
             using var conn = db.Database.GetDbConnection();
-            await conn.OpenAsync();
+            await conn.OpenAsync().ConfigureAwait(false);
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DROP TABLE \"" + table.LookupName.ToNameString() + '\"';
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        public static async ValueTask RemoveTable(TableRef table, DbDynContext db)
+        {
+            using var conn = db.Database.GetDbConnection();
+            await conn.OpenAsync().ConfigureAwait(false);
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "DROP TABLE \"" + table.LookupName.ToNameString() + '\"';
             await cmd.ExecuteNonQueryAsync();

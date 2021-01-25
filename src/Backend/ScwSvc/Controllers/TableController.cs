@@ -59,7 +59,7 @@ namespace ScwSvc.Controllers
             if (tableRef.TableType != TableType.DataSet)
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
 
-            _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRedId=\"" + tableRef.TableRefId + "\"");
+            _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
 
             return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
         }
@@ -98,7 +98,7 @@ namespace ScwSvc.Controllers
             if (tableRef.TableType != TableType.Sheet)
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
 
-            _logger.LogInformation("Sheet access: user=\"" + user.UserId + "\"; tableRedId=\"" + tableRef.TableRefId + "\"");
+            _logger.LogInformation("Sheet access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
 
             return RedirectPreserveMethod(PostgrestBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
         }
