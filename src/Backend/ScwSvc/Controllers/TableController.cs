@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ScwSvc.Interactors;
 using ScwSvc.Models;
 using System;
 using System.Linq;
@@ -45,7 +46,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _db.GetUserById(ownerInfo.Value.id);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -84,7 +85,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _db.GetUserById(ownerInfo.Value.id);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -112,7 +113,7 @@ namespace ScwSvc.Controllers
             if (!ownerInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _db.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _db.GetUserById(ownerInfo.Value.id);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");

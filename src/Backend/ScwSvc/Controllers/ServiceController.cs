@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ScwSvc.Interactors;
 using ScwSvc.Models;
 using System;
 using System.Linq;
@@ -33,17 +33,17 @@ namespace ScwSvc.Controllers
         {
             _logger.LogInformation("Register attempt: user=\"" + loginCredentials.Username + "\"");
 
-            if (await _db.Users.AnyAsync(u => u.Name == loginCredentials.Username).ConfigureAwait(false))
+            if (await _db.IsUsernameAssigned(loginCredentials.Username))
                 return BadRequest("User with this name already exists.");
 
             var newUserId = Guid.NewGuid();
-            await _db.Users.AddAsync(new User()
+            await _db.AddUser(new User()
             {
                 UserId = newUserId,
                 Name = loginCredentials.Username,
                 PasswordHash = HashUserPassword(newUserId, loginCredentials.Password),
                 Role = UserRole.Common
-            }).ConfigureAwait(false);
+            });
             await _db.SaveChangesAsync().ConfigureAwait(false);
 
             _logger.LogInformation("Register: user=\"" + loginCredentials.Username + "\"");
@@ -84,26 +84,26 @@ namespace ScwSvc.Controllers
         {
             _logger.LogInformation("Login attempt: user=\"" + loginCredentials.Username + "\"");
 
-            if (_db.Users.FirstOrDefault(u => u.Name == loginCredentials.Username) is User user)
+            var user = await _db.GetUserByName(loginCredentials.Username);
+
+            if (user is null)
+                return BadRequest("User not found.");
+
+            var enteredPassword = HashUserPassword(user.UserId, loginCredentials.Password);
+
+            if (CompareHashes(enteredPassword, user.PasswordHash))
             {
-                var enteredPassword = HashUserPassword(user.UserId, loginCredentials.Password);
+                var cp = new ClaimsPrincipal(new ClaimsIdentity(
+                        new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToNameString()), new Claim(ClaimTypes.Name, user.Name) },
+                    CookieAuthenticationDefaults.AuthenticationScheme));
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
+                _logger.LogInformation("Login: user=\"" + loginCredentials.Username + "\"");
 
-                if (CompareHashes(enteredPassword, user.PasswordHash))
-                {
-                    var cp = new ClaimsPrincipal(new ClaimsIdentity(
-                            new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToNameString()), new Claim(ClaimTypes.Name, user.Name) },
-                        CookieAuthenticationDefaults.AuthenticationScheme));
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
-                    _logger.LogInformation("Login: user=\"" + loginCredentials.Username + "\"");
-
-                    return Ok();
-                }
-
-                _logger.LogInformation("Login fail: user=\"" + loginCredentials.Username + "\"");
-                return BadRequest("Incorrect password.");
+                return Ok();
             }
 
-            return BadRequest("User not found.");
+            _logger.LogInformation("Login fail: user=\"" + loginCredentials.Username + "\"");
+            return BadRequest("Incorrect password.");
         }
 
 #if ENABLE_AD_AUTH
@@ -239,13 +239,13 @@ namespace ScwSvc.Controllers
                 for (int i = 0; i < 3; ++i)
                 {
                     var userId = Guid.NewGuid();
-                    await _db.Users.AddAsync(new User()
+                    await _db.AddUser(new User()
                     {
                         UserId = userId,
                         Name = "test" + i,
                         Role = (UserRole)i,
                         PasswordHash = HashUserPassword(userId, "test")
-                    }).ConfigureAwait(false);
+                    });
                 }
 
                 await _db.SaveChangesAsync();

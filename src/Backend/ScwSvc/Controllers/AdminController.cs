@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNet.OData;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ScwSvc.Interactors;
 using ScwSvc.Models;
 using System;
 using System.Collections.Generic;
@@ -43,10 +43,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> GetUser([FromRoute] Guid userId)
         {
-            if (await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user)
-                return Ok(user);
+            var user = await _sysDb.GetUserById(userId);
 
-            return NotFound("User was not found.");
+            if (user is null)
+                return NotFound("User was not found.");
+
+            return Ok(user);
         }
 
         [HttpDelete("user/{userId}")]
@@ -54,20 +56,18 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> DeleteUser([FromRoute] Guid userId)
         {
-            if (await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user)
-            {
-                await _sysDb.TableRefs.Where(t => t.Collaborators.Contains(user)).ForEachAsync(t => t.Collaborators.Remove(user));
-                _sysDb.TableRefs.RemoveRange(user.OwnTables);
-                _sysDb.Users.Remove(user);
+            var user = await _sysDb.GetUserById(userId);
 
-                foreach (var tableRef in user.OwnTables)
-                    await Interactors.DynDbInteractor.RemoveTable(tableRef, _dynDb);
+            if (user is null)
+                return NotFound("User was not found.");
 
-                await _sysDb.SaveChangesAsync();
-                return Ok();
-            }
+            await _sysDb.RemoveUser(user);
 
-            return NotFound("User was not found.");
+            foreach (var tableRef in user.OwnTables)
+                await DynDbInteractor.RemoveTable(tableRef, _dynDb);
+
+            await _sysDb.SaveChangesAsync();
+            return Ok();
         }
 
         [HttpGet("user/{userId}/table")]
@@ -75,7 +75,9 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> GetUserTables([FromRoute] Guid userId)
         {
-            if (!(await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user))
+            var user = await _sysDb.GetUserById(userId);
+
+            if (user is null)
                 return NotFound("User was not found.");
 
             return Ok(user.OwnTables);
@@ -86,7 +88,9 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> GetUserCollaborations([FromRoute] Guid userId)
         {
-            if (!(await _sysDb.Users.FindAsync(userId).ConfigureAwait(false) is User user))
+            var user = await _sysDb.GetUserById(userId);
+
+            if (user is null)
                 return NotFound("User was not found.");
 
             return Ok(user.Collaborations);
@@ -114,12 +118,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSetModel dsModel)
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidAndStringOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value.id);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -127,7 +131,7 @@ namespace ScwSvc.Controllers
             if (dsModel.Columns.Length < 1)
                 return BadRequest("No columns specified.");
 
-            _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
+            _logger.LogInformation("Create dataset: user=\"" + userInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
             try
             {
@@ -143,9 +147,9 @@ namespace ScwSvc.Controllers
                 };
 
                 await _sysDb.TableRefs.AddAsync(newTable);
-                await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
-
+                await DynDbInteractor.CreateDataSet(newTable, _dynDb);
                 await _sysDb.SaveChangesAsync();
+
                 return Created("/api/data/dataset/" + newDsId, newTable);
             }
             catch (InvalidTableException e)
@@ -167,12 +171,12 @@ namespace ScwSvc.Controllers
             if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(userInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value.id);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
-            var table = await _sysDb.TableRefs.FindAsync(tableRefId);
+            var table = await _sysDb.GetTableRefById(tableRefId);
 
             if (table is null)
                 return NotFound("This data set does not exist.");
@@ -182,11 +186,10 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Remove dataset: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
 
-            await _sysDb.Users.ForEachAsync(u => u.Collaborations.Remove(table));
-            await _sysDb.Users.ForEachAsync(u => u.OwnTables.Remove(table));
-            _sysDb.TableRefs.Remove(table);
-            await Interactors.DynDbInteractor.RemoveDataSet(table, _dynDb);
+            await _sysDb.RemoveTable(table);
+            await DynDbInteractor.RemoveDataSet(table, _dynDb);
             await _sysDb.SaveChangesAsync();
+
             return Ok();
         }
 
@@ -196,17 +199,17 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheetModel shModel)
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidAndStringOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value.id);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
-            _logger.LogInformation("Create sheet: user=\"" + ownerInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
+            _logger.LogInformation("Create sheet: user=\"" + userInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
 
             var newShId = Guid.NewGuid();
             var newTable = new TableRef()
@@ -219,9 +222,9 @@ namespace ScwSvc.Controllers
             };
 
             await _sysDb.TableRefs.AddAsync(newTable);
-            await Interactors.DynDbInteractor.CreateSheet(newTable, _dynDb);
-
+            await DynDbInteractor.CreateSheet(newTable, _dynDb);
             await _sysDb.SaveChangesAsync();
+
             return Created("/api/data/sheet/" + newShId, newTable);
         }
 
@@ -238,12 +241,12 @@ namespace ScwSvc.Controllers
             if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(userInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value.id);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
-            var table = await _sysDb.TableRefs.FindAsync(tableRefId);
+            var table = await _sysDb.GetTableRefById(tableRefId);
 
             if (table is null)
                 return NotFound("This sheet does not exist.");
@@ -253,11 +256,10 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Remove sheet: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
 
-            await _sysDb.Users.ForEachAsync(u => u.Collaborations.Remove(table));
-            await _sysDb.Users.ForEachAsync(u => u.OwnTables.Remove(table));
-            _sysDb.TableRefs.Remove(table);
-            await Interactors.DynDbInteractor.RemoveSheet(table, _dynDb);
+            await _sysDb.RemoveTable(table);
+            await DynDbInteractor.RemoveSheet(table, _dynDb);
             await _sysDb.SaveChangesAsync();
+
             return Ok();
         }
     }

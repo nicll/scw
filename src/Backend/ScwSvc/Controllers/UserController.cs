@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ScwSvc.Interactors;
 using ScwSvc.Models;
 using System;
 using System.Collections.Generic;
@@ -45,6 +45,24 @@ namespace ScwSvc.Controllers
             _dynDb = dynDb;
         }
 
+        [HttpGet("username")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MyUsername()
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(user.Name);
+        }
+
         /// <summary>
         /// Queries a collection of all data sets that the user may access.
         /// </summary>
@@ -54,12 +72,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> MyDataSetsAll()
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -76,12 +94,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> MyDataSetsOwn()
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -98,12 +116,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> MyDataSetsCollaborations()
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -121,12 +139,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> MyDataSet([FromRoute] Guid tableRefId)
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -154,12 +172,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSetModel dsModel)
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidAndStringOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value.id);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -167,7 +185,7 @@ namespace ScwSvc.Controllers
             if (user.OwnTables.Count > MaxDataSetsPerUser)
                 return this.Forbidden("You cannot own more than " + MaxDataSetsPerUser + " data sets at any time.");
 
-            _logger.LogInformation("Create dataset: user=\"" + ownerInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
+            _logger.LogInformation("Create dataset: user=\"" + userInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
 
             try
             {
@@ -183,9 +201,9 @@ namespace ScwSvc.Controllers
                 };
 
                 await _sysDb.TableRefs.AddAsync(newTable);
-                await Interactors.DynDbInteractor.CreateDataSet(newTable, _dynDb);
-
+                await DynDbInteractor.CreateDataSet(newTable, _dynDb);
                 await _sysDb.SaveChangesAsync();
+
                 return Created("/api/data/dataset/" + newDsId, newTable);
             }
             catch (InvalidTableException e)
@@ -204,12 +222,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
         public async ValueTask<IActionResult> DeleteDataSet([FromRoute] Guid tableRefId)
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -222,13 +240,10 @@ namespace ScwSvc.Controllers
             if (tableRef.TableType != TableType.DataSet)
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
 
-            await Interactors.DynDbInteractor.RemoveDataSet(tableRef, _dynDb);
-            user.OwnTables.Remove(tableRef);
+            await _sysDb.RemoveTable(tableRef);
+            await DynDbInteractor.RemoveDataSet(tableRef, _dynDb);
+            await _sysDb.SaveChangesAsync();
 
-            foreach (var collaborator in _sysDb.Users.Where(u => u.Collaborations.Contains(tableRef)))
-                collaborator.Collaborations.Remove(tableRef);
-
-            await _sysDb.SaveChangesAsync().ConfigureAwait(false);
             return Ok();
         }
 
@@ -241,12 +256,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> MySheetsAll()
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -263,12 +278,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> MySheetsOwn()
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -285,12 +300,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> MySheetsCollaborations()
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -308,12 +323,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> MySheet([FromRoute] Guid tableRefId)
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -340,12 +355,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheetModel shModel)
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidAndStringOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value.id);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -353,7 +368,7 @@ namespace ScwSvc.Controllers
             if (user.OwnTables.Count > MaxSheetsPerUser)
                 return this.Forbidden("You cannot own more than " + MaxSheetsPerUser + " sheets at any time.");
 
-            _logger.LogInformation("Create sheet: user=\"" + ownerInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
+            _logger.LogInformation("Create sheet: user=\"" + userInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
 
             var newShId = Guid.NewGuid();
             var newTable = new TableRef()
@@ -366,9 +381,9 @@ namespace ScwSvc.Controllers
             };
 
             await _sysDb.TableRefs.AddAsync(newTable);
-            await Interactors.DynDbInteractor.CreateSheet(newTable, _dynDb);
-
+            await DynDbInteractor.CreateSheet(newTable, _dynDb);
             await _sysDb.SaveChangesAsync();
+
             return Created("/api/data/sheet/" + newShId, newTable);
         }
 
@@ -382,12 +397,12 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
         public async ValueTask<IActionResult> DeleteSheet([FromRoute] Guid tableRefId)
         {
-            var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
+            var userInfo = GetUserIdAsGuidOrNull(User);
 
-            if (!ownerInfo.HasValue)
+            if (!userInfo.HasValue)
                 return Unauthorized("You are logged in with an invalid user.");
 
-            var user = await _sysDb.Users.FindAsync(ownerInfo.Value.id).ConfigureAwait(false);
+            var user = await _sysDb.GetUserById(userInfo.Value);
 
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
@@ -400,13 +415,10 @@ namespace ScwSvc.Controllers
             if (tableRef.TableType != TableType.Sheet)
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
 
-            await Interactors.DynDbInteractor.RemoveSheet(tableRef, _dynDb);
-            user.OwnTables.Remove(tableRef);
+            await _sysDb.RemoveTable(tableRef);
+            await DynDbInteractor.RemoveSheet(tableRef, _dynDb);
+            await _sysDb.SaveChangesAsync();
 
-            foreach (var collaborator in _sysDb.Users.Where(u => u.Collaborations.Contains(tableRef)))
-                collaborator.Collaborations.Remove(tableRef);
-
-            await _sysDb.SaveChangesAsync().ConfigureAwait(false);
             return Ok();
         }
     }
