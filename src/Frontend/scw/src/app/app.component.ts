@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { LogInSignUpDialogComponent } from './log-in-sign-up-dialog/log-in-sign-up-dialog.component';
@@ -8,11 +8,14 @@ import { UserService } from './Services/user.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit{
   title = 'scw';
   username:string|undefined;
   tables:any=["test","test2"];
   constructor(public dialog: MatDialog, private user: UserService,private router: Router){}
+  ngOnInit(): void {
+    this.user.GetUser().subscribe(user=>{console.log(user);this.username=user.username});
+  }
   public Login(){
     const dialogRef = this.dialog.open(LogInSignUpDialogComponent, {
       data: "login"
@@ -21,11 +24,8 @@ export class AppComponent {
     dialogRef.afterClosed().subscribe(()=>{
       let usern;
       if(usern=this.user.GetUser()){
-        console.log("te2: "+usern);
-        this.username=usern.username;
+        usern.subscribe(us=>this.username=us.username);
       }
-      
-      console.log("te1: "+usern);
     });
   }
   public Signup(){
@@ -36,7 +36,7 @@ export class AppComponent {
     dialogRef.afterClosed().subscribe(()=>{
       let usern;
       if(usern=this.user.GetUser()){
-        this.username=usern.username;
+        usern.subscribe(us=>this.username=us.username);
       }
     });
   }

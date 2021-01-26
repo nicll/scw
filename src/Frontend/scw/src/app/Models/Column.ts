@@ -1,10 +1,9 @@
 export class Column{
-    position:number;
+    position?:number;
     name:string;
     type:string
     nullable:boolean;
-    constructor(position:number,name:string,type:string,nullable:boolean) {
-        this.position=position;
+    constructor(name:string,type:string,nullable:boolean,position?:number) {
         this.name=name;
         this.type=type;
         this.nullable=nullable
