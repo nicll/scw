@@ -85,9 +85,42 @@ namespace ScwSvc.Controllers
             if (await _sysDb.IsUsernameAssigned(username))
                 return BadRequest("User with this name already exists.");
 
-            user.Name = username;
-            await _sysDb.SaveChangesAsync();
-            return Ok();
+            try
+            {
+                await _sysDb.ModifyUser(user, commit: true, username: username);
+                return Ok();
+            }
+            catch (UserChangeException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPatch("password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> ChangePassword([FromBody] string password)
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            try
+            {
+                await _sysDb.ModifyUser(user, commit: true, password: password);
+                return Ok();
+            }
+            catch (UserChangeException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         /// <summary>

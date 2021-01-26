@@ -3,6 +3,7 @@ using ScwSvc.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using static ScwSvc.Utils.Authentication;
 
 namespace ScwSvc.Interactors
 {
@@ -22,6 +23,31 @@ namespace ScwSvc.Interactors
 
         public static async ValueTask<TableRef> GetTableRefById(this DbSysContext db, Guid id)
             => await db.TableRefs.FindAsync(id).ConfigureAwait(false);
+
+        public static async ValueTask ModifyUser(this DbSysContext db, User user, bool commit = false, string username = null, string password = null)
+        {
+            if (username is not null)
+            {
+                if (String.IsNullOrEmpty(username) || username.Length > 20)
+                    throw new UserChangeException("Invalid username given.") { UserId = user.UserId, OldValue = user.Name, NewValue = username };
+
+                if (await IsUsernameAssigned(db, username))
+                    throw new UserChangeException("Username is already in use.") { UserId = user.UserId, OldValue = user.Name, NewValue = username };
+
+                user.Name = username;
+            }
+
+            if (password is not null)
+            {
+                if (String.IsNullOrEmpty(username) || username.Length < 4) // ToDo: change to more sensible value when testing is finished
+                    throw new UserChangeException("Passwort empty or too short.") { UserId = user.UserId, OldValue = user.Name, NewValue = username };
+
+                user.PasswordHash = HashUserPassword(user.UserId, password);
+            }
+
+            if (commit)
+                await db.SaveChangesAsync().ConfigureAwait(false);
+        }
 
         public static async ValueTask RemoveUser(this DbSysContext db, User user, bool commit = false)
         {
