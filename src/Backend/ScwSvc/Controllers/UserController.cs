@@ -47,7 +47,7 @@ namespace ScwSvc.Controllers
 
         [HttpGet("username")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> MyUsername()
         {
             var userInfo = GetUserIdAsGuidOrNull(User);
@@ -61,6 +61,33 @@ namespace ScwSvc.Controllers
                 return Unauthorized("You are logged in with a non-existent user.");
 
             return Ok(user.Name);
+        }
+
+        [HttpPatch("username")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> ChangeUsername([FromBody] string username)
+        {
+            return StatusCode(StatusCodes.Status501NotImplemented, "Currently not supported.");
+            // ToDo: allow this call when username is no longer readonly
+
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            if (await _sysDb.IsUsernameAssigned(username))
+                return BadRequest("User with this name already exists.");
+
+            user.Name = username;
+            await _sysDb.SaveChangesAsync();
+            return Ok();
         }
 
         /// <summary>
