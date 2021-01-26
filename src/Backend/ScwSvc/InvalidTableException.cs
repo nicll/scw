@@ -2,6 +2,9 @@
 
 namespace ScwSvc
 {
+    /// <summary>
+    /// This exception is thrown when an invalid table is encountered.
+    /// </summary>
     public class InvalidTableException : Exception
     {
         public InvalidTableException() : base()

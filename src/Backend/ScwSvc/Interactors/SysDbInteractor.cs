@@ -9,21 +9,65 @@ namespace ScwSvc.Interactors
 {
     public static class SysDbInteractor
     {
+        /// <summary>
+        /// Gets a <see cref="User"/> object by their <see cref="User.UserId"/>.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="id">The user's <see cref="User.UserId"/>.</param>
+        /// <returns>The full <see cref="User"/> object.</returns>
         public static async ValueTask<User> GetUserById(this DbSysContext db, Guid id)
             => await db.Users.FindAsync(id).ConfigureAwait(false);
 
+        /// <summary>
+        /// Gets a <see cref="User"/> object by their <see cref="User.Name"/>.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="name">The user's <see cref="User.Name"/>.</param>
+        /// <returns>The full <see cref="User"/> object.</returns>
         public static async ValueTask<User> GetUserByName(this DbSysContext db, string name)
             => await db.Users.FirstOrDefaultAsync(u => u.Name == name).ConfigureAwait(false);
 
+        /// <summary>
+        /// Adds a new <see cref="User"/> object to the SYS database.
+        /// </summary>
+        /// <remarks>
+        /// The new user must have a unique <see cref="User.UserId"/> and a unique <see cref="User.Name"/>.</remarks>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="user">The new <see cref="User"/> object.</param>
         public static async ValueTask AddUser(this DbSysContext db, User user)
             => await db.Users.AddAsync(user).ConfigureAwait(false);
 
+        /// <summary>
+        /// Checks whether a username is already in use.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="name">The user's <see cref="User.Name"/>.</param>
+        /// <returns>Whether or not the username is already in use.</returns>
         public static async ValueTask<bool> IsUsernameAssigned(this DbSysContext db, string name)
             => await db.Users.AnyAsync(u => u.Name == name).ConfigureAwait(false);
 
+        /// <summary>
+        /// Gets a <see cref="TableRef"/> by its <see cref="TableRef.TableRefId"/>.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="id">The table's <see cref="TableRef.TableRefId"/>.</param>
+        /// <returns>The full <see cref="TableRef"/> object.</returns>
         public static async ValueTask<TableRef> GetTableRefById(this DbSysContext db, Guid id)
             => await db.TableRefs.FindAsync(id).ConfigureAwait(false);
 
+        /// <summary>
+        /// Modifies a <see cref="User"/> object and optionally updates it in the SYS database.
+        /// </summary>
+        /// <remarks>
+        /// This method performs additional checking for validity.
+        /// If any validation fails then a <see cref="UserChangeException"/> is thrown.
+        /// </remarks>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="user">The unmodified <see cref="User"/> object.</param>
+        /// <param name="commit">Whether or not to save changes to the database.</param>
+        /// <param name="username">The new username.</param>
+        /// <param name="password">The new password.</param>
+        /// <exception cref="UserChangeException">If any validation fails.</exception>
         public static async ValueTask ModifyUser(this DbSysContext db, User user, bool commit = false, string username = null, string password = null)
         {
             if (username is not null)
@@ -49,6 +93,13 @@ namespace ScwSvc.Interactors
                 await db.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Removes a <see cref="User"/> object and optionally updates the SYS database.
+        /// Also removes all references to this <see cref="User"/> object.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="user">The <see cref="User"/> object to remove.</param>
+        /// <param name="commit">Whether or not to save changes to the database.</param>
         public static async ValueTask RemoveUser(this DbSysContext db, User user, bool commit = false)
         {
             await db.TableRefs
@@ -62,6 +113,13 @@ namespace ScwSvc.Interactors
                 await db.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Removes a <see cref="TableRef"/> object and optionally updates the SYS database.
+        /// Also removes all references to this <see cref="TableRef"/> object.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object to remove.</param>
+        /// <param name="commit">Whether or not to save changes to the database.</param>
         public static async ValueTask RemoveTable(this DbSysContext db, TableRef table, bool commit = false)
         {
             await db.Users.ForEachAsync(u => u.Collaborations.Remove(table)).ConfigureAwait(false);
