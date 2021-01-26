@@ -1,7 +1,11 @@
-<hot-table
-  #hot
-  [settings]="hotSettings"
-  [hotId]="id"
-  licenseKey="non-commercial-and-evaluation">
-</hot-table>
+<div  class="hot">
+  <hot-table
+    [settings]="hotSettings"
+    [hotId]="id"
+    licenseKey="non-commercial-and-evaluation">
+  </hot-table>
+</div>
 <button id="search_field" type="search" placeholder="Search" (click)="onKey($event)">Export file</button>
+
+<label for="search"></label><input id="search" type="search" placeholder="Search">
+

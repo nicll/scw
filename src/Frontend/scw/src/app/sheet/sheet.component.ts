@@ -26,11 +26,17 @@ export class SheetComponent implements AfterViewInit,OnInit{
     formulas:true,
     contextMenu:true,
     rowHeaders:true,
+    comments: true,
+    search: true,
+    fillHandle: {
+      autoInsertRow: true
+    },
     data: Handsontable.helper.createEmptySpreadsheetData(20, 20),
   };
 
   dataset: Array<Array<any>>=new Array;
   tables: string[] = ['T1','T2','T3'];
+  searchFiled = document.getElementById('search');
 
   public onKey(event: any) { // without type info
     // @ts-ignore
@@ -48,6 +54,9 @@ export class SheetComponent implements AfterViewInit,OnInit{
       rowHeaders: true
     });
   };
+
+
+
   ngOnInit(): void {
   }
 
