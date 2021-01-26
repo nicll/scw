@@ -1,0 +1,3 @@
+db-uri = "postgres://scw1_user_dyn:npE8yaIvXz8GgD5L2j3vbGqIMTW3MoOU@localhost:5432/scw"
+db-schema = "scw1_dyn"
+db-anon-role = "scw1_user_dyn"

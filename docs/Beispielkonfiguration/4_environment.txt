@@ -1,0 +1,6 @@
+-- Umgebungsvariablen mit zufällig generierten Passwörtern
+-- die Passwörter sollten ausgetauscht werden
+-- Hashes der Passwörter in 1_users.sql müssen dann auch aktualisiert werden
+SCW1_DBPASS_DYN = npE8yaIvXz8GgD5L2j3vbGqIMTW3MoOU
+SCW1_DBPASS_SYS = 5KNih97az0JoiGK3ZEaPVGlAH9igoJhp
+SCW1_PGREST_BASEURL = http://localhost:3000/

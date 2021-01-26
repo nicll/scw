@@ -1,7 +1,6 @@
-Konfigurationsdatei für PostgREST anlegen, beispielsweise:
-db-uri = "postgres://scw1_user_dyn:<Passwort>@localhost:5432/scw"
-db-schema = "scw1_dyn"
-db-anon-role = "scw1_user_dyn"
+Konfigurationsdatei für PostgREST anlegen
+(siehe Order "Beispielskonfiguration" Datei scw1_dyn).
+
 
 Benutzer anlegen:
 "scw1_user_dyn"
@@ -10,4 +9,4 @@ Benutzer anlegen:
 	Passwort mit dem in Konfigurationsdatei abgleichen
 
 Zum Starten:
-postgrest scw1_dyn
+"postgrest.exe scw1_dyn"
