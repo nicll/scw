@@ -4,7 +4,7 @@ Um ScwSvc verwenden zu können muss eine PostgreSQL-Datenbank bereitstehen.
 (am einfachsten einfach "docker pull postgres" oder lokal installieren)
 
 Die Verbindung zur Datenbank muss dann für ScwSvc angegeben werden.
-Derzeit wird dies per Umgebungsvariablen gemacht. (später wahrscheinlich über appsettings.json)
+Derzeit wird dies per Umgebungsvariablen gemacht. (später eventuell über appsettings.json)
 
 Folgende Umgebungsvariablen existieren derzeit:
 

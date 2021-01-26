@@ -1,0 +1,27 @@
+
+-- Role: scw1_user_sys
+-- DROP ROLE scw1_user_sys;
+
+CREATE ROLE scw1_user_sys WITH
+  LOGIN
+  NOSUPERUSER
+  INHERIT
+  CREATEDB
+  NOCREATEROLE
+  NOREPLICATION
+  ENCRYPTED PASSWORD 'SCRAM-SHA-256$4096:cHE4x1789VZ1ylyyymoeDg==$zbWSbu1OPqaq84vtKlzI3k6u6U8T8jJ5lmxdDm4Zdpo=:OYqfRIV/O39rtJiiFYXnKaCGwG8kzUSGxL5rHljUDmU=';
+
+-- Role: scw1_user_dyn
+-- DROP ROLE scw1_user_dyn;
+
+CREATE ROLE scw1_user_dyn WITH
+  LOGIN
+  NOSUPERUSER
+  INHERIT
+  NOCREATEDB
+  NOCREATEROLE
+  NOREPLICATION
+  ENCRYPTED PASSWORD 'SCRAM-SHA-256$4096:dLDimw97MmKsW9++zjPMtA==$ZW/eb1vZHgRlGo4xV56vdgvanODaxOV8JHNUlfCvgwY=:L/1xk6oxYx5QwRMs1kJBDKYjVcrWD+UJuEINTGicvVY=';
+
+COMMENT ON ROLE scw1_user_dyn IS 'Can only read scw1_dyn schema.';
+
