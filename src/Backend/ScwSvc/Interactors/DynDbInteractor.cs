@@ -7,8 +7,13 @@ using System.Threading.Tasks;
 
 namespace ScwSvc.Interactors
 {
-    public static class DynDbInteractor // ToDo: this will be refactored to something nice later on...
+    public static class DynDbInteractor
     {
+        /// <summary>
+        /// Creates a new data set from the DYN database.
+        /// </summary>
+        /// <param name="db">The DYN database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object.</param>
         public static async ValueTask CreateDataSet(this DbDynContext db, TableRef table)
         {
             if (table.Columns.Count < 1)
@@ -24,6 +29,11 @@ namespace ScwSvc.Interactors
             await cmd.ExecuteNonQueryAsync();
         }
 
+        /// <summary>
+        /// Removes a data set from the DYN database.
+        /// </summary>
+        /// <param name="db">The DYN database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object.</param>
         public static async ValueTask RemoveDataSet(this DbDynContext db, TableRef table)
         {
             if (table.TableType != TableType.DataSet)
@@ -32,6 +42,11 @@ namespace ScwSvc.Interactors
             await RemoveTable(db, table);
         }
 
+        /// <summary>
+        /// Creates a new sheet from the DYN database.
+        /// </summary>
+        /// <param name="db">The DYN database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object.</param>
         public static async ValueTask CreateSheet(this DbDynContext db, TableRef table)
         {
             if (table.TableType != TableType.Sheet)
@@ -44,6 +59,11 @@ namespace ScwSvc.Interactors
             await cmd.ExecuteNonQueryAsync();
         }
 
+        /// <summary>
+        /// Removes a sheet from the DYN database.
+        /// </summary>
+        /// <param name="db">The DYN database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object.</param>
         public static async ValueTask RemoveSheet(this DbDynContext db, TableRef table)
         {
             if (table.TableType != TableType.Sheet)
@@ -52,6 +72,12 @@ namespace ScwSvc.Interactors
             await RemoveTable(db, table);
         }
 
+        /// <summary>
+        /// Removes a table from the DYN database.
+        /// This method does not check the table's <see cref="TableRef.TableType"/>.
+        /// </summary>
+        /// <param name="db">The DYN database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object.</param>
         public static async ValueTask RemoveTable(this DbDynContext db, TableRef table)
         {
             using var conn = db.Database.GetDbConnection();
