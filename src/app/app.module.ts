@@ -18,26 +18,29 @@ import {ButtonModule} from 'primeng/button';
 import {DropdownModule} from 'primeng/dropdown';
 import {ProgressBarModule} from 'primeng/progressbar';
 import {InputTextModule} from 'primeng/inputtext';
+import { ExcelUploadComponent } from './excel-upload/excel-upload.component';
+import {FileUploadModule} from 'primeng/fileupload';
 
 @NgModule({
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    TableModule,
-    CalendarModule,
-		SliderModule,
-		DialogModule,
-		MultiSelectModule,
-		ContextMenuModule,
-		DropdownModule,
-		ButtonModule,
-		ToastModule,
-    InputTextModule,
-    ProgressBarModule,
-    HttpClientModule,
-    FormsModule
-  ],
-  declarations: [ AppComponent ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        TableModule,
+        CalendarModule,
+        SliderModule,
+        DialogModule,
+        MultiSelectModule,
+        ContextMenuModule,
+        DropdownModule,
+        ButtonModule,
+        ToastModule,
+        InputTextModule,
+        ProgressBarModule,
+        HttpClientModule,
+        FormsModule,
+        FileUploadModule
+    ],
+  declarations: [ AppComponent, ExcelUploadComponent ],
   bootstrap:    [ AppComponent ],
   providers: [ProductService]
 })

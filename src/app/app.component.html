@@ -2,6 +2,13 @@
 
 <p-contextMenu #cm [model]="items"></p-contextMenu>
 
+<p-fileUpload (change)="onFileChange($event)"  multiple="multiple"
+              accept=".xlsx"></p-fileUpload>
+
+<div *ngIf="willDownload">
+    <a id="download"> Download JSON File </a>
+</div>
+
 <div class="card">
     <h5>Cell Editing</h5>
     <p-table #dt [rowHover]="true" [loading]="loading" [responsive]="true" [scrollable]="true" [reorderableColumns]="true"[resizableColumns]="true"[(contextMenuSelection)]="selectedProduct" [contextMenu]="cm" [columns]="cols" [value]="products1" dataKey="id" sortMode="multiple" stateStorage="local" stateKey="statedemo-local">

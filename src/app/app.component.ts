@@ -6,6 +6,10 @@ import { SelectItem } from 'primeng/api';
 import {MessageService} from 'primeng/api';
 import {jsPDF} from 'jspdf';
 import 'jspdf-autotable';
+import {FileUploadModule} from 'primeng/fileupload';
+import {HttpClientModule} from '@angular/common/http';
+import * as XLSX from 'xlsx';
+
 
 @Component({
   selector: 'app-root',
@@ -34,6 +38,7 @@ export class AppComponent {
 
     exportColumns: any[];
     items: MenuItem[];
+    willDownload = false;
 
 
 
@@ -61,7 +66,7 @@ export class AppComponent {
         // this.products2 = localStorage.getItem('product');
 
 
-        this.statuses = [{label: 'In Stock', value: 'INSTOCK'}, {label: 'Low Stock', value: 'LOWSTOCK'},{label: 'Out of Stock', value: 'OUTOFSTOCK'}];
+        this.statuses = [{label: 'In Stock', value: 'INSTOCK'}, {label: 'Low Stock', value: 'LOWSTOCK'}, {label: 'Out of Stock', value: 'OUTOFSTOCK'}];
 
         this.exportColumns = this.statuses.map(col => ({title: col.label, dataKey: col.value}));
 
@@ -73,6 +78,36 @@ export class AppComponent {
     viewProduct(product: Product) {
         this.messageService.add({severity: 'info', summary: 'Product Selected', detail: product.name });
     }
+
+    onFileChange(ev) {
+        let workBook = null;
+        let jsonData = null;
+        const reader = new FileReader();
+        const file = ev.target.files[0];
+        reader.onload = (event) => {
+            const data = reader.result;
+            workBook = XLSX.read(data, { type: 'binary' });
+            jsonData = workBook.SheetNames.reduce((initial, name) => {
+                const sheet = workBook.Sheets[name];
+                initial[name] = XLSX.utils.sheet_to_json(sheet);
+                return initial;
+            }, {});
+            const dataString = JSON.stringify(jsonData);
+            document.getElementById('output').innerHTML = dataString.slice(0, 300).concat('...');
+            this.setDownload(dataString);
+        };
+        reader.readAsBinaryString(file);
+    }
+    setDownload(data) {
+        this.willDownload = true;
+        setTimeout(() => {
+            const el = document.querySelector('#download');
+            el.setAttribute('href', `data:text/json;charset=utf-8,${encodeURIComponent(data)}`);
+            el.setAttribute('download', 'xlsxtojson.json');
+        }, 1000);
+    }
+
+
 
     deleteProduct(product: Product) {
         this.products1 = this.products1.filter((p) => p.id !== product.id);
@@ -89,10 +124,9 @@ export class AppComponent {
             delete this.clonedProducts[product.id];
             localStorage.setItem('product', JSON.stringify(this.products1));
             console.log(localStorage.getItem('product'));
-            this.messageService.add({severity:'success', summary: 'Success', detail:'Product is updated'});
-        }
-        else {
-            this.messageService.add({severity:'error', summary: 'Error', detail:'Invalid Price'});
+            this.messageService.add({severity: 'success', summary: 'Success', detail: 'Product is updated'});
+        } else {
+            this.messageService.add({severity: 'error', summary: 'Error', detail: 'Invalid Price'});
         }
     }
 
@@ -120,4 +154,5 @@ export class AppComponent {
             FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
         });
     }
+
 }
