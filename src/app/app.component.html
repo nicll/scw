@@ -1,13 +1,15 @@
 <p-toast></p-toast>
 
 <p-contextMenu #cm [model]="items"></p-contextMenu>
+<!-- <p-fileUpload  [auto]="true" (change)="onFileChange($event)" multiple="multiple" accept=".xlsx"></p-fileUpload> -->
+<input type="file" (change)="onFileChange($event)" />
 
-<p-fileUpload (change)="onFileChange($event)"  multiple="multiple"
-              accept=".xlsx"></p-fileUpload>
-
+<div id="output"></div>
+<br>
 <div *ngIf="willDownload">
     <a id="download"> Download JSON File </a>
 </div>
+
 
 <div class="card">
     <h5>Cell Editing</h5>

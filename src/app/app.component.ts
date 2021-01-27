@@ -80,6 +80,7 @@ export class AppComponent {
     }
 
     onFileChange(ev) {
+        console.log('test123');
         let workBook = null;
         let jsonData = null;
         const reader = new FileReader();
@@ -87,6 +88,7 @@ export class AppComponent {
         reader.onload = (event) => {
             const data = reader.result;
             workBook = XLSX.read(data, { type: 'binary' });
+            console.log(workBook);
             jsonData = workBook.SheetNames.reduce((initial, name) => {
                 const sheet = workBook.Sheets[name];
                 initial[name] = XLSX.utils.sheet_to_json(sheet);
