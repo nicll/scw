@@ -1,8 +1,10 @@
 <p-toast></p-toast>
 
+<p-contextMenu #cm [model]="items"></p-contextMenu>
+
 <div class="card">
     <h5>Cell Editing</h5>
-    <p-table #dt [columns]="cols" [value]="products1" dataKey="id" sortMode="multiple" stateStorage="local" stateKey="statedemo-local">
+    <p-table #dt [rowHover]="true" [loading]="loading" [responsive]="true" [scrollable]="true" [reorderableColumns]="true"[resizableColumns]="true"[(contextMenuSelection)]="selectedProduct" [contextMenu]="cm" [columns]="cols" [value]="products1" dataKey="id" sortMode="multiple" stateStorage="local" stateKey="statedemo-local">
         <ng-template pTemplate="caption">
             <div class="p-d-flex">
                 <button type="button" pButton pRipple icon="pi pi-file-o" (click)="dt.exportCSV()" class="p-mr-2" pTooltip="CSV" tooltipPosition="bottom"></button>
@@ -14,14 +16,17 @@
 
         <ng-template pTemplate="header">
             <tr>
-                <th *ngFor="let col of cols" [pSortableColumn]="col.header">
+                <th *ngFor="let col of cols" [pSortableColumn]="col.header" pResizableColumn pReorderableColumn>
                     {{col.header}}
                     <p-sortIcon [field]="col.header"></p-sortIcon>
                 </th>
             </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-product let-cols>
-            <tr>
+        <ng-template pTemplate="body" let-product let-cols let-index="rowIndex">
+            <tr [pContextMenuRow]="product" [pReorderableRow]="index">
+                <td>
+                    <i class="pi pi-bars" pReorderableRowHandle></i>
+                </td>
                 <td pEditableColumn>
                     <p-cellEditor>
                         <ng-template pTemplate="input">
@@ -66,6 +71,13 @@
                 </td>
             </tr>
         </ng-template>
+        <ng-template pTemplate="emptymessage" let-columns>
+            <tr>
+                <td [attr.colspan]="columns.length">
+                    No records found
+                </td>
+            </tr>
+        </ng-template>
     </p-table>
 </div>
 
@@ -81,9 +93,9 @@
                 <th style="width:8rem"></th>
             </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-product let-editing="editing" let-ri="rowIndex">
+        <ng-template pTemplate="body" let-product let-editing="editing" let-ri="rowIndex" >
             <tr [pEditableRow]="product">
-                <td pEditableColumn>
+                <td pEditableColumn >
                     <p-cellEditor>
                         <ng-template pTemplate="input">
                             <input pInputText type="text" [(ngModel)]="product.code">
