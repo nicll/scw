@@ -1,6 +1,6 @@
 export class DataSet{
-    data:Array<Array<any>>
-    constructor(data:Array<Array<any>>) {
+    data:Array<any>
+    constructor(data:Array<any>) {
         this.data=data;
     }
 }

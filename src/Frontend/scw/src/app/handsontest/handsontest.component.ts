@@ -17,7 +17,6 @@ export class HandsontestComponent implements OnInit {
   ngOnInit(): void {
     this.dataset = [['', 'Row1', 'Row2', 'row3'], ["testdata", "row2", "row3"], [1, 2, 3], [3, 2, 1]];
     console.log("test");
-    this.http.GetDataSets().subscribe(v=>console.log(v));
   }
 
 }

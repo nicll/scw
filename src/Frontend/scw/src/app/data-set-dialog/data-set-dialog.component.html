@@ -1,0 +1,18 @@
+DataSet Dialog
+<mat-form-field>    
+    <mat-label>Enter displayname: </mat-label>   
+    <input matInput [(ngModel)]="displayname">
+</mat-form-field> 
+<br>
+<mat-form-field>  
+    <mat-label >Enter columns: </mat-label>
+    <button mat-raised-button (click)="addColumn()"> Add column </button>
+    <button mat-raised-button (click)="removeColumn()"> Remove column </button>
+</mat-form-field>  
+<br>
+<small>{{message}} 
+    <br/>
+  </small>
+<br>
+<button mat-raised-button (click)="Ok()" >Ok</button>   
+<button mat-raised-button (click)="Cancel()" style="float: right">Cancel</button>

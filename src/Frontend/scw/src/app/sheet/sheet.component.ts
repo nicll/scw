@@ -1,8 +1,8 @@
 import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
-import {HttpService} from '../Services/http.service';
 import Handsontable from "handsontable";
-import { HotTableComponent } from "@handsontable/angular";
 import {HotTableRegisterer} from "@handsontable/angular";
+import { TableService } from '../Services/table.service';
+import { DataSet } from '../Models/DataSet';
 
 
 @Component({
@@ -12,10 +12,22 @@ import {HotTableRegisterer} from "@handsontable/angular";
 })
 export class SheetComponent implements AfterViewInit,OnInit{
 
-  constructor() { }
+  @Input() tableId:string|undefined;
+  
+  constructor(public table:TableService) { }
+
   ngAfterViewInit(): void {
     this.hot=this.hotRegisterer.getInstance(this.id)
-    console.log("test"+this.hot);
+    console.log("test"+this.tableId);
+    if(this.tableId){
+      this.table.GetDataSet(this.tableId).
+      subscribe(tables=>{
+        if(tables.data.length==0)
+          this.hot!.loadData([{"A":1},{"A":10},{"A":12}]);
+        else
+          this.hot!.loadData(tables.data);
+        });
+    }
   }
   private hotRegisterer = new HotTableRegisterer();
   id = 'hotInstance';
@@ -26,12 +38,26 @@ export class SheetComponent implements AfterViewInit,OnInit{
     formulas:true,
     contextMenu:true,
     rowHeaders:true,
-    data: Handsontable.helper.createEmptySpreadsheetData(20, 20),
+    comments: true,
+    undo: true,
+    stretchH: 'all',
+    maxCols: 255,
+    height:"300px",
+    fillHandle: {
+      autoInsertRow: true
+    },
+    data: Handsontable.helper.createEmptySpreadsheetData(30,10),
   };
 
   dataset: Array<Array<any>>=new Array;
   tables: string[] = ['T1','T2','T3'];
-
+  public saveDataSet(){
+    if(this.tableId&&this.hot){
+      console.log(this.hot.getSourceData());
+      this.table.DeleteDataSet(this.tableId);
+      this.table.PostDataSet(this.tableId,this.hot.getSourceData()).subscribe(res=>console.log(res));
+    }
+  }
   public onKey(event: any) { // without type info
     // @ts-ignore
     let exportPlugin1 = this.hot.getPlugin('exportFile');

@@ -1,7 +1,8 @@
-<hot-table
+<hot-table style="height: 500px;"
   #hot
   [settings]="hotSettings"
   [hotId]="id"
   licenseKey="non-commercial-and-evaluation">
 </hot-table>
-<button id="search_field" type="search" placeholder="Search" (click)="onKey($event)">Export file</button>
+<button mat-raised-button id="search_field" type="search" placeholder="Search" style="margin-right: 10px;" (click)="onKey($event)">Export file</button>
+<button mat-raised-button id="save_but" (click)="saveDataSet()">Save DataSet</button>

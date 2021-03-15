@@ -27,7 +27,8 @@ import { FormsModule } from '@angular/forms';
 import {MatTabsModule} from '@angular/material/tabs';
 import { SheetComponent } from './sheet/sheet.component';
 import { DatasetComponent } from './dataset/dataset.component';
-
+import { DataSetDialogComponent } from './data-set-dialog/data-set-dialog.component';
+import {MatTableModule} from '@angular/material/table';
 @NgModule({
   declarations: [
     AppComponent,
@@ -35,7 +36,8 @@ import { DatasetComponent } from './dataset/dataset.component';
     LogInSignUpDialogComponent,
     AllTablesComponent,
     SheetComponent,
-    DatasetComponent],
+    DatasetComponent,
+    DataSetDialogComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -53,6 +55,7 @@ import { DatasetComponent } from './dataset/dataset.component';
     MatIconModule,
     MatTabsModule,
     MatMenuModule,
+    MatTableModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
