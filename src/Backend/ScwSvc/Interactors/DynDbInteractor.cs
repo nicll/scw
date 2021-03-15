@@ -55,7 +55,7 @@ namespace ScwSvc.Interactors
             using var conn = db.Database.GetDbConnection();
             await conn.OpenAsync().ConfigureAwait(false);
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "CREATE TABLE (A varchar(200), B varchar(200), B varchar(200), D varchar(200), E varchar(200), F varchar(200), G varchar(200), H varchar(200))";
+            cmd.CommandText = "CREATE TABLE \"" + table.LookupName.ToNameString() + "\" (A varchar(200), B varchar(200), C varchar(200), D varchar(200), E varchar(200), F varchar(200), G varchar(200), H varchar(200))";
             await cmd.ExecuteNonQueryAsync();
         }
 

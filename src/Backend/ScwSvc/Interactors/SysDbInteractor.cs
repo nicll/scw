@@ -122,7 +122,8 @@ namespace ScwSvc.Interactors
         /// <param name="commit">Whether or not to save changes to the database.</param>
         public static async ValueTask RemoveTable(this DbSysContext db, TableRef table, bool commit = false)
         {
-            await db.Users.ForEachAsync(u => u.Collaborations.Remove(table)).ConfigureAwait(false);
+            foreach (var user in await db.Users.ToArrayAsync().ConfigureAwait(false))
+                user.Collaborations.Remove(table);
             table.Owner.OwnTables.Remove(table);
             db.TableRefs.Remove(table);
 
