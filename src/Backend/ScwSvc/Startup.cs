@@ -5,6 +5,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,12 @@ namespace ScwSvc
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<KestrelServerOptions>(o =>
+            {
+                o.AddServerHeader = false;
+                //o.AllowSynchronousIO = true; // for Json.NET compatibility
+            });
+
             services.AddControllers()
                 .AddNewtonsoftJson();
             services.AddDbContextPool<DbSysContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={SysUser}; Password={SysPass}; SearchPath=scw1_sys,public").UseLazyLoadingProxies());
@@ -34,6 +41,10 @@ namespace ScwSvc
 
             services.AddOData();
             //services.AddODataQueryFilter();
+
+            services
+                .AddGraphQLServer()
+                .AddQueryType<GraphQL.Query>();
 
             services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(opts =>
@@ -92,6 +103,7 @@ namespace ScwSvc
                 //var defaultConventions = ODataRoutingConventions.CreateDefault();
                 endpoints.EnableDependencyInjection();
                 endpoints.MapControllers();
+                endpoints.MapGraphQL();
                 endpoints.Select().Expand().Filter().OrderBy().Count().MaxTop(256);
                 //endpoints.MapODataRoute("ODataRoute", "odata", GetEdmModel(app.ApplicationServices),
                 //    new DefaultODataPathHandler(), defaultConventions.Except(defaultConventions.OfType<MetadataRoutingConvention>()));
