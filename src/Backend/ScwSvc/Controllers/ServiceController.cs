@@ -67,16 +67,8 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async ValueTask<IActionResult> Login([FromBody] AuthenticationModel loginCredentials)
         {
-#if ENABLE_AD_AUTH
-            return await LoginWithAD(loginCredentials);
-#elif ENABLE_DB_AUTH
+#if ENABLE_DB_AUTH
             return await LoginWithDB(loginCredentials);
-#elif DEBUG
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(new ClaimsIdentity(Roles.All.Select(r => new Claim(ClaimTypes.Role, r)).Append(new Claim(ClaimTypes.NameIdentifier, loginCredentials.Username)), CookieAuthenticationDefaults.AuthenticationScheme)),
-                new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
-            _logger.LogWarning("Auto-Login with full privileges.");
-            return Ok();
 #else
             return StatusCode(StatusCodes.Status503ServiceUnavailable, "Authentication is disabled.");
 #endif
@@ -110,25 +102,6 @@ namespace ScwSvc.Controllers
             _logger.LogInformation("Login fail: user=\"" + loginCredentials.Username + "\"");
             return BadRequest("Incorrect password.");
         }
-
-#if ENABLE_AD_AUTH
-        [HttpPost("login/ad")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async ValueTask<IActionResult> LoginWithAD([FromBody] AuthenticationModel loginCredentials)
-        {
-            _logger.LogInformation("Service AUTH: login attempt; user=\"" + loginCredentials.Username + "\"");
-
-            if (!AuthenticateAndAuthorizeWithAD(loginCredentials.Username, loginCredentials.Password, out string error, out ClaimsIdentity identity))
-                return BadRequest(error);
-
-            // see https://stackoverflow.com/a/37090696
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(identity), new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
-            _logger.LogInformation("Service AUTH: login; user=\"" + loginCredentials.Username + "\"");
-            return Ok();
-        }
-#endif
 
         /// <summary>
         /// Performs logout for logged-in users.
@@ -191,47 +164,6 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<string[]> MyClaims()
             => Ok(User.Claims.Select(c => c.Value).ToArray());
-#endif
-
-#if ENABLE_AD_AUTH
-        // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/cookie?view=aspnetcore-3.0
-        private bool AuthenticateAndAuthorizeWithAD(string username, string password, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(true)] out string? error, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out ClaimsIdentity? identity)
-        {
-            identity = null;
-            using var user = UserPrincipal.FindByIdentity(CurrentPrincipalContext, IdentityType.SamAccountName, username); // not async!
-
-            if (user == null)
-            {
-                error = "User does not exist.";
-                return false;
-            }
-
-            if (user.IsAccountLockedOut())
-            {
-                error = "User is locked out.";
-                return false;
-            }
-
-            if (!CurrentPrincipalContext.ValidateCredentials(username, password))
-            {
-                error = "Invalid credentials.";
-                return false;
-            }
-
-            error = null;
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.SamAccountName, ClaimValueTypes.String)
-            };
-
-            var groups = user.GetGroups().Select(g => g.SamAccountName).ToArray(); // not async!
-
-            foreach (var role in AuthorizedGroups.Where(g => groups.Contains(g.Key)).SelectMany(r => r.Value))
-                claims.Add(new Claim(ClaimTypes.Role, role, ClaimValueTypes.String));
-
-            identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            return true;
-        }
 #endif
 
 #if DEBUG
