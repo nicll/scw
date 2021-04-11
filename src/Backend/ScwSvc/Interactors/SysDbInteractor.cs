@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ScwSvc.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static ScwSvc.Utils.Authentication;
@@ -28,14 +29,28 @@ namespace ScwSvc.Interactors
             => await db.Users.FirstOrDefaultAsync(u => u.Name == name).ConfigureAwait(false);
 
         /// <summary>
+        /// Gets all users of a specific <see cref="UserRole"/>.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="role">The user's <see cref="User.Role"/>.</param>
+        /// <returns>A collection of all such users.</returns>
+        public static async ValueTask<ICollection<User>> GetUsersByRole(this DbSysContext db, UserRole role)
+            => await db.Users.Where(u => u.Role == role).ToArrayAsync().ConfigureAwait(false);
+
+        /// <summary>
         /// Adds a new <see cref="User"/> object to the SYS database.
         /// </summary>
         /// <remarks>
         /// The new user must have a unique <see cref="User.UserId"/> and a unique <see cref="User.Name"/>.</remarks>
         /// <param name="db">The SYS database context.</param>
         /// <param name="user">The new <see cref="User"/> object.</param>
-        public static async ValueTask AddUser(this DbSysContext db, User user)
-            => await db.Users.AddAsync(user).ConfigureAwait(false);
+        public static async ValueTask AddUser(this DbSysContext db, User user, bool commit = true)
+        {
+            await db.Users.AddAsync(user).ConfigureAwait(false);
+
+            if (commit)
+                await db.SaveChangesAsync();
+        }
 
         /// <summary>
         /// Checks whether a username is already in use.
@@ -83,8 +98,8 @@ namespace ScwSvc.Interactors
 
             if (password is not null)
             {
-                if (String.IsNullOrEmpty(username) || username.Length < 4) // ToDo: change to more sensible value when testing is finished
-                    throw new UserChangeException("Passwort empty or too short.") { UserId = user.UserId, OldValue = user.Name, NewValue = username };
+                if (String.IsNullOrEmpty(password) || password.Length < 4) // ToDo: change to more sensible value when testing is finished
+                    throw new UserChangeException("Passwort empty or too short.") { UserId = user.UserId, OldValue = "(old password)", NewValue = "(new password)" };
 
                 user.PasswordHash = HashUserPassword(user.UserId, password);
             }
