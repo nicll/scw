@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using ScwSvc.Models;
 
-namespace ScwSvc.Tests
+namespace ScwSvc.Tests.Unit
 {
     public class DynDbInteractorTests
     {
