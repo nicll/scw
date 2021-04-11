@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScwSvc", "ScwSvc\ScwSvc.csproj", "{0CAFE878-8652-43B9-8202-68156FAE9D95}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScwSvc.Tests", "ScwSvc.Tests\ScwSvc.Tests.csproj", "{BEE74D86-17BE-44BD-B855-2967471E16E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScwSvc.Tests.Unit", "ScwSvc.Tests.Unit\ScwSvc.Tests.Unit.csproj", "{BEE74D86-17BE-44BD-B855-2967471E16E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScwSvc.Tests.Integration", "ScwSvc.Tests.Integration\ScwSvc.Tests.Integration.csproj", "{FC05241E-941B-46BE-9586-A843B300CA83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScwSvc.Tests.Integration", "ScwSvc.Tests.Integration\ScwSvc.Tests.Integration.csproj", "{FC05241E-941B-46BE-9586-A843B300CA83}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
