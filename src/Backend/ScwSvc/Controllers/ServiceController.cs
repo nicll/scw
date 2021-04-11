@@ -26,7 +26,7 @@ namespace ScwSvc.Controllers
             _db = db;
         }
 
-        [HttpPost("register")]
+        [HttpPost("[action]")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async ValueTask<IActionResult> Register([FromBody] AuthenticationModel loginCredentials)
@@ -62,7 +62,7 @@ namespace ScwSvc.Controllers
         /// </summary>
         /// <param name="loginCredentials">Credentials the user wants to login with</param>
         /// <returns>200 and cookie if successful; 400 on validation fail; 503 if disabled</returns>
-        [HttpPost("login")]
+        [HttpPost("[action]")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async ValueTask<IActionResult> Login([FromBody] AuthenticationModel loginCredentials)
@@ -74,7 +74,7 @@ namespace ScwSvc.Controllers
 #endif
         }
 
-        [HttpPost("login/db")]
+        [HttpPost(nameof(Login) + "/db")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async ValueTask<IActionResult> LoginWithDB([FromBody] AuthenticationModel loginCredentials)
