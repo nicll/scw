@@ -1,58 +1,53 @@
 import { DataSource } from '@angular/cdk/table';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { Column } from '../Models/Column';
 import { Table } from '../Models/Table';
-import { TableService } from '../Services/table.service';
 import { UserService } from '../Services/user.service';
 
+const data:Column[]=[  ]
+  
 @Component({
   selector: 'app-data-set-dialog',
   templateUrl: './data-set-dialog.component.html',
   styleUrls: ['./data-set-dialog.component.scss']
 })
-export class DataSetDialogComponent implements OnInit {
+
+export class DataSetDialogComponent {
   
   name:string="";
-  nullable:string="false";
+  nullable:boolean=false;
   type:string="";
-
+  @ViewChild(MatTable, {static: true}) table!: MatTable<Column>;
+  displayname:string="";
   displayedColumns: string[] = ['name', 'type', 'nullable'];
-  dataSource= new ExampleDataSource();
-  constructor(private user:UserService,public dialogRef: MatDialogRef<DataSetDialogComponent>) { }
-  displayname!:string;
-
-  message!:string;
-  addColumn() {
-    if(this.name&&this.type&&this.nullable)
-      this.dataSource.data.value.push(new Column(this.name,this.type,false));
+  dataSource=new MatTableDataSource(data);
+  constructor(private user:UserService,public dialogRef: MatDialogRef<DataSetDialogComponent>) { 
   }
-
-  removeColumn() {
-    if (this.dataSource.data.value.length) {
+  message!:string;
+  addRow() {
+    console.log(this.type)
+    if(this.name&&this.type){
+      this.dataSource.data.push(new Column(this.name,this.type,this.nullable));
+      this.name="";
+      this.type="";
+      this.nullable=false;
+      this.table.renderRows();
     }
   }
-  ngOnInit(): void {
-  } 
+  removeRow() {
+    if(this.dataSource.data.length>0){
+      this.dataSource.data.splice(this.dataSource.data.length-1)  
+      this.table.renderRows();
+    }
+  }
   public Ok(){
-    if(!this.name||!this.type||!this.nullable||this.dataSource.data.value.length==0)
-      return;
-    this.user.PostDataSet(new Table(this.displayname,this.dataSource.data.value)).subscribe(_=>this.dialogRef.close(),err=>this.message=err) 
+    this.user.PostDataSet(new Table(this.displayname,this.dataSource.data)).subscribe(_=>this.dialogRef.close(),err=>this.message=err) 
   }
   public Cancel(){
     this.dialogRef.close();
   }
 
 }
-export class ExampleDataSource extends DataSource<Column> {
-  /** Stream of data that is provided to the table. */
-  data = new BehaviorSubject<Column[]>([new Column("A","Integer",false)]);
 
-  /** Connect function called by the table to retrieve one stream containing the data to render. */
-  connect(): Observable<Column[]> {
-    return this.data;
-  }
-
-  disconnect() {}
-}

@@ -12,7 +12,6 @@ import { DataSet } from '../Models/DataSet';
 export class TableService {
   private handleError: HandleError;
   baseUri: string='http://localhost:5000/api';
-
   constructor(private http:HttpClient,httpErrorHandler: HttpErrorHandler) {
     this.handleError = httpErrorHandler.createHandleError('HeroesService');
   }
@@ -47,13 +46,13 @@ export class TableService {
     );
   }
   public GetDataSet(id:string):Observable<DataSet>{
-    return this.http.get<any[]>(this.baseUri+"/data/dataset/"+id,{withCredentials:true}).pipe(
+    return this.http.get<any>(this.baseUri+"/data/dataset/"+id,{withCredentials:true}).pipe(
       catchError(err=>{
-        this.handleError('GetSheet');
+        this.handleError('GetDataset');
         console.error(err);
         return throwError(err);
       }),
-      map(sheet=>{return new DataSet(sheet);})
+      map(sheet=>{console.log(id);return sheet;})
     );
   }
   public PostDataSet(id:string,table:Array<any>):Observable<Array<any>>{

@@ -3,6 +3,7 @@ import Handsontable from "handsontable";
 import {HotTableRegisterer} from "@handsontable/angular";
 import { TableService } from '../Services/table.service';
 import { DataSet } from '../Models/DataSet';
+import { UserService } from '../Services/user.service';
 
 
 @Component({
@@ -10,18 +11,18 @@ import { DataSet } from '../Models/DataSet';
   templateUrl: './sheet.component.html',
   styleUrls: ['./sheet.component.scss']
 })
-export class SheetComponent implements AfterViewInit,OnInit{
+export class SheetComponent implements AfterViewInit, OnInit{
 
   @Input() tableId:string|undefined;
   
-  constructor(public table:TableService) { }
+  constructor(public table:TableService, public user:UserService) { }
 
   ngAfterViewInit(): void {
     this.hot=this.hotRegisterer.getInstance(this.id)
-    console.log("test"+this.tableId);
     if(this.tableId){
       this.table.GetDataSet(this.tableId).
       subscribe(tables=>{
+        console.log(tables);
         if(tables.data.length==0)
           this.hot!.loadData([{"A":1},{"A":10},{"A":12}]);
         else
@@ -50,8 +51,7 @@ export class SheetComponent implements AfterViewInit,OnInit{
   };
 
   dataset: Array<Array<any>>=new Array;
-  tables: string[] = ['T1','T2','T3'];
-  public saveDataSet(){
+  public saveSheet(){
     if(this.tableId&&this.hot){
       console.log(this.hot.getSourceData());
       this.table.DeleteDataSet(this.tableId);
@@ -76,5 +76,7 @@ export class SheetComponent implements AfterViewInit,OnInit{
   };
   ngOnInit(): void {
   }
-
+  deleteSheet(){
+    this.user.DeleteDataSet(this.tableId!).subscribe(data=>console.log("Sheet deleted"))
+  }
 }

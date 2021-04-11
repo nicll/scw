@@ -61,6 +61,7 @@ export class UserService {
       })
     );
   }
+  
   public GetDataSets():Observable<Table[]>{
     return this.http.get<Table[]>(this.baseUri+"/my/dataset",{withCredentials:true}).pipe(
       catchError(err=>{
@@ -81,6 +82,17 @@ export class UserService {
       map(_=>{return table;})
     );
   }
+  public DeleteDataSet(id:string):Observable<string>{
+    return this.http.delete<Table>(this.baseUri+"/my/dataset/"+id,{withCredentials:true}).pipe(
+      catchError(err=>{
+        this.handleError('DeleteDataSet');
+        console.error(err);
+        return throwError(err);
+      }),
+      map(_=>{return id;})
+    );
+  }
+
   public GetSheets():Observable<Table[]>{
     return this.http.get<Table[]>(this.baseUri+"/my/sheet",{withCredentials:true}).pipe(
       catchError(err=>{
@@ -91,14 +103,25 @@ export class UserService {
       map(sheets=>{return sheets;})
     );
   }
-  public PostSheet(table:Table):Observable<Table>{
-    return this.http.post<Table>(this.baseUri+"/my/sheet",table,{withCredentials:true}).pipe(
+  public PostSheet(name:string):Observable<string>{
+    return this.http.post<Table>(this.baseUri+"/my/sheet",name,{withCredentials:true}).pipe(
       catchError(err=>{
         this.handleError('PostSheet');
         console.error(err);
         return throwError(err);
       }),
-      map(_=>{return table;})
+      map(_=>{return name;})
     );
   }
+  public DeleteSheet(id:string):Observable<string>{
+    return this.http.delete<Table>(this.baseUri+"/my/sheet/"+id,{withCredentials:true}).pipe(
+      catchError(err=>{
+        this.handleError('DeleteSheet');
+        console.error(err);
+        return throwError(err);
+      }),
+      map(_=>{return id;})
+    );
+  }
+
 }

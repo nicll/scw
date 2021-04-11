@@ -12,8 +12,8 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
-
-
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatSelectModule} from '@angular/material/select';
 //3rd party stuff
 import { HotTableModule } from '@handsontable/angular';
 
@@ -56,6 +56,8 @@ import {MatTableModule} from '@angular/material/table';
     MatTabsModule,
     MatMenuModule,
     MatTableModule,
+    MatCheckboxModule,
+    MatSelectModule
   ],
   providers: [],
   bootstrap: [AppComponent]

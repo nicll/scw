@@ -20,7 +20,7 @@ export class AllTablesComponent implements OnInit {
     this.user.GetDataSets().subscribe(tables=>{this.tabs=this.tabs.concat(tables);console.log(this.tabs);});
   }
   public AddDataset(){
-    this.dialog.open(DataSetDialogComponent);
+    this.dialog.open(DataSetDialogComponent,{width:"500px"});
   }
 
 }
