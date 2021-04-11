@@ -87,7 +87,7 @@ namespace ScwSvc.Controllers
 
             try
             {
-                await _sysDb.ModifyUser(user, commit: true, username: username);
+                await _sysDb.ModifyUser(user, username: username);
                 return Ok();
             }
             catch (UserChangeException e)
@@ -114,7 +114,7 @@ namespace ScwSvc.Controllers
 
             try
             {
-                await _sysDb.ModifyUser(user, commit: true, password: password);
+                await _sysDb.ModifyUser(user, password: password);
                 return Ok();
             }
             catch (UserChangeException e)

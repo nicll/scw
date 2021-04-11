@@ -83,7 +83,7 @@ namespace ScwSvc.Interactors
         /// <param name="username">The new username.</param>
         /// <param name="password">The new password.</param>
         /// <exception cref="UserChangeException">If any validation fails.</exception>
-        public static async ValueTask ModifyUser(this DbSysContext db, User user, bool commit = false, string username = null, string password = null)
+        public static async ValueTask ModifyUser(this DbSysContext db, User user, bool commit = true, string username = null, string password = null)
         {
             if (username is not null)
             {
