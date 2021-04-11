@@ -11,7 +11,8 @@ namespace ScwSvc.Models
 
         public DbSysContext(DbContextOptions<DbSysContext> options) : base(options)
         {
-            Database.Migrate();
+            if (Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
+                Database.Migrate();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
