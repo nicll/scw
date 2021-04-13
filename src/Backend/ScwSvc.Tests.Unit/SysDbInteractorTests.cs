@@ -12,8 +12,8 @@ namespace ScwSvc.Tests.Unit
     {
         private DbSysContext _sysDb;
         private readonly User
-            _commonUser =  new() { Name = "CommonUser",  Role = UserRole.Common,  UserId = Guid.NewGuid() },
-            _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.NewGuid() },
+            _commonUser =  new() { Name = "CommonUser",  Role = UserRole.Common,  UserId = Guid.NewGuid(), PasswordHash = new byte[32] },
+            _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.NewGuid(), OwnTables = new TableRef[0] },
             _adminUser =   new() { Name = "AdminUser",   Role = UserRole.Admin,   UserId = Guid.NewGuid() };
 
         [OneTimeSetUp]
@@ -83,6 +83,42 @@ namespace ScwSvc.Tests.Unit
             Assert.IsTrue(await _sysDb.IsUsernameAssigned(_commonUser.Name));
             Assert.IsTrue(await _sysDb.IsUsernameAssigned(_managerUser.Name));
             Assert.IsTrue(await _sysDb.IsUsernameAssigned(_adminUser.Name));
+        }
+
+        [Test, Order(8)]
+        public async Task ModifyUserUsername()
+        {
+            throw new InconclusiveException("Known defect: see ToDo in DbSysContext.cs");
+
+            await _sysDb.ModifyUser(_commonUser, commit: true, username: nameof(_commonUser));
+
+            var foundUser = await _sysDb.GetUserByName(_commonUser.Name);
+
+            Assert.AreEqual(nameof(_commonUser), _commonUser.Name);
+            Assert.AreEqual(_commonUser, foundUser);
+        }
+
+        [Test, Order(9)]
+        public async Task ModifyUserPassword()
+        {
+            var oldPasswordHash = _commonUser.PasswordHash;
+
+            await _sysDb.ModifyUser(_commonUser, commit: true, password: nameof(_commonUser));
+
+            var foundUser = await _sysDb.GetUserByName(_commonUser.Name);
+
+            Assert.IsFalse(oldPasswordHash.SequenceEqual(_commonUser.PasswordHash));
+            Assert.IsFalse(oldPasswordHash.SequenceEqual(foundUser.PasswordHash));
+        }
+
+        [Test, Order(10)]
+        public async Task RemoveUser()
+        {
+            await _sysDb.RemoveUser(_managerUser, commit: true);
+
+            Assert.IsNull(await _sysDb.GetUserById(_managerUser.UserId));
+            Assert.IsNull(await _sysDb.GetUserByName(_managerUser.Name));
+            Assert.IsEmpty(await _sysDb.GetUsersByRole(_managerUser.Role));
         }
     }
 }
