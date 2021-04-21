@@ -1,7 +1,7 @@
 import { Injectable, OnInit } from '@angular/core';
 import { User } from '../Models/User';
 import { Roles } from '../Models/Roles';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, pipe, throwError } from 'rxjs';
 import {catchError, map} from 'rxjs/operators'
 import { HandleError, HttpErrorHandler } from '../http-error-handler.service';
 import { HttpClient } from '@angular/common/http';
@@ -53,13 +53,8 @@ export class UserService {
   }
   public Logout(){
     this.user=undefined;
-    return this.http.post(this.baseUri+"/Service/Logout",{withCredentials:true}).pipe(
-      catchError(err=>{
-        this.handleError('Logout');
-        console.error(err);
-        return throwError(err);
-      })
-    );
+    return this.http.get(this.baseUri+"/Service/Logout",{withCredentials:true}).subscribe(
+        _=>console.log("Logout"));
   }
   
   public GetDataSets():Observable<Table[]>{
