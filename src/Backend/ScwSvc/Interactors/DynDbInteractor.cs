@@ -19,6 +19,9 @@ namespace ScwSvc.Interactors
             if (table.Columns.Count < 1)
                 throw new InvalidTableException("No columns were specified.");
 
+            if (table.Columns.Count > 255)
+                throw new InvalidTableException("Too many columns were specified.");
+
             if (table.TableType != TableType.DataSet)
                 throw new InvalidTableException("Not the correct table type.");
 
@@ -102,8 +105,14 @@ namespace ScwSvc.Interactors
                 if (column.Name.Any(c => !Char.IsLetterOrDigit(c)))
                     throw new InvalidTableException("Invalid character(s) in column: " + column.Name);
 
-                create.Append("\"").Append(column.Name).Append("\"")
-                    .Append(" ")
+                if (String.Compare(column.Name, "id", StringComparison.OrdinalIgnoreCase) == 0)
+                    throw new InvalidTableException("Invalid column name: " + column.Name);
+
+                // first column (id) is primary key
+                create.Append("\"id\" serial not null primary key,");
+
+                create.Append('"').Append(column.Name).Append('"')
+                    .Append(' ')
                     .Append(column.Type switch
                     {
                         ColumnType.Integer => "bigint",
@@ -113,11 +122,11 @@ namespace ScwSvc.Interactors
                         _ => throw new InvalidTableException("Invalid column type: " + column.Type)
                     })
                     .Append(column.Nullable ? " null" : " not null")
-                    .Append(",");
+                    .Append(',');
             }
 
             create.Length -= ",".Length;
-            create.Append(")");
+            create.Append(')');
             return create.ToString();
         }
     }
