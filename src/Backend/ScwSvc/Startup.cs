@@ -44,7 +44,7 @@ namespace ScwSvc
 
             services
                 .AddGraphQLServer()
-                .AddQueryType<GraphQL.Query>();
+                .AddQueryType<GraphQL.AdminQuery>();
 
             services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(opts =>
