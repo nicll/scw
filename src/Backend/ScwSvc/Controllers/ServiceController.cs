@@ -108,6 +108,7 @@ namespace ScwSvc.Controllers
         /// Does not complain if user wasn't logged in when calling.
         /// </summary>
         /// <returns>200 always</returns>
+        [HttpGet("[action]")] // ToDo: temporary fix for frontend
         [HttpPost("[action]")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async ValueTask<ActionResult> Logout()
