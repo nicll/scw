@@ -481,5 +481,71 @@ namespace ScwSvc.Controllers
 
             return Ok();
         }
+
+        /// <summary>
+        /// Queries a collection of all tables (datasets and sheets) that the user may access.
+        /// </summary>
+        /// <returns>A collection of all accessible tables.</returns>
+        [HttpGet("table")]
+        [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MyTablesAll()
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(user.OwnTables.Concat(user.Collaborations));
+        }
+
+        /// <summary>
+        /// Queries a collection of all tables (datasets and sheets) that the user owns.
+        /// </summary>
+        /// <returns>A collection of all of the user's tables.</returns>
+        [HttpGet("table/own")]
+        [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MyTablesOwn()
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(user.OwnTables);
+        }
+
+        /// <summary>
+        /// Queries a collection of other people's tables (datasets and sheets) that the user may access.
+        /// </summary>
+        /// <returns>A collection of all of the tables shared with the user.</returns>
+        [HttpGet("table/collaborations")]
+        [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MyTablesCollaborations()
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(user.Collaborations);
+        }
     }
 }
