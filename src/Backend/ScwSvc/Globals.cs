@@ -4,7 +4,7 @@ using static ScwSvc.Utils.Configuration;
 namespace ScwSvc
 {
     /// <summary>
-    /// Contains global variables used within this application.
+    /// Contains global variables and constants used within this application.
     /// </summary>
     internal static class Globals
     {
@@ -42,6 +42,27 @@ namespace ScwSvc
             /// Specifies the password of the DYN user when connecting to the database.
             /// </summary>
             public static readonly string DynPass = GetEnvironmentVariableOrFail("SCW1_DBPASS_DYN");
+        }
+
+        /// <summary>
+        /// Defines names of policies for authorization used across the application.
+        /// </summary>
+        internal static class Authorization
+        {
+            /// <summary>
+            /// This functionality is available for managers only.
+            /// </summary>
+            public const string ManagerOnly = nameof(ManagerOnly);
+
+            /// <summary>
+            /// This functionality is available for administrators only.
+            /// </summary>
+            public const string AdminOnly = nameof(AdminOnly);
+
+            /// <summary>
+            /// This functionality is available for managers and administrators only.
+            /// </summary>
+            public const string ManagerOrAdminOnly = nameof(ManagerOrAdminOnly);
         }
 
         /// <summary>

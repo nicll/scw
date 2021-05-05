@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.OData;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static ScwSvc.Globals.Authorization;
 using static ScwSvc.Utils.Authentication;
 using static ScwSvc.Utils.DataConversion;
 
@@ -18,7 +20,7 @@ namespace ScwSvc.Controllers
     /// Managers generally only have read-only access to everything.
     /// </summary>
     [Route("api/[controller]")]
-    [AuthorizeRoles(nameof(UserRole.Admin), nameof(UserRole.Manager))]
+    [Authorize(Policy = ManagerOrAdminOnly)]
     [ApiController]
     public class AdminController : ControllerBase
     {
@@ -112,7 +114,7 @@ namespace ScwSvc.Controllers
             => _sysDb.TableRefs.Where(t => t.TableType == TableType.Sheet);
 
         [HttpPost("dataset")]
-        [AuthorizeRoles(nameof(UserRole.Admin))]
+        [Authorize(Policy = AdminOnly)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
@@ -159,7 +161,7 @@ namespace ScwSvc.Controllers
         }
 
         [HttpDelete("dataset/{tableRefId}")]
-        [AuthorizeRoles(nameof(UserRole.Admin))]
+        [Authorize(Policy = AdminOnly)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
@@ -194,7 +196,7 @@ namespace ScwSvc.Controllers
         }
 
         [HttpPost("sheet")]
-        [AuthorizeRoles(nameof(UserRole.Admin))]
+        [Authorize(Policy = AdminOnly)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheetModel shModel)
@@ -229,7 +231,7 @@ namespace ScwSvc.Controllers
         }
 
         [HttpDelete("sheet/{tableRefId}")]
-        [AuthorizeRoles(nameof(UserRole.Admin))]
+        [Authorize(Policy = AdminOnly)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]

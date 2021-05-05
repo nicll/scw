@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using ScwSvc.Models;
+using static ScwSvc.Globals.Authorization;
 using static ScwSvc.Globals.DbConnectionString;
 
 namespace ScwSvc
@@ -44,6 +45,7 @@ namespace ScwSvc
 
             services
                 .AddGraphQLServer()
+                .AddAuthorization()
                 .AddQueryType<GraphQL.AdminQuery>();
 
             services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
@@ -60,7 +62,12 @@ namespace ScwSvc
                     opts.SlidingExpiration = true;
                     opts.ExpireTimeSpan = TimeSpan.FromDays(1); // extend this later
                 });
-            services.AddAuthorization();
+            services.AddAuthorization(opts =>
+            {
+                opts.AddPolicy(ManagerOnly, policy => policy.RequireRole(nameof(UserRole.Manager)));
+                opts.AddPolicy(AdminOnly, policy => policy.RequireRole(nameof(UserRole.Admin)));
+                opts.AddPolicy(ManagerOrAdminOnly, policy => policy.RequireRole(nameof(UserRole.Manager), nameof(UserRole.Admin)));
+            });
 
             services.AddCors();
 
