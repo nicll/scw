@@ -2,4 +2,4 @@ Zuerst wird Postgraphile global installiert:
 npm install -g postgraphile
 
 Zum Starten wird ein Befehl folgenden Formats verwendet:
-postgraphile -c "postgres://username:password@domain:port/scw" -s "schema" -p port
+postgraphile -c "postgres://username:password@domain:port/scw" -w -C "postgres://superuser:password@domain:port/scw" -s "schema" -p port
