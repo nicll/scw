@@ -95,7 +95,8 @@ namespace ScwSvc.Interactors
             var create = new StringBuilder();
             create.Append("CREATE TABLE \"")
                 .Append(table.LookupName.ToNameString())
-                .Append("\" (");
+                .Append("\" (")
+                .Append("\"id\" serial not null primary key,"); // first column (id) is primary key
 
             foreach (var column in table.Columns)
             {
@@ -107,9 +108,6 @@ namespace ScwSvc.Interactors
 
                 if (String.Compare(column.Name, "id", StringComparison.OrdinalIgnoreCase) == 0)
                     throw new InvalidTableException("Invalid column name: " + column.Name);
-
-                // first column (id) is primary key
-                create.Append("\"id\" serial not null primary key,");
 
                 create.Append('"').Append(column.Name).Append('"')
                     .Append(' ')
