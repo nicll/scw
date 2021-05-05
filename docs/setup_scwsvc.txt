@@ -42,3 +42,4 @@ Database "scw" mit CREATE und CONNECT Berechtigungen für beide DBUSER Accounts
 Schema "scw1_sys" mit SCW1_DBUSER_SYS als Owner
 Schema "scw1_dyn" mit SCW1_DBUSER_SYS als Owner und USAGE und CREATE Berechtigungen für beide DBUSER
 Schema "public" für EF Core Migrations
+Schema "postgraphile_watch" wird von postgraphile einmalig angelegt, danach kann SCW1_DBUSER_SYS als Owner gesetzt werden
