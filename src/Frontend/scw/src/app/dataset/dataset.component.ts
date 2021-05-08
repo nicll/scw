@@ -1,7 +1,5 @@
 
 import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
-import Handsontable from "handsontable";
-import {HotTableRegisterer} from "@handsontable/angular";
 import { TableService } from '../Services/table.service';
 import { DataSet } from '../Models/DataSet';
 import { UserService } from '../Services/user.service';

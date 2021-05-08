@@ -1,6 +1,5 @@
 //Components
 import { AppComponent } from './app.component';
-import { HandsontestComponent } from './handsontest/handsontest.component';
 import { LogInSignUpDialogComponent } from './log-in-sign-up-dialog/log-in-sign-up-dialog.component';
 import { AllTablesComponent } from './all-tables/all-tables.component';
 //Materials
@@ -18,7 +17,6 @@ import {MatSelectModule} from '@angular/material/select';
 
 //3rd party stuff
 import { Routes, RouterModule } from '@angular/router'; // CLI imports router
-import { HotTableModule } from '@handsontable/angular';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
@@ -57,7 +55,6 @@ import {MenubarModule} from "primeng/menubar";
 @NgModule({
   declarations: [
     AppComponent,
-    HandsontestComponent,
     LogInSignUpDialogComponent,
     AllTablesComponent,
     SheetComponent,
@@ -67,7 +64,6 @@ import {MenubarModule} from "primeng/menubar";
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HotTableModule,
     BrowserAnimationsModule,
     MatButtonModule,
     HttpClientModule,
