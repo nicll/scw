@@ -15,7 +15,7 @@ export class UserService {
     this.handleError = httpErrorHandler.createHandleError('UserService');
   }
 
-  private handleError: HandleError;
+  private readonly handleError: HandleError;
   baseUri: string='http://localhost:5000/api';
   user?:User=undefined;
 
@@ -29,7 +29,7 @@ export class UserService {
       map(name=>{return this.user=new User(name,"",Roles.Common,"");})
     );
   }
-  public Login(username:string,password:string):Observable<User>{ 
+  public Login(username:string,password:string):Observable<User>{
     let us=new User(username,"",Roles.Common,password);
     return this.http.post<User>(this.baseUri+"/Service/login",us,{withCredentials:true}).pipe(
       catchError(err=>{
@@ -61,7 +61,7 @@ export class UserService {
       })
     );
   }
-  
+
   public GetDataSets():Observable<Table[]>{
     return this.http.get<Table[]>(this.baseUri+"/my/dataset",{withCredentials:true}).pipe(
       catchError(err=>{

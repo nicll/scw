@@ -10,7 +10,7 @@ import { DataSet } from '../Models/DataSet';
   providedIn: 'root'
 })
 export class TableService {
-  private handleError: HandleError;
+  private readonly handleError: HandleError;
   baseUri: string='http://localhost:5000/api';
   constructor(private http:HttpClient,httpErrorHandler: HttpErrorHandler) {
     this.handleError = httpErrorHandler.createHandleError('HeroesService');
