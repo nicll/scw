@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/InnoLab-SCW.iml" filepath="$PROJECT_DIR$/.idea/InnoLab-SCW.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SCW.iml" filepath="$PROJECT_DIR$/.idea/SCW.iml" />
     </modules>
   </component>
 </project>

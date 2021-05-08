@@ -1,0 +1,53 @@
+DataSet Dialog
+<br>
+<mat-form-field>
+    <mat-label>Enter displayname: </mat-label>
+    <input matInput [(ngModel)]="displayname">
+</mat-form-field>
+<br>
+<mat-label >Enter columns: </mat-label><br>
+<mat-form-field>
+  <mat-label>Enter Columnname: </mat-label>
+  <input matInput [(ngModel)]="name">
+</mat-form-field> <br>
+<mat-form-field>
+  <mat-label>Enter column type: </mat-label>
+  <mat-select [(ngModel)]="type">
+    <mat-option value="Integer">Integer</mat-option>
+    <mat-option value="Real">Real number</mat-option>
+    <mat-option value="String">String</mat-option>
+    <mat-option value="Timestamp">Timestamp</mat-option>
+  </mat-select>
+</mat-form-field><br>
+<mat-label>Enter if column can be empty: </mat-label><br>
+<mat-checkbox [(ngModel)]="nullable"> Can be empty</mat-checkbox>
+
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Columnname</th>
+      <td mat-cell *matCellDef="let column"> {{column.name}} </td>
+    </ng-container>
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef>Column datatype</th>
+      <td mat-cell *matCellDef="let column"> {{column.type}} </td>
+    </ng-container>
+    <ng-container matColumnDef="nullable">
+      <th mat-header-cell *matHeaderCellDef>Can be empty</th>
+      <td mat-cell *matCellDef="let column"> {{column.nullable}} </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+
+
+<br>
+<button mat-raised-button (click)="addRow()"> Add Row </button>
+<button mat-raised-button (click)="removeRow()"> Remove Row </button>
+<br>
+<small>{{message}}
+    <br/>
+  </small>
+<br>
+<button mat-raised-button (click)="Ok()" >Ok</button>
+<button mat-raised-button (click)="Cancel()" style="float: right">Cancel</button>

@@ -2,12 +2,12 @@
 /shelf/
 /workspace.xml
 # Rider ignored files
-/contentModel.xml
-/.idea.SpreadsheetComponents.iml
-/modules.xml
 /projectSettingsUpdater.xml
+/contentModel.xml
+/modules.xml
+/.idea.SpreadsheetComponents.iml
 # Datasource local storage ignored files
-/../../../../../../../../:\FH Technikum\InnoLab-SCW\src\Backend\.idea\.idea.SpreadsheetComponents\.idea/dataSources/
+/../../../../../../../../../../:\FH Technikum\4. Semester\InnoLab\SCW\src\Backend\.idea\.idea.SpreadsheetComponents\.idea/dataSources/
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
