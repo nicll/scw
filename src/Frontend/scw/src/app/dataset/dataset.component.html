@@ -1,21 +1,28 @@
-<p-table [columns]="cols" [value]="data">
-  <ng-template pTemplate="header">
+<app-menubar></app-menubar>
+<p-table #dt [columns]="cols" [value]="data" styleClass="p-datatable-responsive" selectionMode="multiple" [(selection)]="selectedRows" [metaKeySelection]="true">
+  <ng-template pTemplate="caption">
+    <div class="p-d-flex">
+      <button type="button" pButton icon="pi pi-file-o" (click)="dt.exportCSV()" class="p-mr-2"></button>
+      <button type="button" pButton pRipple icon="pi pi-filter" (click)="dt.exportCSV({selectionOnly:true})" class="p-button-info p-ml-auto" pTooltip="Selection Only" tooltipPosition="bottom"></button>
+
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header" let-cols>
     <tr>
       <th *ngFor="let col of cols">
-        {{col}}
+        {{col.field}}
       </th>
     </tr>
   </ng-template>
-  <ng-template pTemplate="body" let-data>
-    <tr>
-      <td *ngFor="let col of cols">
-        {{data[col]}}
+  <ng-template pTemplate="body" let-rowData let-columns="columns">
+    <tr [pSelectableRow]="rowData">
+      <td *ngFor="let col of columns">
+        {{rowData[col.field]}}
       </td>
     </tr>
   </ng-template>
 </p-table>
-<button mat-raised-button id="search_field" type="search" placeholder="Search" style="margin-right: 10px;"
-        (click)="onKey($event)">Export file
-</button>
+
+<!--<button mat-raised-button id="search_field" type="search" placeholder="Search" style="margin-right: 10px;" (click)="onKey($event)">Export file</button>
 <button mat-raised-button id="save_but" (click)="saveSheet()" style="margin-right: 10px;">Save Sheet</button>
-<button mat-raised-button (click)="deleteSheet()">Delete Sheet</button>
+<button mat-raised-button (click)="deleteSheet()">Delete Sheet</button>-->

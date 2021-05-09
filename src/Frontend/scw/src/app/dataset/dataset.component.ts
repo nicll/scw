@@ -12,174 +12,32 @@ import {Table} from '../Models/Table';
   styleUrls: ['./dataset.component.scss']
 })
 export class DatasetComponent implements AfterViewInit, OnInit{
+  selectedRows: any;
 
   @Input() tableId:string|undefined;
 
   constructor(public table:TableService, public user:UserService) { }
-  data:Table[]= [
-    {
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "displayName": "DatasetName1",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    },{
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-      "displayName": "DatasetName2",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    },{
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-      "displayName": "DatasetName2",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    },{
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-      "displayName": "DatasetName2",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    },{
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-      "displayName": "DatasetName2",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    },{
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-      "displayName": "DatasetName2",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    },{
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-      "displayName": "DatasetName2",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    },{
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-      "displayName": "DatasetName2",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    },{
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-      "displayName": "DatasetName2",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    },{
-      "tableRefId": "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-      "displayName": "DatasetName2",
-      "tableType": "DataSet",
-      "ownerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "columns": [
-        {
-          "position": 0,
-          "name": "string",
-          "type": "Integer",
-          "nullable": true
-        }
-      ]
-    }];
-  namesOfTables = [];
-  cols= ["Col1","Col2","Col3","Col4","Col5"];
-  id = 'hotInstance';
+
+  ngAfterViewInit(): void {}
+  data= [{A:"dataset11",B:"test21",C:"test31",D:"test41"},{A:"dataset12",B:"test2",C:"test3",D:"test4"},{A:"dataset13",B:"test2",C:"test3",D:"test4"},{A:"dataset14",B:"test2",C:"test3",D:"test4"}];
+  cols= [{field:"A", header:"A"},{field:"B", header:"B"},{field:"C", header:"C"},{field:"D", header:"D"}];
   dataset: Array<Array<any>>=new Array;
+  rowData: any;
 
-  ngAfterViewInit(): void { }
+
   ngOnInit(): void {
-    console.log(this.data[0]);
+    console.log(this.data[0]["A"]);
   }
-
-
-  public saveSheet(){
-
-  }
-  public onKey(event: any) { // without type info
-    // @ts-ignore
-    let exportPlugin1 = this.hot.getPlugin('exportFile');
-    exportPlugin1.downloadFile('csv', {
-      bom: false,
-      columnDelimiter: ',',
-      columnHeaders: false,
-      exportHiddenColumns: true,
-      exportHiddenRows: true,
-      fileExtension: 'csv',
-      filename: 'Handsontable-csv-file_[YYYY]-[MM]-[DD]',
-      mimeType: 'text/csv',
-      rowDelimiter: '\r\n',
-      rowHeaders: true
-    });
-  };
-
   deleteSheet(){
     this.user.DeleteDataSet(this.tableId!).subscribe(data=>console.log("Sheet deleted"))
   }
+
+  saveSheet() {
+
+  }
+
+  onKey($event: MouseEvent) {
+
+  }
 }
+
