@@ -9,39 +9,31 @@ import { UserService } from '../Services/user.service';
   styleUrls: ['./sheet.component.scss']
 })
 export class SheetComponent implements AfterViewInit, OnInit{
+  selectedRows: any;
 
   @Input() tableId:string|undefined;
 
   constructor(public table:TableService, public user:UserService) { }
 
   ngAfterViewInit(): void {}
-  data= [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
-  cols: any;
-  id = 'hotInstance';
+  data= [{A:"test11",B:"test21",C:"test31",D:"test41"},{A:"test1",B:"test2",C:"test3",D:"test4"},{A:"test1",B:"test2",C:"test3",D:"test4"},{A:"test1",B:"test2",C:"test3",D:"test4"}];
+  cols= ["A","B","C","D"];
   dataset: Array<Array<any>>=new Array;
+  rowData: any;
 
-  public saveSheet(){
-  }
-  public onKey(event: any) { // without type info
-    // @ts-ignore
-    let exportPlugin1 = this.hot.getPlugin('exportFile');
-    exportPlugin1.downloadFile('csv', {
-      bom: false,
-      columnDelimiter: ',',
-      columnHeaders: false,
-      exportHiddenColumns: true,
-      exportHiddenRows: true,
-      fileExtension: 'csv',
-      filename: 'Handsontable-csv-file_[YYYY]-[MM]-[DD]',
-      mimeType: 'text/csv',
-      rowDelimiter: '\r\n',
-      rowHeaders: true
-    });
-  };
+
   ngOnInit(): void {
-    //++this.user.
+    console.log(this.data[0]["A"]);
   }
   deleteSheet(){
     this.user.DeleteDataSet(this.tableId!).subscribe(data=>console.log("Sheet deleted"))
+  }
+
+  saveSheet() {
+
+  }
+
+  onKey($event: MouseEvent) {
+
   }
 }
