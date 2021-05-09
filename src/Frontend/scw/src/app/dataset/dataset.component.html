@@ -1,23 +1,26 @@
 <app-menubar></app-menubar>
-<p-table #dt [columns]="cols" [value]="data" styleClass="p-datatable-responsive" selectionMode="multiple" [(selection)]="selectedRows" [metaKeySelection]="true">
+<p-table #dt [columns]="cols" [value]="data" styleClass="p-datatable-responsive" selectionMode="multiple"
+         [(selection)]="selectedRows" [metaKeySelection]="true" [responsive]="true">
   <ng-template pTemplate="caption">
     <div class="p-d-flex">
       <button type="button" pButton icon="pi pi-file-o" (click)="dt.exportCSV()" class="p-mr-2"></button>
-      <button type="button" pButton pRipple icon="pi pi-filter" (click)="dt.exportCSV({selectionOnly:true})" class="p-button-info p-ml-auto" pTooltip="Selection Only" tooltipPosition="bottom"></button>
+      <button type="button" pButton pRipple icon="pi pi-filter" (click)="dt.exportCSV({selectionOnly:true})"
+              class="p-button-info p-ml-auto" pTooltip="Selection Only" tooltipPosition="bottom"></button>
 
     </div>
   </ng-template>
   <ng-template pTemplate="header" let-cols>
     <tr>
-      <th *ngFor="let col of cols">
+      <th *ngFor="let col of cols" [pSortableColumn]="col.field">
         {{col.field}}
+        <p-sortIcon [field]="col.field"></p-sortIcon>
       </th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr [pSelectableRow]="rowData">
-      <td *ngFor="let col of columns">
-        {{rowData[col.field]}}
+      <td *ngFor="let col of columns" pEditableColumn>
+          {{rowData[col.field]}}
       </td>
     </tr>
   </ng-template>
