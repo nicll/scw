@@ -1,0 +1,27 @@
+{
+  "name": "postgraphile-svc",
+  "version": "1.0.0",
+  "description": "PostGraphile wrapper for ScwSvc",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicll/scw.git"
+  },
+  "author": "Nicolas Klement",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nicll/scw/issues"
+  },
+  "homepage": "https://github.com/nicll/scw#readme",
+  "dependencies": {
+    "bufferutil": "^4.0.3",
+    "express": "^4.17.1",
+    "graphql": "^14.7.0",
+    "pg-native": "^3.0.0",
+    "postgraphile": "^4.11.0",
+    "utf-8-validate": "^5.0.5"
+  }
+}

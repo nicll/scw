@@ -3,3 +3,6 @@ npm install -g postgraphile
 
 Zum Starten wird ein Befehl folgenden Formats verwendet:
 postgraphile -c "postgres://username:password@domain:port/scw" -w -C "postgres://superuser:password@domain:port/scw" -s "schema" -p port
+
+Alternativ kann auch der PostGraphile-Wrapper in src/PostGraphile verwendet werden.
+Dieser wird per "node index.js" gestartet und verwendet die in "setup_scwsvc.txt" beschriebenen Umgebungsvariablen.
