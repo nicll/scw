@@ -12,15 +12,15 @@ using static ScwSvc.Utils.Authentication;
 
 namespace ScwSvc.Controllers
 {
-    [Route("api/data")]
+    [Route("api/odata")]
     [ApiController]
     [Authorize]
-    public class TableController : ControllerBase
+    public class ODataTableController : ControllerBase
     {
-        private readonly ILogger<TableController> _logger;
+        private readonly ILogger<ODataTableController> _logger;
         private readonly DbSysContext _db;
 
-        public TableController(ILogger<TableController> logger, DbSysContext db)
+        public ODataTableController(ILogger<ODataTableController> logger, DbSysContext db)
         {
             _logger = logger;
             _db = db;

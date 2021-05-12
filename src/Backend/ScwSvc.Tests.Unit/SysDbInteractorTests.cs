@@ -13,7 +13,7 @@ namespace ScwSvc.Tests.Unit
         private DbSysContext _sysDb;
         private readonly User
             _commonUser =  new() { Name = "CommonUser",  Role = UserRole.Common,  UserId = Guid.NewGuid(), PasswordHash = new byte[32] },
-            _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.NewGuid(), OwnTables = new TableRef[0] },
+            _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.NewGuid(), OwnTables = Array.Empty<TableRef>() },
             _adminUser =   new() { Name = "AdminUser",   Role = UserRole.Admin,   UserId = Guid.NewGuid() };
 
         [OneTimeSetUp]

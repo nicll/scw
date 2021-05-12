@@ -28,6 +28,7 @@ Folgende Umgebungsvariablen existieren derzeit:
 	SCW1_DBPASS_DYN	Passwort des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
 
 	SCW1_PGREST_BASEURL	Basis-URL zum PostgREST-Server, z.B. "http://localhost:3000/".
+	SCW1_PGRAPHILE_BASEURL	Basis-URL zum Postgraphile-Server, z.B. "http://localhost:4000/graphql".
 
 Innerhalb der Postgres-Instanz muss eine Database namens 'scw' existieren für die die angegebenen Accounts auch
 entsprechende Berechtigungen besitzen, damit die Tables angelegt und befüllt werden können.
