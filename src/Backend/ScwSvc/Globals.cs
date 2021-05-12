@@ -69,5 +69,10 @@ namespace ScwSvc
         /// Specifies the base URL of the PostgREST server to redirect to.
         /// </summary>
         public static readonly string PostgrestBaseUrl = GetEnvironmentVariableOrFail("SCW1_PGREST_BASEURL");
+
+        /// <summary>
+        /// Specifies the base url of the Postgraphile server to redirect to.
+        /// </summary>
+        public static readonly string PostgraphileBaseUrl = GetEnvironmentVariableOrFail("SCW1_PGRAPHILE_BASEURL");
     }
 }
