@@ -6,8 +6,8 @@ import { Column } from '../Models/Column';
 import { Table } from '../Models/Table';
 import { UserService } from '../Services/user.service';
 
-const data:Column[]=[  ]
-  
+let data:Column[]=[  ]
+
 @Component({
   selector: 'app-data-set-dialog',
   templateUrl: './data-set-dialog.component.html',
@@ -15,7 +15,7 @@ const data:Column[]=[  ]
 })
 
 export class DataSetDialogComponent {
-  
+
   name:string="";
   nullable:boolean=false;
   type:string="";
@@ -23,10 +23,11 @@ export class DataSetDialogComponent {
   displayname:string="";
   displayedColumns: string[] = ['name', 'type', 'nullable'];
   dataSource=new MatTableDataSource(data);
-  constructor(private user:UserService,public dialogRef: MatDialogRef<DataSetDialogComponent>) { 
+  constructor(private user:UserService,public dialogRef: MatDialogRef<DataSetDialogComponent>) {
   }
   message!:string;
   addRow() {
+    // @ts-ignore
     console.log(this.type)
     if(this.name&&this.type){
       this.dataSource.data.push(new Column(this.name,this.type,this.nullable));
@@ -38,12 +39,12 @@ export class DataSetDialogComponent {
   }
   removeRow() {
     if(this.dataSource.data.length>0){
-      this.dataSource.data.splice(this.dataSource.data.length-1)  
+      this.dataSource.data.splice(this.dataSource.data.length-1)
       this.table.renderRows();
     }
   }
   public Ok(){
-    this.user.PostDataSet(new Table(this.displayname,this.dataSource.data)).subscribe(_=>this.dialogRef.close(),err=>this.message=err) 
+    this.user.PostDataSet(new Table(this.displayname,this.dataSource.data)).subscribe(_=>this.dialogRef.close(),err=>this.message=err)
   }
   public Cancel(){
     this.dialogRef.close();

@@ -1,4 +1,4 @@
- <mat-toolbar color="accent" class="header"> 
+ <mat-toolbar class="header">
     <div *ngIf="!username" class="LogInSignUp-buttons">
         <button mat-raised-button (click)="Signup()">Sign Up</button>
         <button mat-raised-button color="primary" (click)="Login()">Login</button>
@@ -15,10 +15,9 @@
                 <span>Logout</span>
             </button>
         </mat-menu>
-    </div>    
+    </div>
 </mat-toolbar>
 
-
-<mat-toolbar color="accent" class="SubComponent">
+<mat-toolbar class="SubComponent">
     <router-outlet></router-outlet>
 </mat-toolbar>

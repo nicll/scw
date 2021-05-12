@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HandsontestComponent } from './handsontest.component';
+import { MenubarComponent } from './menubar.component';
 
-describe('HandsontestComponent', () => {
-  let component: HandsontestComponent;
-  let fixture: ComponentFixture<HandsontestComponent>;
+describe('MenubarComponent', () => {
+  let component: MenubarComponent;
+  let fixture: ComponentFixture<MenubarComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ HandsontestComponent ]
+      declarations: [ MenubarComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(HandsontestComponent);
+    fixture = TestBed.createComponent(MenubarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
