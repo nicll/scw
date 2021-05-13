@@ -10,9 +10,7 @@ import {MenuModule} from 'primeng/menu';
   styleUrls: ['./menubar.component.scss']
 })
 export class MenubarComponent{
-  constructor(){
-
-  }
+  constructor(){}
 
   items: MenuItem[] = [
     {
