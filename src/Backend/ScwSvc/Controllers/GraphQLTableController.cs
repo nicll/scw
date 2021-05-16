@@ -14,7 +14,7 @@ namespace ScwSvc.Controllers
 {
     [Route("api/graphql")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class GraphQLTableController : ControllerBase
     {
         private readonly ILogger<GraphQLTableController> _logger;
@@ -31,19 +31,16 @@ namespace ScwSvc.Controllers
             => RedirectPreserveMethod(PostgraphileBaseUrl);
 
         /// <summary>
-        /// Redirect to the specified Postgraphile endpoint for this data set.
+        /// Queries the <see cref="TableRef.LookupName"/> for a data set's <see cref="TableRef.TableRefId"/>.
         /// </summary>
-        /// <param name="tableRefId">The ID of the table reference.</param>
-        /// <returns>Redirect to Postgraphile server.</returns>
-        [HttpGet("dataset/{tableRefId}")]
-        [HttpPost("dataset/{tableRefId}")]
-        [HttpPatch("dataset/{tableRefId}")]
-        [HttpDelete("dataset/{tableRefId}")]
+        /// <param name="tableRefId">The incoming <see cref="TableRef.TableRefId"/>.</param>
+        /// <returns>The corresponding <see cref="TableRef.LookupName"/>.</returns>
+        [HttpGet("dataset/{tableRefId}/lookup")]
         [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
-        public async ValueTask<IActionResult> GetDataSet([FromRoute] Guid tableRefId)
+        public async ValueTask<IActionResult> GetDataSetLookupName([FromRoute] Guid tableRefId)
         {
             var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
 
@@ -66,23 +63,20 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
 
-            return RedirectPreserveMethod(PostgraphileBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
+            return Ok(tableRef.LookupName);
         }
 
         /// <summary>
-        /// Redirect to the specified Postgraphile endpoint for this sheet.
+        /// Queries the <see cref="TableRef.LookupName"/> for a sheet's <see cref="TableRef.TableRefId"/>.
         /// </summary>
-        /// <param name="tableRefId">The ID of the table reference.</param>
-        /// <returns>Redirect to Postgraphile server.</returns>
-        [HttpGet("sheet/{tableRefId}")]
-        [HttpPost("sheet/{tableRefId}")]
-        [HttpPatch("sheet/{tableRefId}")]
-        [HttpDelete("sheet/{tableRefId}")]
+        /// <param name="tableRefId">The incoming <see cref="TableRef.TableRefId"/>.</param>
+        /// <returns>The corresponding <see cref="TableRef.LookupName"/>.</returns>
+        [HttpGet("sheet/{tableRefId}/lookup")]
         [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
-        public async ValueTask<IActionResult> GetSheet([FromRoute] Guid tableRefId)
+        public async ValueTask<IActionResult> GetSheetLookupName([FromRoute] Guid tableRefId)
         {
             var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
 
@@ -103,9 +97,9 @@ namespace ScwSvc.Controllers
             if (tableRef.TableType != TableType.Sheet)
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
 
-            _logger.LogInformation("Sheet access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
+            _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
 
-            return RedirectPreserveMethod(PostgraphileBaseUrl + tableRef.LookupName.ToNameString() + "?" + HttpContext.Request.QueryString);
+            return Ok(tableRef.LookupName);
         }
     }
 }
