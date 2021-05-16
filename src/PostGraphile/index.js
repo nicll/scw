@@ -12,6 +12,7 @@ app.use(
             graphiql: true,
             enhanceGraphiql: true,
             subscriptions: true,
+            enableCors: true,
             ownerConnectionString: "postgres://" + process.env.SCW1_DBUSER_SYS + ":" + process.env.SCW1_DBPASS_SYS + "@localhost:5432/scw"
         }
     )
