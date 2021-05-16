@@ -34,7 +34,6 @@ import { MatTableModule } from '@angular/material/table';
 //import {AccordionModule} from 'primeng/accordion';     //accordion and accordion tab
 import { MenuItem } from 'primeng/api';                  //api
 
-/*import {TableModule} from 'primeng/table';*/
 import {ToastModule} from 'primeng/toast';
 import {CalendarModule} from 'primeng/calendar';
 import {SliderModule} from 'primeng/slider';
@@ -50,7 +49,9 @@ import {TableModule} from "primeng/table";
 import { GraphQLModule } from './graphql.module';
 import { MenubarComponent } from './menubar/menubar.component';
 import {MenubarModule} from "primeng/menubar";
-
+import {APOLLO_OPTIONS} from "apollo-angular";
+import { InMemoryCache } from '@apollo/client/cache/inmemory/inMemoryCache';
+import { HttpLink } from 'apollo-angular/http';
 
 
 @NgModule({
@@ -106,7 +107,18 @@ import {MenubarModule} from "primeng/menubar";
     InputTextModule,
     ButtonModule
   ],
-  providers: [],
+  providers: [{
+    provide: APOLLO_OPTIONS,
+    useFactory: (httpLink: HttpLink) => {
+      return {
+        cache: new InMemoryCache(),
+        link: httpLink.create({
+          uri: 'http://localhost:5000/graphql',
+        }),
+      };
+    },
+    deps: [HttpLink],
+  },],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
