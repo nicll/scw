@@ -52,18 +52,24 @@ import {MenubarModule} from "primeng/menubar";
 import {APOLLO_OPTIONS} from "apollo-angular";
 import { InMemoryCache } from '@apollo/client/cache/inmemory/inMemoryCache';
 import { HttpLink } from 'apollo-angular/http';
+import { SpreadjsComponent } from './spreadjs/spreadjs.component';
+
+import { DesignerModule } from '@grapecity/spread-sheets-designer-angular'
 
 
 @NgModule({
   declarations: [
+
     AppComponent,
     LogInSignUpDialogComponent,
     AllTablesComponent,
     SheetComponent,
     DatasetComponent,
     DataSetDialogComponent,
-    MenubarComponent],
+    MenubarComponent,
+    SpreadjsComponent],
   imports: [
+    DesignerModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
