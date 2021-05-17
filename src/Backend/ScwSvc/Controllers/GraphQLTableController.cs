@@ -36,7 +36,7 @@ namespace ScwSvc.Controllers
         /// <param name="tableRefId">The incoming <see cref="TableRef.TableRefId"/>.</param>
         /// <returns>The corresponding <see cref="TableRef.LookupName"/>.</returns>
         [HttpGet("dataset/{tableRefId}/lookup")]
-        [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
@@ -63,7 +63,7 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
 
-            return Ok(tableRef.LookupName);
+            return Ok(tableRef.LookupName.ToNameString());
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace ScwSvc.Controllers
         /// <param name="tableRefId">The incoming <see cref="TableRef.TableRefId"/>.</param>
         /// <returns>The corresponding <see cref="TableRef.LookupName"/>.</returns>
         [HttpGet("sheet/{tableRefId}/lookup")]
-        [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
@@ -99,7 +99,7 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
 
-            return Ok(tableRef.LookupName);
+            return Ok(tableRef.LookupName.ToNameString());
         }
     }
 }
