@@ -3,6 +3,7 @@ using NUnit.Framework;
 using ScwSvc.Interactors;
 using ScwSvc.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,16 +11,26 @@ namespace ScwSvc.Tests.Unit
 {
     public class SysDbInteractorTests
     {
+        private const string
+            CommonUserId = "00000000-0000-0000-0000-000000000001",
+            ManagerUserId = "00000000-0000-0000-0000-000000000002",
+            AdminUserId = "00000000-0000-0000-0000-000000000003";
         private DbSysContext _sysDb;
         private readonly User
-            _commonUser =  new() { Name = "CommonUser",  Role = UserRole.Common,  UserId = Guid.NewGuid(), PasswordHash = new byte[32] },
-            _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.NewGuid(), OwnTables = Array.Empty<TableRef>() },
-            _adminUser =   new() { Name = "AdminUser",   Role = UserRole.Admin,   UserId = Guid.NewGuid() };
+            _commonUser =  new() { Name = "CommonUser",  Role = UserRole.Common,  UserId = Guid.Parse(CommonUserId), PasswordHash = new byte[32], Collaborations = new List<TableRef>() },
+            _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.Parse(ManagerUserId), Collaborations = new List<TableRef>(), OwnTables = Array.Empty<TableRef>() },
+            _adminUser =   new() { Name = "AdminUser",   Role = UserRole.Admin,   UserId = Guid.Parse(AdminUserId), Collaborations = new List<TableRef>(), OwnTables = Array.Empty<TableRef>() };
+        private readonly TableRef
+            _datasetTable = new() { TableRefId = Guid.NewGuid(), TableType = TableType.DataSet, OwnerUserId = Guid.Parse(CommonUserId) },
+            _sheetTable =   new() { TableRefId = Guid.NewGuid(), TableType = TableType.Sheet, OwnerUserId = Guid.Parse(CommonUserId) };
 
         [OneTimeSetUp]
         public void SetupOnce()
         {
             _sysDb = new DbSysContext(new DbContextOptionsBuilder<DbSysContext>().UseInMemoryDatabase("test").UseLazyLoadingProxies().Options);
+            //_commonUser.OwnTables = new[] { _datasetTable, _sheetTable };
+            _datasetTable.Owner = _commonUser;
+            _sheetTable.Owner = _commonUser;
         }
 
         [Test, Order(1)]
@@ -119,6 +130,46 @@ namespace ScwSvc.Tests.Unit
             Assert.IsNull(await _sysDb.GetUserById(_managerUser.UserId));
             Assert.IsNull(await _sysDb.GetUserByName(_managerUser.Name));
             Assert.IsEmpty(await _sysDb.GetUsersByRole(_managerUser.Role));
+        }
+
+        [Test, Order(11)]
+        public async Task CreateDataSet()
+        {
+            var tableRef = _datasetTable;
+
+            await _sysDb.AddTable(tableRef, commit: true);
+
+            Assert.AreEqual(tableRef, await _sysDb.GetTableRefById(tableRef.TableRefId));
+        }
+
+        [Test, Order(12)]
+        public async Task CreateSheet()
+        {
+            var tableRef = _sheetTable;
+
+            await _sysDb.AddTable(tableRef, commit: true);
+
+            Assert.AreEqual(tableRef, await _sysDb.GetTableRefById(tableRef.TableRefId));
+        }
+
+        [Test, Order(13)]
+        public async Task DeleteDataSet()
+        {
+            var tableRef = _datasetTable;
+
+            await _sysDb.RemoveTable(tableRef, commit: true);
+
+            Assert.IsNull(await _sysDb.GetTableRefById(tableRef.TableRefId));
+        }
+
+        [Test, Order(14)]
+        public async Task DeleteSheet()
+        {
+            var tableRef = _sheetTable;
+
+            await _sysDb.RemoveTable(tableRef, commit: true);
+
+            Assert.IsNull(await _sysDb.GetTableRefById(tableRef.TableRefId));
         }
     }
 }
