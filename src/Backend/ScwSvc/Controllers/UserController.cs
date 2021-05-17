@@ -260,7 +260,7 @@ namespace ScwSvc.Controllers
                     Columns = ConvertColumns(dsModel.Columns, newDsId)
                 };
 
-                await _sysDb.TableRefs.AddAsync(newTable);
+                await _sysDb.AddTable(newTable);
                 await _dynDb.CreateDataSet(newTable);
                 await _sysDb.SaveChangesAsync();
 
@@ -440,7 +440,7 @@ namespace ScwSvc.Controllers
                 LookupName = Guid.NewGuid()
             };
 
-            await _sysDb.TableRefs.AddAsync(newTable);
+            await _sysDb.AddTable(newTable);
             await _dynDb.CreateSheet(newTable);
             await _sysDb.SaveChangesAsync();
 

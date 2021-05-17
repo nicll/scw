@@ -71,6 +71,20 @@ namespace ScwSvc.Interactors
             => await db.TableRefs.FindAsync(id).ConfigureAwait(false);
 
         /// <summary>
+        /// Creates a <see cref="TableRef"/> object and optionally updates the SYS database.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object to create.</param>
+        /// <param name="commit">Whether or not to save changes to the database.</param>
+        public static async ValueTask AddTable(this DbSysContext db, TableRef table, bool commit = false)
+        {
+            await db.TableRefs.AddAsync(table).ConfigureAwait(false);
+
+            if (commit)
+                await db.SaveChangesAsync();
+        }
+
+        /// <summary>
         /// Modifies a <see cref="User"/> object and optionally updates it in the SYS database.
         /// </summary>
         /// <remarks>
