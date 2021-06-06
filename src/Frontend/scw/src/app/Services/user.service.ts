@@ -67,6 +67,17 @@ export class UserService {
       map(tables=>{return tables;})
     );
   }
+  
+  public GetDataSet(id:string):Observable<Table>{
+    return this.http.get<Table>(this.baseUri+"/my/dataset/"+id,{withCredentials:true}).pipe(
+      catchError(err=>{
+        this.handleError('GetDataset');
+        console.error(err);
+        return throwError(err);
+      }),
+      map(sheet=>{console.log(id);return sheet;})
+    );
+  }
   public PostDataSet(table:Table):Observable<Table>{
     return this.http.post<Table>(this.baseUri+"/my/dataset",table,{withCredentials:true}).pipe(
       catchError(err=>{
@@ -96,6 +107,17 @@ export class UserService {
         return throwError(err);
       }),
       map(sheets=>{return sheets;})
+    );
+  }
+  
+  public GetSheet(id:string):Observable<Table>{
+    return this.http.get<Table>(this.baseUri+"/my/sheet/"+id,{withCredentials:true}).pipe(
+      catchError(err=>{
+        this.handleError('GetSheet');
+        console.error(err);
+        return throwError(err);
+      }),
+      map(sheet=>{return sheet;})
     );
   }
   public PostSheet(name:string):Observable<string>{

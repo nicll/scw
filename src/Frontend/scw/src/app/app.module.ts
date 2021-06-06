@@ -29,6 +29,9 @@ import { SheetComponent } from './sheet/sheet.component';
 import { DatasetComponent } from './dataset/dataset.component';
 import { DataSetDialogComponent } from './data-set-dialog/data-set-dialog.component';
 import { MatTableModule } from '@angular/material/table';
+import { InMemoryCache } from '@apollo/client/cache/inmemory/inMemoryCache';
+import { HttpLink } from 'apollo-angular/http';
+import { APOLLO_OPTIONS } from 'apollo-angular';
 
 //primeNG stuff
 //import {AccordionModule} from 'primeng/accordion';     //accordion and accordion tab
@@ -105,7 +108,18 @@ import {MenubarModule} from "primeng/menubar";
     InputTextModule,
     ButtonModule
   ],
-  providers: [],
+  providers: [{
+    provide: APOLLO_OPTIONS,
+    useFactory: (httpLink: HttpLink) => {
+      return {
+        cache: new InMemoryCache(),
+        link: httpLink.create({
+          uri: 'http://localhost:4000/graphql',
+        }),
+      };
+    },
+    deps: [HttpLink],
+  },],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
