@@ -1,0 +1,20 @@
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { AllTablesComponent } from './all-tables/all-tables.component';
+import { SheetComponent } from './sheet/sheet.component';
+import { DatasetComponent } from './dataset/dataset.component';
+import {MenubarComponent} from "./menubar/menubar.component";
+
+const routes: Routes =
+  [
+    {path: 'sheet',component: SheetComponent},
+    {path: '',component: DatasetComponent},
+    {path:'tables',component:AllTablesComponent},
+    {path:'menubarTest',component:MenubarComponent}
+  ];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }

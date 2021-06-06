@@ -1,0 +1,23 @@
+ <mat-toolbar class="header">
+    <div *ngIf="!username" class="LogInSignUp-buttons">
+        <button mat-raised-button (click)="Signup()">Sign Up</button>
+        <button mat-raised-button color="primary" (click)="Login()">Login</button>
+    </div>
+    <div *ngIf="username" class="User" >
+        <button mat-raised-button [matMenuTriggerFor]="menu">
+            {{username}}
+        </button>
+        <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="ClickAllTables()">
+              <span>All Tables</span>
+            </button>
+            <button mat-menu-item (click)="Logout()">
+                <span>Logout</span>
+            </button>
+        </mat-menu>
+    </div>
+</mat-toolbar>
+
+<mat-toolbar class="SubComponent">
+    <router-outlet></router-outlet>
+</mat-toolbar>

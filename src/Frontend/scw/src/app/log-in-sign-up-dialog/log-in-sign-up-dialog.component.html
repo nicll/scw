@@ -1,0 +1,22 @@
+<div *ngIf="data=='login'">
+    LogIn Dialog
+</div>
+<div *ngIf="data=='signup'">
+    SignUp Dialog
+</div>
+<mat-form-field>    
+    <mat-label>Enter username: </mat-label>   
+    <input matInput [(ngModel)]="username">
+</mat-form-field> 
+<br>
+<mat-form-field>  
+    <mat-label >Enter password: </mat-label>
+    <input matInput [(ngModel)]="password">
+</mat-form-field>  
+<br>
+<small>{{message}} 
+    <br/>
+  </small>
+<br>
+<button mat-raised-button (click)="Ok()" >Ok</button>   
+<button mat-raised-button (click)="Cancel()" style="float: right">Cancel</button>
