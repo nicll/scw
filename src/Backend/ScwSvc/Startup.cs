@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,6 +72,8 @@ namespace ScwSvc
 
             services.AddCors();
 
+            services.AddSpaStaticFiles(config => config.RootPath = "../../Frontend/scw/dist");
+
 #if DEBUG
             services.AddSwaggerGen(opts => opts.SwaggerDoc("v0", new Microsoft.OpenApi.Models.OpenApiInfo() { Title = "Spreadsheet Components for Web-Based Projects API", Version = "v0" }));
             services.AddSwaggerGenNewtonsoftSupport();
@@ -92,7 +95,10 @@ namespace ScwSvc
                 app.UseHsts();
                 app.UseExceptionHandler("/error");
                 app.UseHttpsRedirection();
+                app.UseSpaStaticFiles();
             }
+
+            app.UseStaticFiles();
 
             app.UseRouting();
             app.UseCors(b => b.WithOrigins("http://localhost:4200").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
@@ -114,6 +120,12 @@ namespace ScwSvc
                 endpoints.Select().Expand().Filter().OrderBy().Count().MaxTop(256);
                 //endpoints.MapODataRoute("ODataRoute", "odata", GetEdmModel(app.ApplicationServices),
                 //    new DefaultODataPathHandler(), defaultConventions.Except(defaultConventions.OfType<MetadataRoutingConvention>()));
+            });
+
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = @"..\..\Frontend\scw";
+                spa.UseAngularCliServer("start");
             });
         }
 

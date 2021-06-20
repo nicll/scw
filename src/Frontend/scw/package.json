@@ -4,7 +4,8 @@
   "description": "This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.0.2.",
   "main": "karma.conf.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"start": "ng serve"
   },
   "author": "",
   "license": "ISC",
