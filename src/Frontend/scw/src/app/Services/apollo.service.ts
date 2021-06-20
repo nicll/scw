@@ -1,10 +1,9 @@
 import { Injectable} from '@angular/core';
-import {Apollo} from 'apollo-angular';
 import {ApolloQueryResult, FetchResult} from '@apollo/client/core';
 import { gql } from '@apollo/client/core';
 import { Observable } from 'rxjs';
-import { query } from '@angular/animations';
 import { HttpClient } from '@angular/common/http';
+import { Apollo } from 'apollo-angular';
 
 @Injectable({
   providedIn: 'root'
