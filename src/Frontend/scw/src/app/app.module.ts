@@ -16,7 +16,6 @@ import {MatSelectModule} from '@angular/material/select';
 
 
 //3rd party stuff
-import { Routes, RouterModule } from '@angular/router'; // CLI imports router
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
@@ -29,15 +28,11 @@ import { SheetComponent } from './sheet/sheet.component';
 import { DatasetComponent } from './dataset/dataset.component';
 import { DataSetDialogComponent } from './data-set-dialog/data-set-dialog.component';
 import { MatTableModule } from '@angular/material/table';
-import { InMemoryCache } from '@apollo/client/cache/inmemory/inMemoryCache';
-import { HttpLink } from 'apollo-angular/http';
-import { APOLLO_OPTIONS } from 'apollo-angular';
 
 //primeNG stuff
 //import {AccordionModule} from 'primeng/accordion';     //accordion and accordion tab
 import { MenuItem } from 'primeng/api';                  //api
 
-/*import {TableModule} from 'primeng/table';*/
 import {ToastModule} from 'primeng/toast';
 import {CalendarModule} from 'primeng/calendar';
 import {SliderModule} from 'primeng/slider';
@@ -53,18 +48,28 @@ import {TableModule} from "primeng/table";
 import { GraphQLModule } from './graphql.module';
 import { MenubarComponent } from './menubar/menubar.component';
 import {MenubarModule} from "primeng/menubar";
+import { InMemoryCache } from '@apollo/client/cache/inmemory/inMemoryCache';
+import { SpreadjsComponent } from './spreadjs/spreadjs.component';
+
+import { DesignerModule } from '@grapecity/spread-sheets-designer-angular'
+import { RouterModule } from '@angular/router';
+import { APOLLO_OPTIONS } from 'apollo-angular';
+import {HttpLink} from 'apollo-angular/http';
 
 
 @NgModule({
   declarations: [
+
     AppComponent,
     LogInSignUpDialogComponent,
     AllTablesComponent,
     SheetComponent,
     DatasetComponent,
     DataSetDialogComponent,
-    MenubarComponent],
+    MenubarComponent,
+    SpreadjsComponent],
   imports: [
+    DesignerModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,

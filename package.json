@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "file-saver": "^2.0.5",
+    "jspdf": "^2.3.1",
+    "jspdf-autotable": "^3.5.14",
+    "xlsx": "^0.16.9"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.2"
+  }
+}
