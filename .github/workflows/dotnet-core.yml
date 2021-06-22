@@ -1,4 +1,4 @@
-name: .NET Core
+name: .NET 5
 
 on:
   push:
@@ -25,4 +25,4 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test ScwSvc.Tests.Unit --no-restore --verbosity normal
