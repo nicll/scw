@@ -5,8 +5,8 @@ const app = express();
 
 app.use(
     postgraphile(
-        "postgres://" + process.env.SCW1_DBUSER_DYN + ":" + process.env.SCW1_DBPASS_DYN
-            + "@" + process.env.SCW1_DBSERVER + ":" + process.env.SCW1_DBPORT + "/scw",
+        "postgres://" + process.env.SCW1_DB_USER_DYN + ":" + process.env.SCW1_DB_PASS_DYN
+            + "@" + process.env.SCW1_DB_HOST + ":" + process.env.SCW1_DB_PORT + "/scw",
         "scw1_dyn",
         {
             watchPg: true,
@@ -14,10 +14,11 @@ app.use(
             enhanceGraphiql: true,
             subscriptions: true,
             enableCors: true,
-            ownerConnectionString: "postgres://" + process.env.SCW1_DBUSER_SYS + ":" + process.env.SCW1_DBPASS_SYS
-                + "@" + process.env.SCW1_DBSERVER + ":" + process.env.SCW1_DBPORT + "/scw"
+            graphqlRoute: process.env.SCW1_PGRAPHILE_ROUTE,
+            ownerConnectionString: "postgres://" + process.env.SCW1_DB_USER_SYS + ":" + process.env.SCW1_DB_PASS_SYS
+                + "@" + process.env.SCW1_DB_HOST + ":" + process.env.SCW1_DB_PORT + "/scw"
         }
     )
 );
 
-app.listen(4000);
+app.listen(process.env.SCW1_PGRAPHILE_PORT);

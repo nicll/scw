@@ -34,8 +34,8 @@ namespace ScwSvc.Tests.Integration
             _client = _factory.CreateClient(new() { AllowAutoRedirect = true });
             RootUrl = "http://127.0.0.1:5000";
             //Wrapper = new SqlMapApiWrapper("127.0.0.1", 8775);
-            string dbUser = Environment.GetEnvironmentVariable("SCW1_DBUSER_SYS");
-            string dbPassword = Environment.GetEnvironmentVariable("SCW1_DBPASS_SYS");
+            string dbUser = Environment.GetEnvironmentVariable("SCW1_DB_USER_SYS");
+            string dbPassword = Environment.GetEnvironmentVariable("SCW1_DB_PASS_SYS");
             Connection = new NpgsqlConnection($"Host=localhost;Username={dbUser};Password={dbPassword};Database=scw");
             schema = "scw1_sys";
             await DeleteTableContent();

@@ -8,39 +8,41 @@ Derzeit wird dies per Umgebungsvariablen gemacht. (später eventuell über appse
 
 Folgende Umgebungsvariablen existieren derzeit:
 
-	SCW1_DBSERVER	IP-Adresse oder Hostname des Datenbankservers.
-			Optional, wenn nicht konfiguriert: 127.0.0.1
+        SCW1_DB_HOST  IP-Adresse oder Hostname des Datenbankservers.
+                      Optional, wenn nicht konfiguriert: 127.0.0.1
 
-	SCW1_DBPORT	Port, der zum Verbinden zur Datenbank verwendet wird.
-			Optional, wenn nicht konfiguriert: 5432 (Postgres default port)
+        SCW1_DB_PORT  Port, der zum Verbinden zur Datenbank verwendet wird.
+                      Optional, wenn nicht konfiguriert: 5432 (Postgres default port)
 
-	SCW1_DBUSER_SYS	Name des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
-			Dieser Account wird für allgemeinere Zwecke verwendet.
-			Standardname ist "scw1_user_sys".
+        SCW1_DB_USER_SYS  Name des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
+                          Dieser Account wird für allgemeinere Zwecke verwendet.
+                          Standardname ist "scw1_user_sys".
 
-	SCW1_DBPASS_SYS	Passwort des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
+        SCW1_DB_PASS_SYS  Passwort des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
 
-	SCW1_DBUSER_DYN	Name des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
-			Dieser Account wird beim Abrufen und Abändern von von Benutzern erstellten Tables verwendet;
-			er benötigt nicht so viele Berechtigungen wie der andere Account.
-			Standardname ist "scw1_user_dyn".
+        SCW1_DB_USER_DYN  Name des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
+                          Dieser Account wird beim Abrufen und Abändern von von Benutzern erstellten Tables verwendet;
+                          er benötigt nicht so viele Berechtigungen wie der andere Account.
+                          Standardname ist "scw1_user_dyn".
 
-	SCW1_DBPASS_DYN	Passwort des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
+        SCW1_DB_PASS_DYN  Passwort des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
 
-	SCW1_PGREST_BASEURL	Basis-URL zum PostgREST-Server, z.B. "http://localhost:3000/".
-	SCW1_PGRAPHILE_BASEURL	Basis-URL zum Postgraphile-Server, z.B. "http://localhost:4000/graphql".
+        SCW1_PGREST_BASEURL     Basis-URL zum PostgREST-Server, z.B. "http://localhost:3000/".
+        SCW1_PGRAPHILE_HOST     IP-Adresse oder Hostname des PostGraphile-Servers.
+        SCW1_PGRAPHILE_PORT     Port, der zum Verbinden zu PostGraphile verwendet wird.
+        SCW1_PGRAPHILE_ROUTE    Pfad zum GraphQL Endpunkt.
 
 Innerhalb der Postgres-Instanz muss eine Database namens 'scw' existieren für die die angegebenen Accounts auch
 entsprechende Berechtigungen besitzen, damit die Tables angelegt und befüllt werden können.
-Sofern die Schemas bereits erstellt sind, muss sichergestellt werden, dass SCW1_DBUSER_SYS alle notwendigen
-Berechtigungen für die Schemas "scw1_sys" und "scw1_dyn" besitzt (USAGE, CREATE, DROP; SELECT; INSERT; UPDATE; DELETE, ...),
-SCW1_DBUSER_DYN benötigt selbige Berechtiungen für das Schema "scw1_dyn".
+Sofern die Schemas bereits erstellt sind, muss sichergestellt werden, dass SCW1_DB_USER_SYS alle notwendigen
+Berechtigungen für die Schemas "scw1_sys" und "scw1_dyn" besitzt (USAGE, CREATE, DROP, SELECT, INSERT, UPDATE, DELETE, ...),
+SCW1_DB_USER_DYN benötigt selbige Berechtiungen für das Schema "scw1_dyn".
 Sollte das Schema "scw1_dyn" nicht automatisch angelegt werden, so muss dies händisch gemacht werden.
 Um Migrations verwenden zu können sind außerdem Berechtiungen für das Schema "PUBLIC" nötig.
 
 Struktur der DB - Kurzgefasst:
-Database "scw" mit CREATE und CONNECT Berechtigungen für beide DBUSER Accounts
-Schema "scw1_sys" mit SCW1_DBUSER_SYS als Owner
-Schema "scw1_dyn" mit SCW1_DBUSER_SYS als Owner und USAGE und CREATE Berechtigungen für beide DBUSER
+Database "scw" mit CREATE und CONNECT Berechtigungen für beide DB_USER Accounts
+Schema "scw1_sys" mit SCW1_DB_USER_SYS als Owner
+Schema "scw1_dyn" mit SCW1_DB_USER_SYS als Owner und USAGE und CREATE Berechtigungen für beide DB_USER
 Schema "public" für EF Core Migrations
-Schema "postgraphile_watch" wird von postgraphile einmalig angelegt, danach kann SCW1_DBUSER_SYS als Owner gesetzt werden
+Schema "postgraphile_watch" wird von postgraphile einmalig angelegt, danach kann SCW1_DB_USER_SYS als Owner gesetzt werden
