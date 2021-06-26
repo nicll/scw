@@ -16,32 +16,32 @@ namespace ScwSvc
             /// <summary>
             /// Specifies the hostname or IP address used for connecting to the database.
             /// </summary>
-            public static readonly string Server = GetEnvironmentVariableOrNull("SCW1_DBSERVER") ?? "127.0.0.1";
+            public static readonly string Server = GetEnvironmentVariableOrNull("SCW1_DB_HOST") ?? "127.0.0.1";
 
             /// <summary>
             /// Specifies the port number used when connecting to the database.
             /// </summary>
-            public static readonly string Port = GetEnvironmentVariableOrNull("SCW1_DBPORT") ?? "5432";
+            public static readonly string Port = GetEnvironmentVariableOrNull("SCW1_DB_PORT") ?? "5432";
 
             /// <summary>
             /// Specifies the name of the SYS user when connecting to the database.
             /// </summary>
-            public static readonly string SysUser = GetEnvironmentVariableOrNull("SCW1_DBUSER_SYS") ?? "scw1_user_sys";
+            public static readonly string SysUser = GetEnvironmentVariableOrNull("SCW1_DB_USER_SYS") ?? "scw1_user_sys";
 
             /// <summary>
             /// Specifies the password of the SYS user when connecting to the database.
             /// </summary>
-            public static readonly string SysPass = GetEnvironmentVariableOrFail("SCW1_DBPASS_SYS");
+            public static readonly string SysPass = GetEnvironmentVariableOrFail("SCW1_DB_PASS_SYS");
 
             /// <summary>
             /// Specifies the name of the DYN user when connecting to the database.
             /// </summary>
-            public static readonly string DynUser = GetEnvironmentVariableOrNull("SCW1_DBUSER_DYN") ?? "scw1_user_dyn";
+            public static readonly string DynUser = GetEnvironmentVariableOrNull("SCW1_DB_USER_DYN") ?? "scw1_user_dyn";
 
             /// <summary>
             /// Specifies the password of the DYN user when connecting to the database.
             /// </summary>
-            public static readonly string DynPass = GetEnvironmentVariableOrFail("SCW1_DBPASS_DYN");
+            public static readonly string DynPass = GetEnvironmentVariableOrFail("SCW1_DB_PASS_DYN");
         }
 
         /// <summary>
@@ -73,6 +73,7 @@ namespace ScwSvc
         /// <summary>
         /// Specifies the base url of the Postgraphile server to redirect to.
         /// </summary>
-        public static readonly string PostgraphileBaseUrl = GetEnvironmentVariableOrFail("SCW1_PGRAPHILE_BASEURL");
+        public static readonly string PostgraphileBaseUrl = "http://" + GetEnvironmentVariableOrFail("SCW1_PGRAPHILE_HOST") + ":"
+            + GetEnvironmentVariableOrFail("SCW1_PGRAPHILE_PORT") + "/" + GetEnvironmentVariableOrFail("SCW1_PGRAPHILE_ROUTE");
     }
 }
