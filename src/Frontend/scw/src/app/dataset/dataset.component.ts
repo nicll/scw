@@ -22,7 +22,7 @@ export class DatasetComponent implements AfterViewInit, OnInit{
   selectedRows: any;
   items: MenuItem[];
   data: any[];
-  cols= [{field:"A", header:"A"},{field:"B", header:"B"},{field:"C", header:"C"},{field:"D", header:"D"}];
+  cols = [{field:"A", header:"A"},{field:"B", header:"B"},{field:"C", header:"C"},{field:"D", header:"D"}];
   dataset: Array<Array<any>>=new Array;
   rowData: any;
   rowIndex: any;
@@ -39,19 +39,18 @@ export class DatasetComponent implements AfterViewInit, OnInit{
       {A:"dataset2",B:"test2",C:"test2",D:"test2"},
       {A:"dataset3",B:"test3",C:"test3",D:"test3"},
       {A:"dataset4",B:"test4",C:"test4",D:"test4"}];
+    //this.data=[];
     this.items = [
       {label: 'View', icon: 'pi pi-fw pi-search'},
       {label: 'Delete', icon: 'pi pi-fw pi-times'}
     ];
 
     this.exportColumns = this.cols.map(col => ({title: col.header, dataKey: col.field}));
-    this._selectedColumns = this.cols;
+    //this._selectedColumns = this.cols;
+    this._selectedColumns=[];
 
   }
-  onEditComplete(event: Event): void {
-    console.log(this.data);
-    console.log('Edit Init Event Called');
-  }
+  
 
   @Input() get selectedColumns(): any[] {
     return this._selectedColumns;
@@ -66,18 +65,26 @@ export class DatasetComponent implements AfterViewInit, OnInit{
   }
 
   ngOnInit(): void {
+    //load data from graphql
     if(this.tableId != undefined){
       let id=this.tableId;
       this.user.GetDataSet(id).subscribe(dataset=>{//Get details of DataSet
         this.apollo.lookUpDataSetId(id).subscribe(id=>{//Get the GraphqlId
-          let query=this.apollo.QueryBuilder(id,dataset.columns.map(v=>v.name))//Build our query
+          let query=this.apollo.QueryBuilder(id, dataset.columns.map(v=>v.name))//Build our query
           this.apollo.GetData<any>(query).subscribe(data=>{
             this.data=data.data["all"+this.apollo.makeQueryRightCase(id+"s")].nodes;
+            let dataclone: any[] = [];
+            this.data.forEach(val => dataclone.push(Object.assign({}, val)));
+            dataclone.forEach((element:any) => {
+              element["__typename"]=undefined;
+            });
+            this.data=dataclone;
+            console.log(data);
             this.cols=[];
             dataset.columns.forEach((field)=>
               this.cols=this.cols.concat({field:field.name, header:field.name}))
+            this._selectedColumns=this.cols; //set the selectedcolumns to all columns in dataset
           });
-          //this.apollo.Update("id",12,new Map().set("bruhmode1","200")).subscribe(data=>console.log(data));
         });
       });
     }
@@ -88,13 +95,29 @@ export class DatasetComponent implements AfterViewInit, OnInit{
       { label: "Starts With", value: FilterMatchMode.STARTS_WITH },
       { label: "Contains", value: FilterMatchMode.CONTAINS }
     ];
-    console.log(this.data[0]["A"]);
     this.exportColumns = this.cols.map(col => ({title: col.header, dataKey: col.field}));
   }
+
   deleteSheet(){
     this.user.DeleteDataSet(this.tableId!).subscribe(data=>console.log("Sheet deleted"))
   }
 
+  onEditComplete(event: {field:string, data:any, originalEvent:Event,index:number}): void {
+    if(event.index==null||event.index==undefined||!event.field||!event.data||!this.tableId){
+      return;
+    }
+    console.log(event.data);
+    this.apollo.lookUpDataSetId(this.tableId).subscribe((id:string)=>{//Get the GraphqlId
+      let testdata:Map<string,string>=new Map();
+      this.cols.forEach((tmp:{field:string,header:string})=> {
+        if(tmp&&tmp.field&&event.data[tmp.field]){
+          testdata.set(tmp.field,event.data[tmp.field])
+        }
+      })
+
+      this.apollo.Update(id,event.index+1,testdata).subscribe(()=>(next:any)=>console.log(next),(err)=>console.log(err));
+    });
+  }
   saveSheet() {}
 
   onKey($event: MouseEvent) {}

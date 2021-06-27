@@ -41,9 +41,9 @@
       </th>
     </tr>
   </ng-template>
-  <ng-template pTemplate="body" let-rowData let-columns="columns">
-    <tr [pSelectableRow]="rowData" [pContextMenuRow]="rowData" [pContextMenuRowIndex]="rowIndex">
-      <td *ngFor="let col of columns" pEditableColumn="rowData[col.field]">
+  <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+    <tr [pSelectableRow]="rowData" [pContextMenuRow]="rowData" [pContextMenuRowIndex]="rowIndex" [pSelectableRowIndex]="rowIndex">
+      <td *ngFor="let col of columns" [pEditableColumn]="rowData" [pEditableColumnField]="col.field" [pEditableColumnRowIndex]="rowIndex">
         <p-cellEditor>
           <ng-template pTemplate="input">
             <input pInputText type="text" [(ngModel)]="rowData[col.field]" required>
