@@ -55,21 +55,20 @@ export class ApolloService {
       mutation = mutation.concat(val + ":" + key + ",");
     });
     mutation = mutation.concat(`}}){__typename}}`);
-    console.log(mutation)
-    const link = onError(({ graphQLErrors, networkError }) => {
-      if (graphQLErrors)
-        graphQLErrors.map(({ message, locations, path }) =>
-          console.log(
-            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-          ),
-        );
-    
-      if (networkError) console.log(`[Network error]: ${networkError}`);
-    });
-    
+    console.log(mutation);
     return this.apollo.mutate<number>({
-      mutation: gql(mutation),
-      errorPolicy: 'all'
+      mutation: gql(mutation)
+    })
+  }
+  public Delete(table: string, id: number): Observable<FetchResult<number, Record<string, any>, Record<string, any>>> {
+    table = this.makeQueryRightCase(table);
+    let mutation = `mutation {delete${table}ById(`
+    table=table[0].toLowerCase()+table.substring(1);
+    mutation=mutation+`input: { id: ${id}`;
+    mutation = mutation.concat(`}){__typename}}`);
+    console.log(mutation)
+    return this.apollo.mutate<number>({
+      mutation: gql(mutation)
     })
   }
   public lookUpDataSetId(tableId: string): Observable<any> {

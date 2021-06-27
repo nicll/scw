@@ -85,6 +85,7 @@ export class DatasetComponent implements AfterViewInit, OnInit{
               this.cols=this.cols.concat({field:field.name, header:field.name}))
             this._selectedColumns=this.cols; //set the selectedcolumns to all columns in dataset
           });
+          //this.apollo.Delete(id,1).subscribe(()=>console.log("delete"));
         });
       });
     }
