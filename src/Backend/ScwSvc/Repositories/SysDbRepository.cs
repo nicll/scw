@@ -6,9 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using static ScwSvc.Utils.Authentication;
 
-namespace ScwSvc.Interactors
+namespace ScwSvc.Repositories
 {
-    public static class SysDbInteractor
+    public static class SysDbRepository
     {
         /// <summary>
         /// Gets a <see cref="User"/> object by their <see cref="User.UserId"/>.

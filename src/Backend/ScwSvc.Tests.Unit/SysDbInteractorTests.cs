@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using ScwSvc.Interactors;
+using ScwSvc.Repositories;
 using ScwSvc.Models;
 using System;
 using System.Collections.Generic;
