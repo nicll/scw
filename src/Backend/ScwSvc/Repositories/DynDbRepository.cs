@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ScwSvc.Interactors
+namespace ScwSvc.Repositories
 {
-    public static class DynDbInteractor
+    public static class DynDbRepository
     {
         /// <summary>
         /// Creates a new data set from the DYN database.

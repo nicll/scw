@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScwSvc.Interactors;
+using ScwSvc.Repositories;
 using ScwSvc.Models;
 using System;
 using System.Linq;
