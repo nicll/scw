@@ -14,7 +14,7 @@ app.use(
             enhanceGraphiql: true,
             subscriptions: true,
             enableCors: true,
-            graphqlRoute: process.env.SCW1_PGRAPH_ROUTE,
+            graphqlRoute: process.env.SCW1_PGRAPH_PATH,
             ownerConnectionString: "postgres://" + process.env.SCW1_DB_USER_SYS + ":" + process.env.SCW1_DB_PASS_SYS
                 + "@" + process.env.SCW1_DB_HOST + ":" + process.env.SCW1_DB_PORT + "/scw"
         }

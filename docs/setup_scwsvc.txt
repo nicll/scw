@@ -31,13 +31,13 @@ Folgende Umgebungsvariablen existieren derzeit:
                                 Optional, wenn nicht konfiguriert: 127.0.0.1
         SCW1_PGREST_PORT     Port, der zum Verbinden zu PostgREST verwendet wird.
                                 Optional, wenn nicht konfiguriert: 80
-        SCW1_PGREST_ROUTE    Pfad zum PostgREST Endpunkt.
+        SCW1_PGREST_PATH     Pfad zum PostgREST Endpunkt.
                                 Optional, wenn nicht konfiguriert: (leer)
         SCW1_PGRAPH_HOST     IP-Adresse oder Hostname des PostGraphile-Servers.
                                 Optional, wenn nicht konfiguriert: 127.0.0.1
         SCW1_PGRAPH_PORT     Port, der zum Verbinden zu PostGraphile verwendet wird.
                                 Optional, wenn nicht konfiguriert: 80
-        SCW1_PGRAPH_ROUTE    Pfad zum GraphQL Endpunkt.
+        SCW1_PGRAPH_PATH     Pfad zum GraphQL Endpunkt.
                                 Optional, wenn nicht konfiguriert: graphql
 
 Innerhalb der Postgres-Instanz muss eine Database namens 'scw' existieren für die die angegebenen Accounts auch
