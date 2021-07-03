@@ -71,7 +71,7 @@ namespace ScwSvc
         public static readonly string PostgrestBaseUrl = "http://"
             + (GetEnvironmentVariableOrNull("SCW1_PGREST_HOST") ?? "127.0.0.1") + ":"
             + (GetEnvironmentVariableOrNull("SCW1_PGREST_PORT") ?? "80") + "/"
-            + (GetEnvironmentVariableOrNull("SCW1_PGREST_ROUTE") ?? "").TrimStart('/');
+            + (GetEnvironmentVariableOrNull("SCW1_PGREST_PATH") ?? "").TrimStart('/');
 
         /// <summary>
         /// Specifies the base url of the Postgraphile server to redirect to.
@@ -79,6 +79,6 @@ namespace ScwSvc
         public static readonly string PostgraphileBaseUrl = "http://"
             + (GetEnvironmentVariableOrNull("SCW1_PGRAPH_HOST") ?? "127.0.0.1") + ":"
             + (GetEnvironmentVariableOrNull("SCW1_PGRAPH_PORT") ?? "80") + "/"
-            + (GetEnvironmentVariableOrNull("SCW1_PGRAPH_ROUTE") ?? "graphql").TrimStart('/');
+            + (GetEnvironmentVariableOrNull("SCW1_PGRAPH_PATH") ?? "graphql").TrimStart('/');
     }
 }
