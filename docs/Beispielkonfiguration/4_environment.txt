@@ -3,7 +3,9 @@
 -- Hashes der Passwörter in 1_users.sql müssen dann auch aktualisiert werden
 SCW1_DB_PASS_DYN = npE8yaIvXz8GgD5L2j3vbGqIMTW3MoOU
 SCW1_DB_PASS_SYS = 5KNih97az0JoiGK3ZEaPVGlAH9igoJhp
-SCW1_PGREST_BASEURL = http://localhost:3000/
-SCW1_PGRAPHILE_HOST = localhost
-SCW1_PGRAPHILE_PORT = 4000
-SCW1_PGRAPHILE_ROUTE = graphql
+SCW1_PGREST_HOST = localhost
+SCW1_PGREST_PORT = 3000
+SCW1_PGREST_ROUTE = /
+SCW1_PGRAPH_HOST = localhost
+SCW1_PGRAPH_PORT = 4000
+SCW1_PGRAPH_ROUTE = graphql

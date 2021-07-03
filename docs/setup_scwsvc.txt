@@ -4,7 +4,7 @@ Um ScwSvc verwenden zu können muss eine PostgreSQL-Datenbank bereitstehen.
 (am einfachsten einfach "docker pull postgres" oder lokal installieren)
 
 Die Verbindung zur Datenbank muss dann für ScwSvc angegeben werden.
-Derzeit wird dies per Umgebungsvariablen gemacht. (später eventuell über appsettings.json)
+Derzeit wird dies per Umgebungsvariablen gemacht.
 
 Folgende Umgebungsvariablen existieren derzeit:
 
@@ -16,21 +16,29 @@ Folgende Umgebungsvariablen existieren derzeit:
 
         SCW1_DB_USER_SYS  Name des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
                           Dieser Account wird für allgemeinere Zwecke verwendet.
-                          Standardname ist "scw1_user_sys".
+                          Optional, Standardname ist "scw1_user_sys".
 
         SCW1_DB_PASS_SYS  Passwort des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
 
         SCW1_DB_USER_DYN  Name des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
                           Dieser Account wird beim Abrufen und Abändern von von Benutzern erstellten Tables verwendet;
                           er benötigt nicht so viele Berechtigungen wie der andere Account.
-                          Standardname ist "scw1_user_dyn".
+                          Optional, Standardname ist "scw1_user_dyn".
 
         SCW1_DB_PASS_DYN  Passwort des Accounts, der für die Anmeldung bei der Datenbank verwendet werden soll.
 
-        SCW1_PGREST_BASEURL     Basis-URL zum PostgREST-Server, z.B. "http://localhost:3000/".
-        SCW1_PGRAPHILE_HOST     IP-Adresse oder Hostname des PostGraphile-Servers.
-        SCW1_PGRAPHILE_PORT     Port, der zum Verbinden zu PostGraphile verwendet wird.
-        SCW1_PGRAPHILE_ROUTE    Pfad zum GraphQL Endpunkt.
+        SCW1_PGREST_HOST     IP-Adresse oder Hostname des PostgREST-Servers.
+                                Optional, wenn nicht konfiguriert: 127.0.0.1
+        SCW1_PGREST_PORT     Port, der zum Verbinden zu PostgREST verwendet wird.
+                                Optional, wenn nicht konfiguriert: 80
+        SCW1_PGREST_ROUTE    Pfad zum PostgREST Endpunkt.
+                                Optional, wenn nicht konfiguriert: (leer)
+        SCW1_PGRAPH_HOST     IP-Adresse oder Hostname des PostGraphile-Servers.
+                                Optional, wenn nicht konfiguriert: 127.0.0.1
+        SCW1_PGRAPH_PORT     Port, der zum Verbinden zu PostGraphile verwendet wird.
+                                Optional, wenn nicht konfiguriert: 80
+        SCW1_PGRAPH_ROUTE    Pfad zum GraphQL Endpunkt.
+                                Optional, wenn nicht konfiguriert: graphql
 
 Innerhalb der Postgres-Instanz muss eine Database namens 'scw' existieren für die die angegebenen Accounts auch
 entsprechende Berechtigungen besitzen, damit die Tables angelegt und befüllt werden können.
