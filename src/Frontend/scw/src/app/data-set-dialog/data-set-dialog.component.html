@@ -19,8 +19,8 @@ DataSet Dialog
     <mat-option value="Timestamp">Timestamp</mat-option>
   </mat-select>
 </mat-form-field><br>
-<mat-label>Enter if column can be empty: </mat-label><br>
-<mat-checkbox [(ngModel)]="nullable"> Can be empty</mat-checkbox>
+<mat-label>Enter if column can be empty: </mat-label><br><br>
+<mat-checkbox [(ngModel)]="nullable"> Can be empty</mat-checkbox><br><br>
 
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
     <ng-container matColumnDef="name">
