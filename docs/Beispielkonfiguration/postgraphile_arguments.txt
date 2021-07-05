@@ -1,2 +1,2 @@
 Ausgefüllter Befehl um Postgraphile zu starten:
-postgraphile -c "postgres://scw1_user_dyn:npE8yaIvXz8GgD5L2j3vbGqIMTW3MoOU@localhost:5432/scw" -s "scw1_dyn" -p 4000 -C "postgres://scw1_user_sys:5KNih97az0JoiGK3ZEaPVGlAH9igoJhp@localhost:5432/scw" -w
+postgraphile -c "postgres://scw1_user_dyn:npE8yaIvXz8GgD5L2j3vbGqIMTW3MoOU@localhost:5432/scw" -s "scw1_dyn" -p 4000 -C "postgres://scw1_user_sys:5KNih97az0JoiGK3ZEaPVGlAH9igoJhp@localhost:5432/scw" -w -o
