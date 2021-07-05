@@ -119,8 +119,7 @@ export class MenubarComponent{
             {
               label: 'Delete',
               icon: 'pi pi-fw pi-calendar-minus'
-            },
-
+            }
           ]
         },
         {

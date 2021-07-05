@@ -82,10 +82,14 @@ export class DatasetComponent implements AfterViewInit, OnInit{
             console.log(data);
             this.cols=[];
             dataset.columns.forEach((field)=>
-              this.cols=this.cols.concat({field:field.name, header:field.name}))
+              this.cols=this.cols.concat({field:field.name.toLowerCase(), header:field.name.toLowerCase()}))
             this._selectedColumns=this.cols; //set the selectedcolumns to all columns in dataset
           });
           //this.apollo.Delete(id,1).subscribe(()=>console.log("delete"));
+          let testdata:Map<string,string>=new Map().set("spalte1",`"3"`);
+          testdata.set("spalte2","null");
+          testdata.set("spalte3",`"Testdaten3"`);
+          //this.apollo.Insert(id,testdata).subscribe(()=>(next:any)=>console.log(next),(err)=>console.log(err));
         });
       });
     }
@@ -100,13 +104,14 @@ export class DatasetComponent implements AfterViewInit, OnInit{
   }
 
   deleteSheet(){
+    console.log(this.tableId);
     this.user.DeleteDataSet(this.tableId!).subscribe(data=>console.log("Sheet deleted"))
   }
 
   onEditComplete(event: {field:string, data:any, originalEvent:Event,index:number}): void {
     if(event.index==null||event.index==undefined||!event.field||!event.data||!this.tableId){
       return;
-    }
+    }//check if valid
     console.log(event.data);
     this.apollo.lookUpDataSetId(this.tableId).subscribe((id:string)=>{//Get the GraphqlId
       let testdata:Map<string,string>=new Map();
@@ -124,9 +129,9 @@ export class DatasetComponent implements AfterViewInit, OnInit{
   onKey($event: MouseEvent) {}
 
   exportPdf() {
-    const doc = new jsPDF()
+    const doc = new jsPDF();
     autoTable(doc,{body: this.data, columns: this.exportColumns});
-    doc.save('table.pdf')
+    doc.save('table.pdf');
   }
 
   exportExcel() {

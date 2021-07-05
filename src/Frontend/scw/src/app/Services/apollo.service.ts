@@ -41,10 +41,24 @@ export class ApolloService {
     console.log(table);
     let query = `query{all${table}{nodes{`;
     fields.forEach(v => {
-      query = query.concat(`${v},`);
+      query = query.concat(`${v[0].toLowerCase()+v.substring(1)},`);
     })
     return query.slice(0, query.length - 1).concat('}}}');
 
+  } 
+  public Insert(table: string, data: Map<string, string>): Observable<FetchResult<number, Record<string, any>, Record<string, any>>> {
+    table = this.makeQueryRightCase(table);
+    let mutation = `mutation {create${table}(`
+    table=table[0].toLowerCase()+table.substring(1);
+    mutation=mutation+`input: {${table}:{`;
+    data.forEach((key, val) => {
+      mutation = mutation.concat(val + ":" + key + ",");
+    });
+    mutation = mutation.concat(`}}){__typename}}`);
+    console.log(mutation);
+    return this.apollo.mutate<number>({
+      mutation: gql(mutation)
+    })
   }
   public Update(table: string, id: number, data: Map<string, string>): Observable<FetchResult<number, Record<string, any>, Record<string, any>>> {
     table = this.makeQueryRightCase(table);
