@@ -4,15 +4,13 @@ using ScwSvc.Models;
 
 namespace ScwSvc.Tests.Unit
 {
-    public class MultiInteractorTests
+    public class DynDbRepositoryTests
     {
-        private DbSysContext _sysDb;
         private DbDynContext _dynDb;
 
         [OneTimeSetUp]
         public void SetupOnce()
         {
-            _sysDb = new DbSysContext(new DbContextOptionsBuilder<DbSysContext>().UseInMemoryDatabase("test").UseLazyLoadingProxies().Options);
             _dynDb = new DbDynContext(new DbContextOptionsBuilder<DbDynContext>().UseInMemoryDatabase("test").UseLazyLoadingProxies().Options);
         }
 

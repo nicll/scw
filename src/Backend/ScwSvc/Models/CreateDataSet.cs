@@ -6,7 +6,7 @@ namespace ScwSvc.Models
     /// <summary>
     /// This class specifies which information is required for creating a new data set.
     /// </summary>
-    public class CreateDataSetModel
+    public class CreateDataSet
     {
         /// <summary>
         /// An optional display name.

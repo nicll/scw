@@ -230,7 +230,7 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-        public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSetModel dsModel)
+        public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSet dsModel)
         {
             var userInfo = GetUserIdAsGuidAndStringOrNull(User);
 
@@ -413,7 +413,7 @@ namespace ScwSvc.Controllers
         [HttpPost("sheet")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-        public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheetModel shModel)
+        public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheet shModel)
         {
             var userInfo = GetUserIdAsGuidAndStringOrNull(User);
 

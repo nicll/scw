@@ -106,7 +106,7 @@ namespace ScwSvc.Repositories
                 if (column.Name.Any(c => !Char.IsLetterOrDigit(c)))
                     throw new InvalidTableException("Invalid character(s) in column: " + column.Name);
 
-                if (String.Compare(column.Name, "id", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(column.Name, "id", StringComparison.OrdinalIgnoreCase))
                     throw new InvalidTableException("Invalid column name: " + column.Name);
 
                 create.Append('"').Append(column.Name).Append('"')

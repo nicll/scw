@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ScwSvc.Models
 {
-    public class AuthenticationModel
+    public class AuthenticationCredentials
     {
         [Required]
         public string Username { get; set; }

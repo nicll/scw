@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ScwSvc.Models
 {
-    public class CreateSheetModel
+    public class CreateSheet
     {
         /// <summary>
         /// An optional display name.

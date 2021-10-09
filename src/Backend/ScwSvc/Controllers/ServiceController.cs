@@ -29,7 +29,7 @@ namespace ScwSvc.Controllers
         [HttpPost("[action]")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async ValueTask<IActionResult> Register([FromBody] AuthenticationModel loginCredentials)
+        public async ValueTask<IActionResult> Register([FromBody] AuthenticationCredentials loginCredentials)
         {
             _logger.LogInformation("Register attempt: user=\"" + loginCredentials.Username + "\"");
 
@@ -65,7 +65,7 @@ namespace ScwSvc.Controllers
         [HttpPost("[action]")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async ValueTask<IActionResult> Login([FromBody] AuthenticationModel loginCredentials)
+        public async ValueTask<IActionResult> Login([FromBody] AuthenticationCredentials loginCredentials)
         {
 #if ENABLE_DB_AUTH
             return await LoginWithDB(loginCredentials);
@@ -77,7 +77,7 @@ namespace ScwSvc.Controllers
         [HttpPost(nameof(Login) + "/db")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async ValueTask<IActionResult> LoginWithDB([FromBody] AuthenticationModel loginCredentials)
+        public async ValueTask<IActionResult> LoginWithDB([FromBody] AuthenticationCredentials loginCredentials)
         {
             _logger.LogInformation("Login attempt: user=\"" + loginCredentials.Username + "\"");
 

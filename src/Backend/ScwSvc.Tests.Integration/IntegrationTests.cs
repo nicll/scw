@@ -129,7 +129,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(1)]
         public async Task RegisterUser()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "test";
             model.Password = "test";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -146,7 +146,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(2)]
         public async Task RegisterSameUserAgain()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "test";
             model.Password = "test";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -163,7 +163,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(3)]
         public async Task RegisterWithNoValues()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "";
             model.Password = "";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -180,7 +180,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(4)]
         public async Task RegisterWithNoUsername()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "";
             model.Password = "sss";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -197,7 +197,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(5)]
         public async Task RegisterWithNoPassword()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "sss";
             model.Password = "";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -214,7 +214,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(6)]
         public async Task RegisterWithSpecialCharacter()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "!§\\\"$%%&/())s";
             model.Password = "-.,!§$%&\\\"/()=?";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -229,7 +229,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(7)]
         public async Task LoginWithUserFromTestNumber1()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "test";
             model.Password = "test";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -246,7 +246,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(8)]
         public async Task LoginWithNoValues()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "";
             model.Password = "";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -262,7 +262,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(9)]
         public async Task LoginWithNoUsername()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "";
             model.Password = "test";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -278,7 +278,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(10)]
         public async Task LoginWithNoPassword()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "test";
             model.Password = "";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -294,7 +294,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(11)]
         public async Task LoginWithNotExistingUser()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "test55";
             model.Password = "test55";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -310,7 +310,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(12)]
         public async Task LoginWithUserFromNumber1Db()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "test";
             model.Password = "test";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -325,7 +325,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(13)]
         public async Task LoginWithNoUsernameDb()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "";
             model.Password = "test55";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -341,7 +341,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(14)]
         public async Task LoginWithNoPasswordDb()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "222";
             model.Password = "";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -357,7 +357,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(15)]
         public async Task LoginWithNoValuesDb()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "";
             model.Password = "";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -373,7 +373,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(16)]
         public async Task LoginWithNotExistingUserDb()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "test55";
             model.Password = "test55";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -494,7 +494,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(25)]
         public async Task CreateSheet()
         {
-            CreateSheetModel model = new CreateSheetModel();
+            CreateSheet model = new CreateSheet();
             model.DisplayName = "TestSheet";
             string jsonData = JsonConvert.SerializeObject(model);
             StringContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -509,7 +509,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(26)]
         public async Task CreateSheetDuplicate()
         {
-            CreateSheetModel model = new CreateSheetModel();
+            CreateSheet model = new CreateSheet();
             model.DisplayName = "TestSheet";
             string jsonData = JsonConvert.SerializeObject(model);
             StringContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -537,13 +537,13 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(28)]
         public async Task CreateDataSet()
         {
-            CreateDataSetModel model = new CreateDataSetModel();
+            CreateDataSet model = new CreateDataSet();
             model.DisplayName = "TestSheet";
-            model.Columns = new CreateDataSetModel.ColumnDefinition[2];
+            model.Columns = new ColumnDefinition[2];
             model.Columns[0] =
-                new CreateDataSetModel.ColumnDefinition() { Name = "TestInteger", Type = ColumnType.Integer, Nullable = false };
+                new ColumnDefinition() { Name = "TestInteger", Type = ColumnType.Integer, Nullable = false };
             model.Columns[1] =
-                new CreateDataSetModel.ColumnDefinition() { Name = "TestString", Type = ColumnType.String, Nullable = true };
+                new ColumnDefinition() { Name = "TestString", Type = ColumnType.String, Nullable = true };
 
             string jsonData = JsonConvert.SerializeObject(model);
             StringContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -558,13 +558,13 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(29)]
         public async Task CreateDuplicatedDataSet()
         {
-            CreateDataSetModel model = new CreateDataSetModel();
+            CreateDataSet model = new CreateDataSet();
             model.DisplayName = "TestSheet";
-            model.Columns = new CreateDataSetModel.ColumnDefinition[2];
+            model.Columns = new ColumnDefinition[2];
             model.Columns[0] =
-                new CreateDataSetModel.ColumnDefinition() { Name = "TestInteger", Type = ColumnType.Integer, Nullable = false };
+                new ColumnDefinition() { Name = "TestInteger", Type = ColumnType.Integer, Nullable = false };
             model.Columns[1] =
-                new CreateDataSetModel.ColumnDefinition() { Name = "TestString", Type = ColumnType.String, Nullable = true };
+                new ColumnDefinition() { Name = "TestString", Type = ColumnType.String, Nullable = true };
 
             string jsonData = JsonConvert.SerializeObject(model);
             StringContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -679,7 +679,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(39)]
         public async Task RegisterUser2()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "test2";
             model.Password = "test2";
             string jsonData = JsonConvert.SerializeObject(model);
@@ -693,7 +693,7 @@ namespace ScwSvc.Tests.Integration
         [Test, Order(40)]
         public async Task LoginWithUserFromTestNumber37()
         {
-            AuthenticationModel model = new AuthenticationModel();
+            AuthenticationCredentials model = new AuthenticationCredentials();
             model.Username = "test2";
             model.Password = "test2";
             string jsonData = JsonConvert.SerializeObject(model);

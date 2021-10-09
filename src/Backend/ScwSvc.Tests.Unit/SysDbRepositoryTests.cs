@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ScwSvc.Tests.Unit
 {
-    public class SysDbInteractorTests
+    public class SysDbRepositoryTests
     {
         private const string
             CommonUserId = "00000000-0000-0000-0000-000000000001",
