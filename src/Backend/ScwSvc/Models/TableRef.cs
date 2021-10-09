@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -71,22 +70,5 @@ namespace ScwSvc.Models
         /// </summary>
         [Required]
         public virtual ICollection<DataSetColumn> Columns { get; set; }
-    }
-
-    /// <summary>
-    /// Lists the different kinds of tables.
-    /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum TableType
-    {
-        /// <summary>
-        /// A table that is directly mapped to the database.
-        /// </summary>
-        DataSet,
-
-        /// <summary>
-        /// A spreadsheet table.
-        /// </summary>
-        Sheet
     }
 }
