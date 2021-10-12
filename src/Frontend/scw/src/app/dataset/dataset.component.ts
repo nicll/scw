@@ -90,6 +90,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   ngAfterViewInit(): void {
   }
 
+
   ngOnInit(): void {
     //load data from graphql
     if (this.tableId != undefined) {
@@ -164,12 +165,6 @@ export class DatasetComponent implements AfterViewInit, OnInit {
     doc.save('table.pdf')
   }
 
-  /* exportPdf() {
-     const doc = new jsPDF('p','pt');
-     doc.autoTable(this._selectedColumns, this.data);
-     doc.save("products.pdf");
-   }*/
-
   exportExcel() {
     const worksheet = xlsx.utils.json_to_sheet(this.data);
     const workbook = {Sheets: {'data': worksheet}, SheetNames: ['data']};
@@ -209,18 +204,31 @@ export class DatasetComponent implements AfterViewInit, OnInit {
         data = xlsx.utils.sheet_to_json(ws);
         console.log("data" + data);
 
+        /*
+        * convert object to array of column names
+        * */
+        //TODO
+
+        //call the api
+        this.postDataSet(Object.keys(data[0]), ws)
+
 
       };
-      reader.readAsBinaryString(target.files[0]);
+      reader.readAsBinaryString(event.files[0]);
 
       reader.onloadend = (e) => {
         // this.spinnerEnabled = false;
-        console.log(Object.keys(data[0]));
-        //this.dataSheet.next(data)
+        // console.log(Object.keys(data[0]));
+        console.log(Object.keys(data[0]))
 
+        //this.dataSheet.next(data)
         form.clear();
       }
     }
+  }
+
+  public postDataSet(table: any[], displayNameTable: any) {
+    this.user.PostDataSet(new Table(displayNameTable, table)).subscribe()
   }
 }
 
