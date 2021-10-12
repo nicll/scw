@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ScwSvc.Utils;
 
 namespace ScwSvc.Repositories
 {
@@ -19,7 +20,7 @@ namespace ScwSvc.Repositories
             if (table.Columns.Count < 1)
                 throw new InvalidTableException("No columns were specified.");
 
-            if (table.Columns.Count > 255)
+            if (table.Columns.Count > Byte.MaxValue)
                 throw new InvalidTableException("Too many columns were specified.");
 
             if (table.TableType != TableType.DataSet)
@@ -43,6 +44,49 @@ namespace ScwSvc.Repositories
                 throw new InvalidTableException("Not the correct table type.");
 
             await RemoveTable(db, table);
+        }
+
+        /// <summary>
+        /// Adds a column to an existing table in the DYN database.
+        /// </summary>
+        /// <param name="db">The DYN database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object.</param>
+        /// <param name="column">The column to add.</param>
+        public static async ValueTask AddColumnToDataSet(this DbDynContext db, TableRef table, DataSetColumn column)
+        {
+            if (table.TableType != TableType.DataSet)
+                throw new InvalidTableException("Not the correct table type.");
+
+            if (table.Columns.Count > Byte.MaxValue)
+                throw new InvalidTableException("Too many columns were specified.");
+
+            using var conn = db.Database.GetDbConnection();
+            await conn.OpenAsync().ConfigureAwait(false);
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "ALTER TABLE \"" + table.LookupName.ToNameString() + "\" ADD COLUMN " + ConvertToSqlColumn(column);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        /// <summary>
+        /// Removes a column from an existing table in the DYN database.
+        /// </summary>
+        /// <param name="db">The DYN database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object.</param>
+        /// <param name="columnName">The column to remove.</param>
+        /// <returns></returns>
+        public static async ValueTask RemoveColumnFromDataSet(this DbDynContext db, TableRef table, string columnName)
+        {
+            if (table.TableType != TableType.DataSet)
+                throw new InvalidTableException("Not the correct table type.");
+
+            if (table.Columns.SingleOrDefault(c => c.Name == columnName) is not (var column and not null))
+                throw new InvalidTableException("Column does not exist.");
+
+            using var conn = db.Database.GetDbConnection();
+            await conn.OpenAsync().ConfigureAwait(false);
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "ALTER TABLE \"" + table.LookupName.ToNameString() + "\" DROP COLUMN \"" + column.Name + "\"";
+            await cmd.ExecuteNonQueryAsync();
         }
 
         /// <summary>
@@ -95,33 +139,10 @@ namespace ScwSvc.Repositories
             var create = new StringBuilder();
             create.Append("CREATE TABLE \"")
                 .Append(table.LookupName.ToNameString())
-                .Append("\" (")
-                .Append("\"id\" serial not null primary key,"); // first column (id) is primary key
+                .Append("\" (\"_id\" serial not null primary key,"); // first column (_id) is primary key
 
             foreach (var column in table.Columns)
-            {
-                if (column.Name.Length > 20)
-                    throw new InvalidTableException("Name for column is too long: " + column.Name);
-
-                if (column.Name.Any(c => !Char.IsLetterOrDigit(c)))
-                    throw new InvalidTableException("Invalid character(s) in column: " + column.Name);
-
-                if (String.Equals(column.Name, "id", StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidTableException("Invalid column name: " + column.Name);
-
-                create.Append('"').Append(column.Name).Append('"')
-                    .Append(' ')
-                    .Append(column.Type switch
-                    {
-                        ColumnType.Integer => "bigint",
-                        ColumnType.Real => "double precision",
-                        ColumnType.Timestamp => "timestamp",
-                        ColumnType.String => "varchar(200)",
-                        _ => throw new InvalidTableException("Invalid column type: " + column.Type)
-                    })
-                    .Append(column.Nullable ? " null" : " not null")
-                    .Append(',');
-            }
+                create.Append(ConvertToSqlColumn(column)).Append(',');
 
             create.Length -= ",".Length;
             create.Append(')');

@@ -123,6 +123,70 @@ namespace ScwSvc.Repositories
         }
 
         /// <summary>
+        /// Adds a column to an existing table and optionally updates it in the SYS database.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object to modify.</param>
+        /// <param name="column">The column to add.</param>
+        /// <param name="commit">Whether or not to save changes to the database.</param>
+        /// <returns>Converted column definition.</returns>
+        public static async ValueTask<DataSetColumn> AddColumnToDataSet(this DbSysContext db, TableRef table, ColumnDefinition column, bool commit = true)
+        {
+            if (table.TableType != TableType.DataSet)
+                throw new InvalidTableException("Not the correct table type.");
+
+            if (table.Columns.Count >= Byte.MaxValue)
+                throw new InvalidTableException("Too many columns in table.");
+
+            if (!table.Columns.Select(c => c.Name).Append(column.Name).AllUnique())
+                throw new InvalidTableException("Column names not unique.");
+
+            var dsColumn = new DataSetColumn()
+            {
+                TableRefId = table.TableRefId,
+                TableRef = table,
+                Name = column.Name,
+                Type = column.Type,
+                Nullable = column.Nullable,
+                Position = (byte)table.Columns.Count
+            };
+
+            table.Columns.Add(dsColumn);
+
+            for (byte i = 0; i < table.Columns.Count; ++i)
+                table.Columns[i].Position = i;
+
+            if (commit)
+                await db.SaveChangesAsync().ConfigureAwait(false);
+
+            return dsColumn;
+        }
+
+        /// <summary>
+        /// Removes a column from an existing table and optionally updates it in the SYS database.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object to modify.</param>
+        /// <param name="columnName">The name of the column to remove.</param>
+        /// <param name="commit">Whether or not to save changes to the database.</param>
+        public static async ValueTask RemoveColumnFromDataSet(this DbSysContext db, TableRef table, string columnName, bool commit = true)
+        {
+            if (table.TableType != TableType.DataSet)
+                throw new InvalidTableException("Not the correct table type.");
+
+            if (table.Columns.SingleOrDefault(c => c.Name == columnName) is not (var column and not null))
+                throw new InvalidTableException("Column does not exist.");
+
+            table.Columns.Remove(column);
+
+            for (byte i = 0; i < table.Columns.Count; ++i)
+                table.Columns[i].Position = i;
+
+            if (commit)
+                await db.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Removes a <see cref="User"/> object and optionally updates the SYS database.
         /// Also removes all references to this <see cref="User"/> object.
         /// </summary>

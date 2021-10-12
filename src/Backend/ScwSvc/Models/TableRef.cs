@@ -69,6 +69,6 @@ namespace ScwSvc.Models
         /// This is ignored if <see cref="TableType"/> is <see cref="TableType.Sheet"/>.
         /// </summary>
         [Required]
-        public virtual ICollection<DataSetColumn> Columns { get; set; }
+        public virtual IList<DataSetColumn> Columns { get; set; }
     }
 }

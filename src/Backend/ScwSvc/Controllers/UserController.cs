@@ -196,7 +196,9 @@ namespace ScwSvc.Controllers
         /// <returns>The table reference of the data set.</returns>
         [HttpGet("dataset/{tableRefId}")]
         [ProducesResponseType(typeof(TableRef), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
         public async ValueTask<IActionResult> MyDataSet([FromRoute] Guid tableRefId)
         {
             var userInfo = GetUserIdAsGuidOrNull(User);
@@ -230,6 +232,7 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
         public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSet dsModel)
         {
             var userInfo = GetUserIdAsGuidAndStringOrNull(User);
@@ -278,6 +281,7 @@ namespace ScwSvc.Controllers
         /// <param name="tableRefId">The table reference ID.</param>
         [HttpDelete("dataset/{tableRefId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
         public async ValueTask<IActionResult> DeleteDataSet([FromRoute] Guid tableRefId)
@@ -302,6 +306,87 @@ namespace ScwSvc.Controllers
 
             await _sysDb.RemoveTable(tableRef);
             await _dynDb.RemoveDataSet(tableRef);
+            await _sysDb.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Adds a column to an existing table.
+        /// </summary>
+        /// <param name="tableRefId">The table reference ID.</param>
+        /// <param name="columnName">The name of the new column.</param>
+        /// <param name="column">The definition of the new column.</param>
+        [HttpPost("dataset/{tableRefId}/{columnName}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+        public async ValueTask<IActionResult> AddColumnToDataSet([FromRoute] Guid tableRefId, [FromRoute] string columnName, [FromBody] ColumnDefinition column)
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
+
+            if (tableRef.TableType != TableType.DataSet)
+                return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
+
+            if (columnName != column.Name)
+                return BadRequest("Column name does not match.");
+
+            var dsColumn = await _sysDb.AddColumnToDataSet(tableRef, column, commit: false);
+            await _dynDb.AddColumnToDataSet(tableRef, dsColumn);
+            await _sysDb.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Removes a column from an existing table.
+        /// </summary>
+        /// <param name="tableRefId">The table reference ID.</param>
+        /// <param name="columnName">The name of the column.</param>
+        [HttpDelete("dataset/{tableRefId}/{columnName}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+        public async ValueTask<IActionResult> RemoveColumnFromDataSet([FromRoute] Guid tableRefId, [FromRoute] string columnName)
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
+
+            if (tableRef.TableType != TableType.DataSet)
+                return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
+
+            if (!tableRef.Columns.Any(c => c.Name == columnName))
+                return BadRequest("Column does not exist.");
+
+            await _sysDb.RemoveColumnFromDataSet(tableRef, columnName, commit: false);
+            await _dynDb.RemoveColumnFromDataSet(tableRef, columnName);
             await _sysDb.SaveChangesAsync();
 
             return Ok();
@@ -380,7 +465,9 @@ namespace ScwSvc.Controllers
         /// <returns>The table reference of the sheet.</returns>
         [HttpGet("sheet/{tableRefId}")]
         [ProducesResponseType(typeof(TableRef), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
         public async ValueTask<IActionResult> MySheet([FromRoute] Guid tableRefId)
         {
             var userInfo = GetUserIdAsGuidOrNull(User);
@@ -413,6 +500,7 @@ namespace ScwSvc.Controllers
         [HttpPost("sheet")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
         public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheet shModel)
         {
             var userInfo = GetUserIdAsGuidAndStringOrNull(User);
@@ -453,6 +541,7 @@ namespace ScwSvc.Controllers
         /// <param name="tableRefId">The table reference ID.</param>
         [HttpDelete("sheet/{tableRefId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
         public async ValueTask<IActionResult> DeleteSheet([FromRoute] Guid tableRefId)
