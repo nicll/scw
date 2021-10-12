@@ -118,30 +118,23 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     //load data from graphql
-    if(this.tableId != undefined){
-      let id=this.tableId;
-      this.user.GetDataSet(id).subscribe(dataset=>{//Get details of DataSet
-        console.log(dataset);
-        this.creationDate = dataset.creationDate;
-        this.apollo.lookUpDataSetId(id).subscribe(id=>{//Get the GraphqlId
-          let query=this.apollo.QueryBuilder(id, dataset.columns.map(v=>v.name))//Build our query
-          this.apollo.GetData<any>(query).subscribe(data=>{
-            this.data=data.data["all"+this.apollo.makeQueryRightCase(id+"s")].nodes;
+    if (this.tableId != undefined) {
+      let id = this.tableId;
+      this.user.GetDataSet(id).subscribe(dataset => {//Get details of DataSet
+        this.apollo.lookUpDataSetId(id).subscribe(id => {//Get the GraphqlId
+          let query = this.apollo.QueryBuilder(id, dataset.columns.map(v => v.name))//Build our query
+          this.apollo.GetData<any>(query).subscribe(data => {
+            this.data = data.data["all" + this.apollo.makeQueryRightCase(id + "s")].nodes;
             let dataclone: any[] = [];
-            this.data.forEach((val) => dataclone.push(Object.assign({}, val)));
+            this.data.forEach(val => dataclone.push(Object.assign({}, val)));
             dataclone.forEach((element: any) => {
-              element['__typename'] = undefined;
+              element["__typename"] = undefined;
             });
             this.data = dataclone;
-
+            console.log(data);
             this.cols = [];
-            dataset.columns.forEach(
-              (field) =>
-                (this.cols = this.cols.concat({
-                  field: field.name,
-                  header: field.name,
-                }))
-            );
+            dataset.columns.forEach((field) =>
+              this.cols = this.cols.concat({field: field.name, header: field.name}))
             this._selectedColumns = this.cols; //set the selectedcolumns to all columns in dataset
           });
           //this.apollo.Delete(id,1).subscribe(()=>console.log("delete"));
@@ -154,9 +147,9 @@ export class DatasetComponent implements AfterViewInit, OnInit {
     const customFilterName = 'custom-equals';
 
     this.matchModeOptions = [
-      { label: 'Custom Equals', value: customFilterName },
-      { label: 'Starts With', value: FilterMatchMode.STARTS_WITH },
-      { label: 'Contains', value: FilterMatchMode.CONTAINS },
+      {label: "Custom Equals", value: customFilterName},
+      {label: "Starts With", value: FilterMatchMode.STARTS_WITH},
+      {label: "Contains", value: FilterMatchMode.CONTAINS}
     ];
     this.exportColumns = this.cols.map((col) => ({
       title: col.header,
@@ -215,6 +208,12 @@ export class DatasetComponent implements AfterViewInit, OnInit {
     doc.save('table.pdf')
   }
 
+  /* exportPdf() {
+     const doc = new jsPDF('p','pt');
+     doc.autoTable(this._selectedColumns, this.data);
+     doc.save("products.pdf");
+   }*/
+
   exportExcel() {
     const worksheet = xlsx.utils.json_to_sheet(this.data);
     const workbook = {Sheets: {'data': worksheet}, SheetNames: ['data']};
@@ -252,75 +251,17 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
         /* save data */
         data = xlsx.utils.sheet_to_json(ws);
-        console.log("data" + JSON.stringify(data[0]));
-
-        //call the api
-        console.log("worksheetname --- " + wsname);
-
-        this.postDataSet(this.completedColumns, wsname)
-
-        for (let i = 0; i < data.length; i++) {
-
-          let x;
-
-          for (x = 0; x < Object.keys(data[i]).length; x++) {
-            this.completedColumns[x] = new Column(Object.keys(data[i])[x], "String", true)
-          }
-
-          const map1 = new Map();
-          for (const [key, value] of Object.entries(data[i])) {
-            map1.set(key, '"' + value + '"');
-          }
-
-          // data[0].forEach(element => this.completedColumns[])
-
-          /*    console.log(JSON.stringify(wb.SheetNames))
-
-              console.log(JSON.stringify(this.completedColumns[0]))*/
+        console.log("data" + data);
 
 
-          this.user.GetDataSets().subscribe(y => {
-            let element = (y[y.length - 1].tableId)
-
-            // @ts-ignore
-            this.apollo.lookUpDataSetId(element).subscribe(z => {
-              let mapIter = map1.values();
-              let keyiter = map1.keys();
-              console.log("ELEMENT -----------" + element)
-              console.log("MAP1 -------- " + mapIter.next().value)
-              console.log("MAP1 -------- " + mapIter.next().value)
-              console.log("MAP1 -------- " + mapIter.next().value)
-              console.log(".................................")
-              console.log("MAP1 -------- " + keyiter.next().value)
-              console.log("MAP1 -------- " + keyiter.next().value)
-              console.log("MAP1 -------- " + keyiter.next().value)
-
-              // @ts-ignore
-              this.apollo.Insert(z, map1).subscribe()
-            });
-
-          })
-
-        }
-
-
-        //@ts-ignore
-
-        //this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableId, map1).subscribe())
-
-        // console.log(JSON.stringify(element))
-        // console.log(wsname);
       };
-
-
-      reader.readAsBinaryString(event.files[0]);
+      reader.readAsBinaryString(target.files[0]);
 
       reader.onloadend = (e) => {
         // this.spinnerEnabled = false;
-        // console.log(Object.keys(data[0]));
-        console.log(Object.keys(data[0]))
-
+        console.log(Object.keys(data[0]));
         //this.dataSheet.next(data)
+
         form.clear();
       }
     }
@@ -375,5 +316,5 @@ export class DatasetComponent implements AfterViewInit, OnInit {
         }
       )
   })*/
-}
+  }
 }

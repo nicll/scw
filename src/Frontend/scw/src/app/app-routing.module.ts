@@ -19,6 +19,7 @@ const routes: Routes =
     {path:'upload',component:MenubarComponent},
     {path:'admin',component:AdminUserListComponent},
     {path:'stats',component:AdminStatisticsPageComponent},
+    {path:'spreadjs',component:SpreadjsComponent}
   ];
 
 @NgModule({
