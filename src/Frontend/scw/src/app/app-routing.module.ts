@@ -12,6 +12,7 @@ const routes: Routes =
     {path: '',component: DatasetComponent},
     {path:'tables',component:AllTablesComponent},
     {path:'menubarTest',component:MenubarComponent},
+    {path:'upload',component:MenubarComponent},
     {path:'spreadjs',component:SpreadjsComponent}
 
   ];

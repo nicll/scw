@@ -1,4 +1,6 @@
 <app-menubar></app-menubar>
+<p-fileUpload #form name="myfile[]" [customUpload]="true" (uploadHandler)="myUploader($event, form)"></p-fileUpload>
+
 <p-table #dt [columns]="selectedColumns" [value]="data" styleClass="p-datatable-responsive" selectionMode="multiple"
          [(selection)]="selectedRows" [metaKeySelection]="true" [responsive]="true"
          [(contextMenuSelection)]="selectedRows"
