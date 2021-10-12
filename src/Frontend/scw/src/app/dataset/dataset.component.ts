@@ -17,7 +17,9 @@ import xlsx from 'xlsx';
 import FileSaver from 'file-saver';
 import { MenuItem } from 'primeng/api';
 import { SelectItem, FilterService, FilterMatchMode } from 'primeng/api';
-
+import {FileUploadModule} from 'primeng/fileupload';
+import {HttpClientModule} from '@angular/common/http';
+import {map} from "rxjs/operators";
 import { Table } from '../Models/Table';
 import { ApolloService } from '../Services/apollo.service';
 import { User } from '../Models/User';
@@ -32,9 +34,12 @@ import { DeleteColumnDialogComponent } from '../Dialogs/delete-column-dialog/del
 })
 export class DatasetComponent implements AfterViewInit, OnInit {
   selectedRows: any;
+  columnsTest: any;
+  uploadedFiles: any[] = [];
   items: MenuItem[];
   data: any[];
   collaborators: User[]=[];
+  cache: any[];
   cols = [
     { field: 'A', header: 'A' },
     { field: 'B', header: 'B' },
@@ -59,12 +64,27 @@ export class DatasetComponent implements AfterViewInit, OnInit {
     public dialog: MatDialog,
     public collab: CollaborationsService
   ) {
+    this.cache = [{
+      tourid: "1",
+      report: "testReport",
+      tourname: "testName"
+    }]
     this.data = [
       { A: 'dataset1', B: 'test1', C: 'test1', D: 'test1' },
       { A: 'dataset2', B: 'test2', C: 'test2', D: 'test2' },
       { A: 'dataset3', B: 'test3', C: 'test3', D: 'test3' },
       { A: 'dataset4', B: 'test4', C: 'test4', D: 'test4' },
     ];
+    this.columnsTest = [
+      {
+        dataKey: "tourname",
+        header: "tourname"
+      },
+      {
+        dataKey: "tourid",
+        header: "tourid"
+      }
+    ]
     this.items = [
       { label: 'View', icon: 'pi pi-fw pi-search' },
       { label: 'Delete', icon: 'pi pi-fw pi-times' },
@@ -172,37 +192,82 @@ export class DatasetComponent implements AfterViewInit, OnInit {
       );
     });
   }
-  saveSheet() {}
-
-  onKey($event: MouseEvent) {}
 
   exportPdf() {
-    const doc = new jsPDF();
-    autoTable(doc, { body: this.data, columns: this.exportColumns });
-    doc.save('table.pdf');
+
+    let formattedSelectedColumns = this._selectedColumns.map(s => {
+        if (s.hasOwnProperty("field")) {
+          s.dataKey = s.field;
+        }
+        return s;
+      }
+    )
+
+
+    this.cache.forEach(element => console.log(element));
+    const doc = new jsPDF('p', 'pt')
+    console.log(formattedSelectedColumns)
+    autoTable(doc, {body: this.data, columns: formattedSelectedColumns});
+    doc.save('table.pdf')
   }
+
+  /* exportPdf() {
+     const doc = new jsPDF('p','pt');
+     doc.autoTable(this._selectedColumns, this.data);
+     doc.save("products.pdf");
+   }*/
 
   exportExcel() {
     const worksheet = xlsx.utils.json_to_sheet(this.data);
-    const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
-    const excelBuffer: any = xlsx.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array',
-    });
-    this.saveAsExcelFile(excelBuffer, 'data');
+    const workbook = {Sheets: {'data': worksheet}, SheetNames: ['data']};
+    const excelBuffer: any = xlsx.write(workbook, {bookType: 'xlsx', type: 'array'});
+    this.saveAsExcelFile(excelBuffer, "data");
   }
 
   saveAsExcelFile(buffer: any, fileName: string): void {
-    let EXCEL_TYPE =
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+    let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
     let EXCEL_EXTENSION = '.xlsx';
     const data: Blob = new Blob([buffer], {
-      type: EXCEL_TYPE,
+      type: EXCEL_TYPE
     });
-    FileSaver.saveAs(
-      data,
-      fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION
-    );
+    FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+  }
+
+  myUploader(event: any, form: any) {
+    console.log("test");
+    let data: any, header;
+    const target: DataTransfer = <DataTransfer>(event.target);
+
+    for (let file of event.files) {
+      console.log("file" + file);
+
+      this.uploadedFiles.push(file);
+      const reader: FileReader = new FileReader();
+      reader.onload = (e: any) => {
+        /* read workbook */
+        const bstr: string = e.target.result;
+        const wb: xlsx.WorkBook = xlsx.read(bstr, {type: 'binary'});
+
+        /* grab first sheet */
+        const wsname: string = wb.SheetNames[0];
+        const ws: xlsx.WorkSheet = wb.Sheets[wsname];
+
+        /* save data */
+        data = xlsx.utils.sheet_to_json(ws);
+        console.log("data" + data);
+
+
+      };
+      reader.readAsBinaryString(target.files[0]);
+
+      reader.onloadend = (e) => {
+        // this.spinnerEnabled = false;
+        console.log(Object.keys(data[0]));
+        //this.dataSheet.next(data)
+
+        form.clear();
+      }
+    }
   }
   onAddColumn() {
     const dialogRef = this.dialog.open(AddColumnDialogComponent, {

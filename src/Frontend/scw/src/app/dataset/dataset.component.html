@@ -9,6 +9,8 @@
     <mat-list-item role="listitem" *ngFor="let collaborator of collaborators">{{collaborator.username}}</mat-list-item>
 </mat-list>
 <app-menubar></app-menubar>
+<p-fileUpload #form name="myfile[]" [customUpload]="true" (uploadHandler)="myUploader($event, form)"></p-fileUpload>
+
 <p-table #dt [columns]="selectedColumns" [value]="data" styleClass="p-datatable-responsive" selectionMode="multiple" [(selection)]="selectedRows" [metaKeySelection]="true" [responsive]="true" [(contextMenuSelection)]="selectedRows" [rowHover]="true" [contextMenu]="cm"
     [filterDelay]="0" [globalFilterFields]="['A','B','C','D']" (onEditComplete)="onEditComplete($event)" [paginator]="true" [rows]="10" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
 

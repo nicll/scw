@@ -14,7 +14,8 @@ const routes: Routes =
     {path:'tables',component:AllTablesComponent},
     {path:'menubarTest',component:MenubarComponent},
     {path:'spreadjs',component:SpreadjsComponent},
-    {path:'collabs',component:AllCollaborationsComponent}
+    {path:'collabs',component:AllCollaborationsComponent},
+    {path:'upload',component:MenubarComponent},
 
   ];
 
