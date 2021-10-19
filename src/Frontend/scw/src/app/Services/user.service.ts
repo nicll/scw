@@ -67,7 +67,7 @@ export class UserService {
       map(tables=>{return tables;})
     );
   }
-  
+
   public GetDataSet(id:string):Observable<Table>{
     return this.http.get<Table>(this.baseUri+"/my/dataset/"+id,{withCredentials:true}).pipe(
       catchError(err=>{
@@ -88,6 +88,7 @@ export class UserService {
       map(_=>{return table;})
     );
   }
+
   public DeleteDataSet(id:string):Observable<string>{
     return this.http.delete<Table>(this.baseUri+"/my/dataset/"+id,{withCredentials:true}).pipe(
       catchError(err=>{
@@ -109,7 +110,7 @@ export class UserService {
       map(sheets=>{return sheets;})
     );
   }
-  
+
   public GetSheet(id:string):Observable<Table>{
     return this.http.get<Table>(this.baseUri+"/my/sheet/"+id,{withCredentials:true}).pipe(
       catchError(err=>{

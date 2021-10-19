@@ -16,6 +16,7 @@ import {FileUploadModule} from 'primeng/fileupload';
 import {HttpClientModule} from '@angular/common/http';
 import autoTable from "jspdf-autotable";
 import {map} from "rxjs/operators";
+import {Column} from "../Models/Column";
 
 @Component({
   selector: 'app-dataset',
@@ -29,6 +30,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   items: MenuItem[];
   data: any[];
   cache: any[];
+  completedColumns: any[];
   cols = [{field: "A", header: "A"}, {field: "B", header: "B"}, {field: "C", header: "C"}, {field: "D", header: "D"}];
   dataset: Array<Array<any
 >>=
@@ -44,6 +46,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   matchModeOptions: any;
 
   constructor(public table: TableService, public user: UserService, public apollo: ApolloService) {
+    this.completedColumns = [];
     this.cache = [{
       tourid: "1",
       report: "testReport",
@@ -202,16 +205,39 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
         /* save data */
         data = xlsx.utils.sheet_to_json(ws);
-        console.log("data" + data);
-
-        /*
-        * convert object to array of column names
-        * */
-        //TODO
+        console.log("data" + JSON.stringify(data[0]));
 
         //call the api
-        this.postDataSet(Object.keys(data[0]), ws)
+        console.log("worksheetname" + wsname);
+        let x;
 
+        for(x = 0; x < Object.keys(data[0]).length; x++){
+          this.completedColumns[x] = new Column(Object.keys(data[0])[x], "String", true)
+        }
+
+        const map1 = new Map();
+        for (const [key, value] of Object.entries(data[0])) {
+          map1.set(key, value);
+        }
+
+       // data[0].forEach(element => this.completedColumns[])
+
+    /*    console.log(JSON.stringify(wb.SheetNames))
+
+        console.log(JSON.stringify(this.completedColumns[0]))*/
+
+
+        //this.postDataSet(this.completedColumns, wsname)
+        //let element;
+        //this.user.GetDataSets().subscribe(y => console.log(y[y.length-1].tableRefId))
+        //@ts-ignore
+        this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableRefId, map1).subscribe())
+       // console.log(JSON.stringify(element))
+
+
+
+
+        // console.log(wsname);
 
       };
       reader.readAsBinaryString(event.files[0]);
