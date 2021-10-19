@@ -85,7 +85,7 @@ namespace ScwSvc.Repositories
             using var conn = db.Database.GetDbConnection();
             await conn.OpenAsync().ConfigureAwait(false);
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "ALTER TABLE \"" + table.LookupName.ToNameString() + "\" DROP COLUMN \"" + column.Name + "\"";
+            cmd.CommandText = "ALTER TABLE \"" + table.LookupName.ToNameString() + "\" DROP COLUMN \"" + column.Name + "\" CASCADE";
             await cmd.ExecuteNonQueryAsync();
         }
 

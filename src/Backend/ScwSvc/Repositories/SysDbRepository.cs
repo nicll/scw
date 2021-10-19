@@ -148,13 +148,10 @@ namespace ScwSvc.Repositories
                 Name = column.Name,
                 Type = column.Type,
                 Nullable = column.Nullable,
-                Position = (byte)table.Columns.Count
+                Position = (byte)(table.Columns.Max(c => c.Position) + 1)
             };
 
             table.Columns.Add(dsColumn);
-
-            for (byte i = 0; i < table.Columns.Count; ++i)
-                table.Columns[i].Position = i;
 
             if (commit)
                 await db.SaveChangesAsync().ConfigureAwait(false);
@@ -178,9 +175,6 @@ namespace ScwSvc.Repositories
                 throw new InvalidTableException("Column does not exist.");
 
             table.Columns.Remove(column);
-
-            for (byte i = 0; i < table.Columns.Count; ++i)
-                table.Columns[i].Position = i;
 
             if (commit)
                 await db.SaveChangesAsync().ConfigureAwait(false);
