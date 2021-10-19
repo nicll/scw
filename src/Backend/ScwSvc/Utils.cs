@@ -169,10 +169,10 @@ namespace ScwSvc
 
         private static readonly Dictionary<ColumnType, (string typeName, string defaultValue)> _typeMap = new()
         {
-            { ColumnType.Integer,   (nameof(ColumnType.Integer), "0")              },
-            { ColumnType.Real,      (nameof(ColumnType.Real), "0.0")               },
-            { ColumnType.Timestamp, (nameof(ColumnType.Timestamp), "'1970-01-01'") },
-            { ColumnType.String,    (nameof(ColumnType.String), "''")              }
+            { ColumnType.Integer,   ("bigint", "0")               },
+            { ColumnType.Real,      ("double precision", "0.0")   },
+            { ColumnType.Timestamp, ("timestamp", "'1970-01-01'") },
+            { ColumnType.String,    ("varchar(200)", "''")        }
         };
 
         internal static string ConvertToSqlColumn(DataSetColumn column)
