@@ -208,7 +208,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
         console.log("data" + JSON.stringify(data[0]));
 
         //call the api
-        console.log("worksheetname" + wsname);
+        console.log("worksheetname --- " + wsname);
         let x;
 
         for(x = 0; x < Object.keys(data[0]).length; x++){
@@ -227,19 +227,40 @@ export class DatasetComponent implements AfterViewInit, OnInit {
         console.log(JSON.stringify(this.completedColumns[0]))*/
 
 
-        //this.postDataSet(this.completedColumns, wsname)
-        //let element;
-        //this.user.GetDataSets().subscribe(y => console.log(y[y.length-1].tableRefId))
+        this.postDataSet(this.completedColumns, wsname)
+        this.user.GetDataSets().subscribe(y => {
+          let element = (y[y.length-1].tableRefId)
+
+          // @ts-ignore
+          this.apollo.lookUpDataSetId(element).subscribe(z =>{
+            let mapIter = map1.values();
+            let keyiter = map1.keys();
+            console.log("ELEMENT -----------" + element)
+            console.log("MAP1 -------- " + mapIter.next().value)
+            console.log("MAP1 -------- " + mapIter.next().value)
+            console.log("MAP1 -------- " + mapIter.next().value)
+            console.log(".................................")
+            console.log("MAP1 -------- " + keyiter.next().value)
+            console.log("MAP1 -------- " + keyiter.next().value)
+            console.log("MAP1 -------- " + keyiter.next().value)
+
+            // @ts-ignore
+            this.apollo.Insert(z, map1).subscribe()
+          });
+
+        } )
+
+
+
         //@ts-ignore
-        this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableRefId, map1).subscribe())
+
+        //this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableRefId, map1).subscribe())
+
        // console.log(JSON.stringify(element))
-
-
-
-
         // console.log(wsname);
-
       };
+
+
       reader.readAsBinaryString(event.files[0]);
 
       reader.onloadend = (e) => {
