@@ -123,6 +123,36 @@ namespace ScwSvc.Repositories
         }
 
         /// <summary>
+        /// Adds a <see cref="User"/> as a collaborator to a table and optionally updates it in the SYS database.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object to modify.</param>
+        /// <param name="collaborator">The collaborator to add.</param>
+        /// <param name="commit">Whether or not to save changes to the database.</param>
+        public static async ValueTask AddCollaborator(this DbSysContext db, TableRef table, User collaborator, bool commit = true)
+        {
+            table.Collaborators.Add(collaborator);
+
+            if (commit)
+                await db.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Removes a <see cref="User"/> as a collaborator from a table and optionally updates it in the SYS database.
+        /// </summary>
+        /// <param name="db">The SYS database context.</param>
+        /// <param name="table">The <see cref="TableRef"/> object to modify.</param>
+        /// <param name="collaborator">The collaborator to add.</param>
+        /// <param name="commit">Whether or not to save changes to the database.</param>
+        public static async ValueTask RemoveCollaborator(this DbSysContext db, TableRef table, User collaborator, bool commit = true)
+        {
+            table.Collaborators.Remove(collaborator);
+
+            if (commit)
+                await db.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Adds a column to an existing table and optionally updates it in the SYS database.
         /// </summary>
         /// <param name="db">The SYS database context.</param>

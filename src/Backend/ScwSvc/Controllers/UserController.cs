@@ -382,7 +382,7 @@ namespace ScwSvc.Controllers
             if (tableRef.TableType != TableType.DataSet)
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
 
-            if (!tableRef.Columns.Any(c => c.Name == columnName))
+            if (tableRef.Columns.Count(c => c.Name == columnName) != 1)
                 return BadRequest("Column does not exist.");
 
             await _sysDb.RemoveColumnFromDataSet(tableRef, columnName, commit: false);
@@ -635,6 +635,121 @@ namespace ScwSvc.Controllers
                 return Unauthorized("You are logged in with a non-existent user.");
 
             return Ok(user.Collaborations);
+        }
+
+        /// <summary>
+        /// Queries a collection of collaborators for a table that the user posesses.
+        /// </summary>
+        /// <param name="tableRefId">The table reference ID.</param>
+        /// <returns>A collection of all collaborators for this table.</returns>
+        [HttpGet("table/{tableRefId}/collaborator")]
+        [ProducesResponseType(typeof(ICollection<User>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+        public async ValueTask<IActionResult> GetCollaborators([FromRoute] Guid tableRefId)
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
+
+            return Ok(tableRef.Collaborators);
+        }
+
+        /// <summary>
+        /// Adds a user as a collaborator to a table.
+        /// </summary>
+        /// <param name="tableRefId">The table reference ID.</param>
+        /// <param name="userId">The collaborator's <see cref="User.UserId"/>.</param>
+        [HttpPost("table/{tableRefId}/collaborator/{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        public async ValueTask<IActionResult> AddCollaborator([FromRoute] Guid tableRefId, [FromRoute] Guid userId)
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
+
+            var collaborator = await _sysDb.GetUserById(userId);
+
+            if (collaborator is null)
+                return NotFound("User was not found.");
+
+            if (user.UserId == collaborator.UserId)
+                return BadRequest("Cannot add yourself as a collaborator.");
+
+            if (tableRef.Collaborators.Any(u => u.UserId == collaborator.UserId))
+                return BadRequest("Collaborator has already been added to table.");
+
+            await _sysDb.AddCollaborator(tableRef, collaborator);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Removes a user as a collaborator from a table.
+        /// </summary>
+        /// <param name="tableRefId">The table reference ID.</param>
+        /// <param name="userId">The collaborator's <see cref="User.UserId"/>.</param>
+        [HttpDelete("table/{tableRefId}/collaborator/{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        public async ValueTask<IActionResult> RemoveCollaborator([FromRoute] Guid tableRefId, [FromRoute] Guid userId)
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+
+            if (tableRef is null)
+                return this.Forbidden("You are not authorized to view this table or it does not exist.");
+
+            var collaborator = await _sysDb.GetUserById(userId);
+
+            if (collaborator is null)
+                return NotFound("User was not found.");
+
+            if (user.UserId == collaborator.UserId)
+                return BadRequest("Cannot remove yourself as a collaborator.");
+
+            if (!tableRef.Collaborators.Any(u => u.UserId == collaborator.UserId))
+                return BadRequest("User is not a collaborator of this table.");
+
+            await _sysDb.RemoveCollaborator(tableRef, collaborator);
+            return Ok();
         }
     }
 }

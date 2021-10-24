@@ -73,19 +73,15 @@ namespace ScwSvc.Repositories
         /// <param name="db">The DYN database context.</param>
         /// <param name="table">The <see cref="TableRef"/> object.</param>
         /// <param name="columnName">The column to remove.</param>
-        /// <returns></returns>
         public static async ValueTask RemoveColumnFromDataSet(this DbDynContext db, TableRef table, string columnName)
         {
             if (table.TableType != TableType.DataSet)
                 throw new InvalidTableException("Not the correct table type.");
 
-            if (table.Columns.SingleOrDefault(c => c.Name == columnName) is not (var column and not null))
-                throw new InvalidTableException("Column does not exist.");
-
             using var conn = db.Database.GetDbConnection();
             await conn.OpenAsync().ConfigureAwait(false);
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "ALTER TABLE \"" + table.LookupName.ToNameString() + "\" DROP COLUMN \"" + column.Name + "\" CASCADE";
+            cmd.CommandText = "ALTER TABLE \"" + table.LookupName.ToNameString() + "\" DROP COLUMN \"" + columnName + "\" CASCADE";
             await cmd.ExecuteNonQueryAsync();
         }
 
