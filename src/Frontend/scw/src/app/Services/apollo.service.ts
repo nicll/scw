@@ -51,7 +51,12 @@ export class ApolloService {
     table = this.makeQueryRightCase(table);
     let mutation = `mutation {create${table}(`
     table=table[0].toLowerCase()+table.substring(1);
-    mutation=mutation+`input: {${table}:{`;
+    if(table.charCodeAt(0)>47 && table.charCodeAt(0)<58){
+      mutation=mutation+`input: {_${table}:{`;
+    }
+    else{
+      mutation=mutation+`input: {${table}:{`;
+    }
     data.forEach((key, val) => {
       mutation = mutation.concat(val + ":" + key + ",");
     });
