@@ -209,46 +209,52 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
         //call the api
         console.log("worksheetname --- " + wsname);
-        let x;
-
-        for(x = 0; x < Object.keys(data[0]).length; x++){
-          this.completedColumns[x] = new Column(Object.keys(data[0])[x], "String", true)
-        }
-
-        const map1 = new Map();
-        for (const [key, value] of Object.entries(data[0])) {
-          map1.set(key, value);
-        }
-
-       // data[0].forEach(element => this.completedColumns[])
-
-    /*    console.log(JSON.stringify(wb.SheetNames))
-
-        console.log(JSON.stringify(this.completedColumns[0]))*/
-
 
         this.postDataSet(this.completedColumns, wsname)
-        this.user.GetDataSets().subscribe(y => {
-          let element = (y[y.length-1].tableRefId)
 
-          // @ts-ignore
-          this.apollo.lookUpDataSetId(element).subscribe(z =>{
-            let mapIter = map1.values();
-            let keyiter = map1.keys();
-            console.log("ELEMENT -----------" + element)
-            console.log("MAP1 -------- " + mapIter.next().value)
-            console.log("MAP1 -------- " + mapIter.next().value)
-            console.log("MAP1 -------- " + mapIter.next().value)
-            console.log(".................................")
-            console.log("MAP1 -------- " + keyiter.next().value)
-            console.log("MAP1 -------- " + keyiter.next().value)
-            console.log("MAP1 -------- " + keyiter.next().value)
+        for(let i = 0; i<data.length; i++) {
+
+          let x;
+
+          for(x = 0; x < Object.keys(data[i]).length; x++){
+            this.completedColumns[x] = new Column(Object.keys(data[i])[x], "String", true)
+          }
+
+          const map1 = new Map();
+          for (const [key, value] of Object.entries(data[i])) {
+            map1.set(key, '"' + value + '"');
+          }
+
+          // data[0].forEach(element => this.completedColumns[])
+
+          /*    console.log(JSON.stringify(wb.SheetNames))
+
+              console.log(JSON.stringify(this.completedColumns[0]))*/
+
+
+          this.user.GetDataSets().subscribe(y => {
+            let element = (y[y.length-1].tableRefId)
 
             // @ts-ignore
-            this.apollo.Insert(z, map1).subscribe()
-          });
+            this.apollo.lookUpDataSetId(element).subscribe(z =>{
+              let mapIter = map1.values();
+              let keyiter = map1.keys();
+              console.log("ELEMENT -----------" + element)
+              console.log("MAP1 -------- " + mapIter.next().value)
+              console.log("MAP1 -------- " + mapIter.next().value)
+              console.log("MAP1 -------- " + mapIter.next().value)
+              console.log(".................................")
+              console.log("MAP1 -------- " + keyiter.next().value)
+              console.log("MAP1 -------- " + keyiter.next().value)
+              console.log("MAP1 -------- " + keyiter.next().value)
 
-        } )
+              // @ts-ignore
+              this.apollo.Insert(z, map1).subscribe()
+            });
+
+          } )
+
+        }
 
 
 
