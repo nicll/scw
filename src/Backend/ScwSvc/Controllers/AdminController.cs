@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNet.OData;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScwSvc.Repositories;
 using ScwSvc.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using ScwSvc.Repositories;
 using static ScwSvc.Globals.Authorization;
 using static ScwSvc.Utils.Authentication;
 using static ScwSvc.Utils.DataConversion;
@@ -36,7 +35,6 @@ namespace ScwSvc.Controllers
         }
 
         [HttpGet("user")]
-        [EnableQuery]
         public IQueryable<User> GetUsers()
             => _sysDb.Users;
 
@@ -99,17 +97,14 @@ namespace ScwSvc.Controllers
         }
 
         [HttpGet("table")]
-        [EnableQuery]
         public IQueryable<TableRef> GetTables()
             => _sysDb.TableRefs;
 
         [HttpGet("dataset")]
-        [EnableQuery]
         public IQueryable<TableRef> GetDataSets()
             => _sysDb.TableRefs.Where(t => t.TableType == TableType.DataSet);
 
         [HttpGet("sheet")]
-        [EnableQuery]
         public IQueryable<TableRef> GetSheets()
             => _sysDb.TableRefs.Where(t => t.TableType == TableType.Sheet);
 

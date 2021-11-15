@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -11,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Net.Http.Headers;
 using ScwSvc.Models;
 using static ScwSvc.Globals.Authorization;
 using static ScwSvc.Globals.DbConnectionString;
@@ -40,9 +35,6 @@ namespace ScwSvc
                 .AddNewtonsoftJson();
             services.AddDbContextPool<DbSysContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={SysUser}; Password={SysPass}; SearchPath=scw1_sys,public").UseLazyLoadingProxies());
             services.AddDbContextPool<DbDynContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={DynUser}; Password={DynPass}; SearchPath=scw1_dyn"));
-
-            services.AddOData();
-            //services.AddODataQueryFilter();
 
             services
                 .AddGraphQLServer()
@@ -77,7 +69,6 @@ namespace ScwSvc
 #if DEBUG
             services.AddSwaggerGen(opts => opts.SwaggerDoc("v0", new Microsoft.OpenApi.Models.OpenApiInfo() { Title = "Spreadsheet Components for Web-Based Projects API", Version = "v0" }));
             services.AddSwaggerGenNewtonsoftSupport();
-            SetOutputFormatters(services);
 #endif
         }
 
@@ -113,55 +104,14 @@ namespace ScwSvc
 
             app.UseEndpoints(endpoints =>
             {
-                //var defaultConventions = ODataRoutingConventions.CreateDefault();
-                endpoints.EnableDependencyInjection();
                 endpoints.MapControllers();
                 endpoints.MapGraphQL();
-                endpoints.Select().Expand().Filter().OrderBy().Count().MaxTop(256);
-                //endpoints.MapODataRoute("ODataRoute", "odata", GetEdmModel(app.ApplicationServices),
-                //    new DefaultODataPathHandler(), defaultConventions.Except(defaultConventions.OfType<MetadataRoutingConvention>()));
             });
 
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = @"..\..\Frontend\scw";
                 spa.UseAngularCliServer("start");
-            });
-        }
-
-        /*
-        private IEdmModel GetEdmModel(IServiceProvider serviceProvider)
-        {
-            var builder = new ODataConventionModelBuilder(serviceProvider);
-            builder.EntitySet<Student>("Students").EntityType.Select().Expand().Count().Filter().OrderBy();
-            return builder.GetEdmModel();
-        }
-        */
-
-        // Hack: works around compatibility issue between OData and Swagger until officially fixed
-        private static void SetOutputFormatters(IServiceCollection services)
-        {
-            services.AddMvcCore(options =>
-            {
-                IEnumerable<ODataOutputFormatter> outputFormatters =
-                    options.OutputFormatters.OfType<ODataOutputFormatter>()
-                        .Where(formatter => formatter.SupportedMediaTypes.Count == 0);
-
-                IEnumerable<ODataInputFormatter> inputFormatters =
-                    options.InputFormatters.OfType<ODataInputFormatter>()
-                        .Where(formatter => formatter.SupportedMediaTypes.Count == 0);
-
-                foreach (var outputFormatter in outputFormatters)
-                {
-                    outputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/odata"));
-                    outputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/json"));
-                }
-
-                foreach (var inputFormatter in inputFormatters)
-                {
-                    inputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/odata"));
-                    inputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/json"));
-                }
             });
         }
     }

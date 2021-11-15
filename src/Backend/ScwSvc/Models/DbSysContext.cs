@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace ScwSvc.Models
 {
@@ -20,8 +19,7 @@ namespace ScwSvc.Models
             modelBuilder.HasDefaultSchema("scw1_sys");
             modelBuilder.Entity<DataSetColumn>().HasKey(c => new { c.TableRefId, c.Position });
 
-            // ToDo: change this to use HasIndex + IsUnique as soon as it works again
-            modelBuilder.Entity<User>().HasAlternateKey(u => u.Name);
+            modelBuilder.Entity<User>().HasIndex(u => u.Name).IsUnique();
             modelBuilder.Entity<DataSetColumn>().HasAlternateKey(d => new { d.TableRefId, d.Name });
 
             modelBuilder.Entity<User>().HasMany(u => u.OwnTables).WithOne(t => t.Owner);

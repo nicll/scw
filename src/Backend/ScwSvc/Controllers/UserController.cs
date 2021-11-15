@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using ScwSvc.Repositories;
-using ScwSvc.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using ScwSvc.Models;
+using ScwSvc.Repositories;
 using static ScwSvc.Utils.Authentication;
 using static ScwSvc.Utils.DataConversion;
 
@@ -69,9 +69,6 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         public async ValueTask<IActionResult> ChangeUsername([FromBody] string username)
         {
-            return StatusCode(StatusCodes.Status501NotImplemented, "Currently not supported.");
-            // ToDo: allow this call when username is no longer readonly
-
             var userInfo = GetUserIdAsGuidOrNull(User);
 
             if (!userInfo.HasValue)
