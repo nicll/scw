@@ -165,6 +165,50 @@ namespace ScwSvc.Controllers
         }
 
         /// <summary>
+        /// Queries the number of all data sets that the user owns.
+        /// </summary>
+        /// <returns>The number of all of the user's data sets.</returns>
+        [HttpGet("dataset/own/count")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MyDataSetsOwnCount()
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(user.OwnTables.Count(t => t.TableType == TableType.DataSet));
+        }
+
+        /// <summary>
+        /// Queries the remaining number of data sets that the user can create.
+        /// </summary>
+        /// <returns>The remaining number of the user's data sets.</returns>
+        [HttpGet("dataset/own/remaining")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MyDataSetsOwnRemaining()
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(MaxDataSetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.DataSet));
+        }
+
+        /// <summary>
         /// Queries a collection of other people's data sets that the user may access.
         /// </summary>
         /// <returns>A collection of all of the data sets shared with the user.</returns>
@@ -431,6 +475,50 @@ namespace ScwSvc.Controllers
                 return Unauthorized("You are logged in with a non-existent user.");
 
             return Ok(user.OwnTables.Where(t => t.TableType == TableType.Sheet));
+        }
+
+        /// <summary>
+        /// Queries the number of all sheets that the user owns.
+        /// </summary>
+        /// <returns>The number of all of the user's sheets.</returns>
+        [HttpGet("sheet/own/count")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MySheetsOwnCount()
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(user.OwnTables.Count(t => t.TableType == TableType.Sheet));
+        }
+
+        /// <summary>
+        /// Queries the remaining number of sheets that the user can create.
+        /// </summary>
+        /// <returns>The remaining number of the user's sheets.</returns>
+        [HttpGet("sheet/own/remaining")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> MySheetsOwnRemaining()
+        {
+            var userInfo = GetUserIdAsGuidOrNull(User);
+
+            if (!userInfo.HasValue)
+                return Unauthorized("You are logged in with an invalid user.");
+
+            var user = await _sysDb.GetUserById(userInfo.Value);
+
+            if (user is null)
+                return Unauthorized("You are logged in with a non-existent user.");
+
+            return Ok(MaxSheetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.Sheet));
         }
 
         /// <summary>
