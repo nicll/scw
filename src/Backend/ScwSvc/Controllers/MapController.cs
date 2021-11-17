@@ -48,7 +48,7 @@ namespace ScwSvc.Controllers
             return Ok(otherUser.Name);
         }
 
-        [HttpGet("name2id/{userName}")]
+        [HttpGet("name2id/{name}")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
