@@ -2,7 +2,6 @@ using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,8 +63,6 @@ namespace ScwSvc
 
             services.AddCors();
 
-            services.AddSpaStaticFiles(config => config.RootPath = "../../Frontend/scw/dist");
-
 #if DEBUG
             services.AddSwaggerGen(opts => opts.SwaggerDoc("v0", new Microsoft.OpenApi.Models.OpenApiInfo() { Title = "Spreadsheet Components for Web-Based Projects API", Version = "v0" }));
             services.AddSwaggerGenNewtonsoftSupport();
@@ -86,7 +83,6 @@ namespace ScwSvc
                 app.UseHsts();
                 app.UseExceptionHandler("/error");
                 app.UseHttpsRedirection();
-                app.UseSpaStaticFiles();
             }
 
             app.UseStaticFiles();
@@ -106,12 +102,6 @@ namespace ScwSvc
             {
                 endpoints.MapControllers();
                 endpoints.MapGraphQL();
-            });
-
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = @"..\..\Frontend\scw";
-                spa.UseAngularCliServer("start");
             });
         }
     }
