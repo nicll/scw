@@ -1,6 +1,12 @@
+import { environment } from './../environments/environment';
+import { RemoveCollaborationsDialogComponent } from './Dialogs/remove-collaborations-dialog/remove-collaborations-dialog.component';
+import { AddCollaboratorDialogComponent } from './Dialogs/add-collaborator-dialog/add-collaborator-dialog.component';
+
+import { AllCollaborationsComponent } from './all-collaborations/all-collaborations.component';
+
 //Components
 import { AppComponent } from './app.component';
-import { LogInSignUpDialogComponent } from './log-in-sign-up-dialog/log-in-sign-up-dialog.component';
+import { LogInSignUpDialogComponent } from './Dialogs/log-in-sign-up-dialog/log-in-sign-up-dialog.component';
 import { AllTablesComponent } from './all-tables/all-tables.component';
 //Materials
 import {MatDialogModule} from '@angular/material/dialog';
@@ -26,13 +32,13 @@ import { FormsModule } from '@angular/forms';
 import {MatTabsModule} from '@angular/material/tabs';
 import { SheetComponent } from './sheet/sheet.component';
 import { DatasetComponent } from './dataset/dataset.component';
-import { DataSetDialogComponent } from './data-set-dialog/data-set-dialog.component';
+import { DataSetDialogComponent } from './Dialogs/data-set-dialog/data-set-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 
 //primeNG stuff
 //import {AccordionModule} from 'primeng/accordion';     //accordion and accordion tab
 import { MenuItem } from 'primeng/api';                  //api
-
+import {MatListModule} from '@angular/material/list';
 import {ToastModule} from 'primeng/toast';
 import {CalendarModule} from 'primeng/calendar';
 import {SliderModule} from 'primeng/slider';
@@ -45,7 +51,6 @@ import {ProgressBarModule} from 'primeng/progressbar';
 import {InputTextModule} from 'primeng/inputtext';
 import {FileUploadModule} from 'primeng/fileupload';
 import {TableModule} from "primeng/table";
-import { GraphQLModule } from './graphql.module';
 import { MenubarComponent } from './menubar/menubar.component';
 import {MenubarModule} from "primeng/menubar";
 import { InMemoryCache } from '@apollo/client/cache/inmemory/inMemoryCache';
@@ -55,11 +60,11 @@ import { DesignerModule } from '@grapecity/spread-sheets-designer-angular'
 import { RouterModule } from '@angular/router';
 import { APOLLO_OPTIONS } from 'apollo-angular';
 import {HttpLink} from 'apollo-angular/http';
-
+import { AddColumnDialogComponent } from './Dialogs/add-column-dialog/add-column-dialog.component';
+import { DeleteColumnDialogComponent } from './Dialogs/delete-column-dialog/delete-column-dialog.component';
 
 @NgModule({
   declarations: [
-
     AppComponent,
     LogInSignUpDialogComponent,
     AllTablesComponent,
@@ -67,7 +72,13 @@ import {HttpLink} from 'apollo-angular/http';
     DatasetComponent,
     DataSetDialogComponent,
     MenubarComponent,
-    SpreadjsComponent],
+    AddColumnDialogComponent,
+    DeleteColumnDialogComponent,
+    SpreadjsComponent,
+    AllCollaborationsComponent,
+    AddCollaboratorDialogComponent,
+    RemoveCollaborationsDialogComponent
+  ],
   imports: [
     DesignerModule,
     BrowserModule,
@@ -105,13 +116,13 @@ import {HttpLink} from 'apollo-angular/http';
     FormsModule,
     FileUploadModule,
     TableModule,
-    GraphQLModule,
     MenubarModule,
     BrowserModule,
     BrowserAnimationsModule,
     MenubarModule,
     InputTextModule,
-    ButtonModule
+    ButtonModule,
+    MatListModule
   ],
   providers: [{
     provide: APOLLO_OPTIONS,
@@ -119,7 +130,7 @@ import {HttpLink} from 'apollo-angular/http';
       return {
         cache: new InMemoryCache(),
         link: httpLink.create({
-          uri: 'http://localhost:4000/graphql',
+          uri: environment.graphqlUri,
         }),
       };
     },

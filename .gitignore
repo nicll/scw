@@ -453,3 +453,5 @@ dist
 
 # TernJS port file
 .tern-port
+
+public/

@@ -1,3 +1,4 @@
+import { AllCollaborationsComponent } from './all-collaborations/all-collaborations.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AllTablesComponent } from './all-tables/all-tables.component';
@@ -12,7 +13,8 @@ const routes: Routes =
     {path: '',component: DatasetComponent},
     {path:'tables',component:AllTablesComponent},
     {path:'menubarTest',component:MenubarComponent},
-    {path:'spreadjs',component:SpreadjsComponent}
+    {path:'spreadjs',component:SpreadjsComponent},
+    {path:'collabs',component:AllCollaborationsComponent}
 
   ];
 
