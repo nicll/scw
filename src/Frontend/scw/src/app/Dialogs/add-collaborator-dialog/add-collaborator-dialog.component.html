@@ -1,0 +1,12 @@
+<p>Add Collaborator</p>
+<mat-form-field>
+  <mat-label>Enter username to be added: </mat-label>
+  <input matInput [(ngModel)]="username">
+</mat-form-field>
+<br>
+<small>{{message}}
+  <br>
+</small>
+<br>
+<button mat-raised-button (click)="Ok()" >Ok</button>
+<button mat-raised-button (click)="Cancel()" style="float: right">Cancel</button>

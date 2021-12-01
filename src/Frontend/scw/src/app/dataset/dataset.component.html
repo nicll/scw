@@ -1,3 +1,13 @@
+<button color="accent" style="margin: 10px;" mat-raised-button (click)="onAddColumn()">AddColumn</button>
+<button color="accent" style="margin: 10px;" mat-raised-button (click)="onDeleteColumn()">DeleteColumn</button>
+<button color="accent" style="margin: 10px;" *ngIf="!isCollab" mat-raised-button (click)="onAddCollaborations()">Add Collaborator</button>
+
+<button color="accent" style="margin: 10px;" *ngIf="!isCollab" mat-raised-button (click)="onRemoveCollaborations()">Remove Collaborations</button>
+<br>
+<div *ngIf="collaborators.length!=0">Collaborators</div>
+<mat-list>
+  <mat-list-item role="listitem" *ngFor="let collaborator of collaborators">{{collaborator.name}}</mat-list-item>
+</mat-list>
 <app-menubar></app-menubar>
 <p-fileUpload accept=".xlsx, .csv" #form name="myfile[]" [customUpload]="true" (uploadHandler)="myUploader($event, form)"></p-fileUpload>
 

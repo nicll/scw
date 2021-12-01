@@ -6,6 +6,9 @@ import {catchError, map} from 'rxjs/operators'
 import { HandleError, HttpErrorHandler } from '../http-error-handler.service';
 import { HttpClient } from '@angular/common/http';
 import { Table } from '../Models/Table';
+import { Column } from '../Models/Column';
+import sha256 from 'fast-sha256';
+import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
@@ -88,7 +91,6 @@ export class UserService {
       map(_=>{return table;})
     );
   }
-
   public DeleteDataSet(id:string):Observable<string>{
     return this.http.delete<Table>(this.baseUri+"/my/dataset/"+id,{withCredentials:true}).pipe(
       catchError(err=>{
@@ -131,15 +133,75 @@ export class UserService {
       map(_=>{return name;})
     );
   }
-  public DeleteSheet(id:string):Observable<string>{
-    return this.http.delete<Table>(this.baseUri+"/my/sheet/"+id,{withCredentials:true}).pipe(
-      catchError(err=>{
-        this.handleError('DeleteSheet');
-        console.error(err);
-        return throwError(err);
-      }),
-      map(_=>{return id;})
-    );
+  public DeleteSheet(id: string): Observable<string> {
+    return this.http
+      .delete<Table>(this.baseUri + '/my/sheet/' + id, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((err) => {
+          this.handleError('DeleteSheet');
+          console.error(err);
+          return throwError(err);
+        }),
+        map((_) => {
+          return id;
+        })
+      );
+  }
+
+  //Column add/delete
+
+  public PostColumn(
+    id: string,
+    name: string,
+    column: Column
+  ): Observable<string> {
+    return this.http
+      .post<Table>(this.baseUri + '/my/dataset/' + id + '/' + name, column, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((err) => {
+          this.handleError('PostSheet');
+          console.error(err);
+          return throwError(err);
+        }),
+        map((_) => {
+          return id;
+        })
+      );
+  }
+  public DeleteColumn(id: string, name: string): Observable<string> {
+    return this.http
+      .delete<Table>(this.baseUri + '/my/dataset/' + id + '/' + name, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((err) => {
+          this.handleError('PostSheet');
+          console.error(err);
+          return throwError(err);
+        }),
+        map((_) => {
+          return id;
+        })
+      );
+  }
+  //Conversion userid <-> username
+  public GetUserId(username:string):Observable<string>{
+    return this.http
+      .get(this.baseUri + '/Map/name2id/'+username, { responseType: 'text', withCredentials: true })
+      .pipe(
+        catchError((err) => {
+          this.handleError('GetSheet');
+          console.error(err);
+          return throwError(err);
+        }),
+        map((sheet) => {
+          return sheet;
+        })
+      );
   }
 
 }

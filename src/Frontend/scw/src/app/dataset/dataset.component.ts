@@ -1,20 +1,32 @@
-import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
-import {TableService} from '../Services/table.service';
-import {UserService} from '../Services/user.service';
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import { CollaborationsService } from './../Services/collaborations.service';
+import { RemoveCollaborationsDialogComponent } from './../Dialogs/remove-collaborations-dialog/remove-collaborations-dialog.component';
+import { AddCollaboratorDialogComponent } from './../Dialogs/add-collaborator-dialog/add-collaborator-dialog.component';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { TableService } from '../Services/table.service';
+import { UserService } from '../Services/user.service';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import xlsx from 'xlsx';
 import FileSaver from "file-saver";
 import {MenuItem} from "primeng/api";
-import {SelectItem, FilterService, FilterMatchMode} from "primeng/api";
+import { SelectItem, FilterService, FilterMatchMode } from "primeng/api";
 
-import {Table} from '../Models/Table';
-import {ApolloService} from '../Services/apollo.service';
-import {User} from '../Models/User';
+import { Table } from '../Models/Table';
+import { ApolloService } from '../Services/apollo.service';
+import { User } from '../Models/User';
+import { MatDialog } from '@angular/material/dialog';
+import { AddColumnDialogComponent } from '../Dialogs/add-column-dialog/add-column-dialog.component';
+import { DeleteColumnDialogComponent } from '../Dialogs/delete-column-dialog/delete-column-dialog.component';
 
 import {FileUploadModule} from 'primeng/fileupload';
 import {HttpClientModule} from '@angular/common/http';
-import autoTable from "jspdf-autotable";
 import {map} from "rxjs/operators";
 import {Column} from "../Models/Column";
 
@@ -23,7 +35,7 @@ import {Column} from "../Models/Column";
   templateUrl: './dataset.component.html',
   styleUrls: ['./dataset.component.scss']
 })
-export class DatasetComponent implements AfterViewInit, OnInit {
+export class DatasetComponent implements AfterViewInit, OnInit{
   selectedRows: any;
   columnsTest: any;
   uploadedFiles: any[] = [];
@@ -41,11 +53,12 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   exportColumns: any[];
   _selectedColumns: any[];
 
-  @Input() tableId: string | undefined;
+  @Input() tableId:string|undefined;
   contextMenuItems: any;
   matchModeOptions: any;
 
-  constructor(public table: TableService, public user: UserService, public apollo: ApolloService) {
+  constructor(public table: TableService, public user: UserService, public apollo: ApolloService, public dialog: MatDialog,
+              public collab: CollaborationsService) {
     this.completedColumns = [];
     this.cache = [{
       tourid: "1",
@@ -76,7 +89,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
     this.exportColumns = this.cols.map(col => ({title: col.header, dataKey: col.field}));
     //this._selectedColumns = this.cols;
-    this._selectedColumns = [];
+    this._selectedColumns=[];
 
   }
 
@@ -93,27 +106,26 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   ngAfterViewInit(): void {
   }
 
-
   ngOnInit(): void {
     //load data from graphql
-    if (this.tableId != undefined) {
-      let id = this.tableId;
-      this.user.GetDataSet(id).subscribe(dataset => {//Get details of DataSet
-        this.apollo.lookUpDataSetId(id).subscribe(id => {//Get the GraphqlId
-          let query = this.apollo.QueryBuilder(id, dataset.columns.map(v => v.name))//Build our query
-          this.apollo.GetData<any>(query).subscribe(data => {
-            this.data = data.data["all" + this.apollo.makeQueryRightCase(id + "s")].nodes;
+    if(this.tableId != undefined){
+      let id=this.tableId;
+      this.user.GetDataSet(id).subscribe(dataset=>{//Get details of DataSet
+        this.apollo.lookUpDataSetId(id).subscribe(id=>{//Get the GraphqlId
+          let query=this.apollo.QueryBuilder(id, dataset.columns.map(v=>v.name))//Build our query
+          this.apollo.GetData<any>(query).subscribe(data=>{
+            this.data=data.data["all"+this.apollo.makeQueryRightCase(id+"s")].nodes;
             let dataclone: any[] = [];
             this.data.forEach(val => dataclone.push(Object.assign({}, val)));
-            dataclone.forEach((element: any) => {
-              element["__typename"] = undefined;
+            dataclone.forEach((element:any) => {
+              element["__typename"]=undefined;
             });
-            this.data = dataclone;
+            this.data=dataclone;
             console.log(data);
-            this.cols = [];
-            dataset.columns.forEach((field) =>
-              this.cols = this.cols.concat({field: field.name, header: field.name}))
-            this._selectedColumns = this.cols; //set the selectedcolumns to all columns in dataset
+            this.cols=[];
+            dataset.columns.forEach((field)=>
+              this.cols=this.cols.concat({field:field.name, header:field.name}))
+            this._selectedColumns=this.cols; //set the selectedcolumns to all columns in dataset
           });
           //this.apollo.Delete(id,1).subscribe(()=>console.log("delete"));
         });
@@ -122,33 +134,36 @@ export class DatasetComponent implements AfterViewInit, OnInit {
     const customFilterName = "custom-equals";
 
     this.matchModeOptions = [
-      {label: "Custom Equals", value: customFilterName},
-      {label: "Starts With", value: FilterMatchMode.STARTS_WITH},
-      {label: "Contains", value: FilterMatchMode.CONTAINS}
+      { label: "Custom Equals", value: customFilterName },
+      { label: "Starts With", value: FilterMatchMode.STARTS_WITH },
+      { label: "Contains", value: FilterMatchMode.CONTAINS }
     ];
     this.exportColumns = this.cols.map(col => ({title: col.header, dataKey: col.field}));
   }
 
-  deleteSheet() {
-    this.user.DeleteDataSet(this.tableId!).subscribe(data => console.log("Sheet deleted"))
+  deleteSheet(){
+    this.user.DeleteDataSet(this.tableId!).subscribe(data=>console.log("Sheet deleted"))
   }
 
-  onEditComplete(event: { field: string, data: any, originalEvent: Event, index: number }): void {
-    if (event.index == null || event.index == undefined || !event.field || !event.data || !this.tableId) {
+  onEditComplete(event: {field:string, data:any, originalEvent:Event,index:number}): void {
+    if(event.index==null||event.index==undefined||!event.field||!event.data||!this.tableId){
       return;
     }
     console.log(event.data);
-    this.apollo.lookUpDataSetId(this.tableId).subscribe((id: string) => {//Get the GraphqlId
-      let testdata: Map<string, string> = new Map();
-      this.cols.forEach((tmp: { field: string, header: string }) => {
-        if (tmp && tmp.field && event.data[tmp.field]) {
-          testdata.set(tmp.field, event.data[tmp.field])
+    this.apollo.lookUpDataSetId(this.tableId).subscribe((id:string)=>{//Get the GraphqlId
+      let testdata:Map<string,string>=new Map();
+      this.cols.forEach((tmp:{field:string,header:string})=> {
+        if(tmp&&tmp.field&&event.data[tmp.field]){
+          testdata.set(tmp.field,event.data[tmp.field])
         }
       })
 
-      this.apollo.Update(id, event.index + 1, testdata).subscribe(() => (next: any) => console.log(next), (err) => console.log(err));
+      this.apollo.Update(id,event.index+1,testdata).subscribe(()=>(next:any)=>console.log(next),(err)=>console.log(err));
     });
   }
+  saveSheet() {}
+
+  onKey($event: MouseEvent) {}
 
   exportPdf() {
 
@@ -182,6 +197,36 @@ export class DatasetComponent implements AfterViewInit, OnInit {
       type: EXCEL_TYPE
     });
     FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+    let EXCEL_TYPE =
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+    let EXCEL_EXTENSION = '.xlsx';
+    const data: Blob = new Blob([buffer], {
+      type: EXCEL_TYPE,
+    });
+    FileSaver.saveAs(
+      data,
+      fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION
+    );
+  }
+  onAddColumn() {
+    const dialogRef = this.dialog.open(AddColumnDialogComponent, {
+      data: this.tableId,
+    });
+  }
+  onDeleteColumn() {
+    const dialogRef = this.dialog.open(DeleteColumnDialogComponent, {
+      data: { id: this.tableId, columns: this.cols.map((tmp) => tmp.header) },
+    });
+  }
+  onAddCollaborations() {
+    const dialogRef = this.dialog.open(AddCollaboratorDialogComponent, {
+      data: this.tableId,
+    });
+  }
+  onRemoveCollaborations() {
+    const dialogRef = this.dialog.open(RemoveCollaborationsDialogComponent, {
+      data: this.tableId,
+    });
   }
 
   myUploader(event: any, form: any) {

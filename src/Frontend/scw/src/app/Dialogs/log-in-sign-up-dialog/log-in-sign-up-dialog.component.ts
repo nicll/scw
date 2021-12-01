@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { UserService } from '../Services/user.service';
+import { UserService } from '../../Services/user.service';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 @Component({
   selector: 'app-log-in-sign-up-dialog',
@@ -7,16 +7,20 @@ import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
   styleUrls: ['./log-in-sign-up-dialog.component.scss']
 })
 export class LogInSignUpDialogComponent {
-  constructor(private user:UserService, 
-              public dialogRef: MatDialogRef<LogInSignUpDialogComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: string) 
-  { 
-      this.username="";
-      this.password="";
-  }
+  hide = true;
   username:string;
   password:string;
   message:string="";
+
+  constructor(
+    private user:UserService,
+    public dialogRef: MatDialogRef<LogInSignUpDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: string)
+  {
+      this.username="";
+      this.password="";
+  }
+
   public Ok(){
     console.log(this.username+" "+this.password)
     if(!this.username||!this.password)
