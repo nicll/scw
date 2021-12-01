@@ -212,11 +212,11 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
         this.postDataSet(this.completedColumns, wsname)
 
-        for(let i = 0; i<data.length; i++) {
+        for (let i = 0; i < data.length; i++) {
 
           let x;
 
-          for(x = 0; x < Object.keys(data[i]).length; x++){
+          for (x = 0; x < Object.keys(data[i]).length; x++) {
             this.completedColumns[x] = new Column(Object.keys(data[i])[x], "String", true)
           }
 
@@ -233,10 +233,10 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
 
           this.user.GetDataSets().subscribe(y => {
-            let element = (y[y.length-1].tableRefId)
+            let element = (y[y.length - 1].tableRefId)
 
             // @ts-ignore
-            this.apollo.lookUpDataSetId(element).subscribe(z =>{
+            this.apollo.lookUpDataSetId(element).subscribe(z => {
               let mapIter = map1.values();
               let keyiter = map1.keys();
               console.log("ELEMENT -----------" + element)
@@ -252,17 +252,16 @@ export class DatasetComponent implements AfterViewInit, OnInit {
               this.apollo.Insert(z, map1).subscribe()
             });
 
-          } )
+          })
 
         }
-
 
 
         //@ts-ignore
 
         //this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableRefId, map1).subscribe())
 
-       // console.log(JSON.stringify(element))
+        // console.log(JSON.stringify(element))
         // console.log(wsname);
       };
 
@@ -282,6 +281,22 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
   public postDataSet(table: any[], displayNameTable: any) {
     this.user.PostDataSet(new Table(displayNameTable, table)).subscribe()
+  }
+
+  openNew() {
+/*    this.user.GetDataSets().subscribe(y => {
+      let element = (y[y.length - 1].tableRefId)*/
+      // @ts-ignore
+      this.apollo.lookUpDataSetId(this.tableId).subscribe(z => {
+     /*   let map = new Map([
+          ["column1", "123.12"],
+          ["column2", '"2000-12-30T12:23:45.123Z"']
+        ])*/
+          // @ts-ignore
+          this.apollo.Insert(z, map).subscribe();
+        }
+      )
+
   }
 }
 

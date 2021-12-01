@@ -65,6 +65,7 @@ export class ApolloService {
       mutation: gql(mutation)
     })
   }
+
   public Update(table: string, id: number, data: Map<string, string>): Observable<FetchResult<number, Record<string, any>, Record<string, any>>> {
     table = this.makeQueryRightCase(table);
     let mutation = `mutation {update${table}ById(`
