@@ -49,6 +49,14 @@
                     {{col.field}}
                     <p-columnFilter type="text" field="{{col.field}}" display="menu"></p-columnFilter>
                 </div>
+    </ng-template>
+    <ng-template pTemplate="header" let-cols>
+        <tr>
+            <th *ngFor="let col of cols" [pSortableColumn]="col.field">
+                <div class="p-d-flex p-jc-between p-ai-center">
+                    {{col.field}}
+                    <p-columnFilter type="text" field="{{col.field}}" display="menu"></p-columnFilter>
+                </div>
                 <p-sortIcon [field]="col.field"></p-sortIcon>
             </th>
         </tr>

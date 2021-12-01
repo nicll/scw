@@ -795,28 +795,16 @@ true posixrules
       <IntrospectionStateNumber>4601</IntrospectionStateNumber>
       <StartupTime>1633766587</StartupTime>
     </root>
-    <database id="2" parent="1" name="chess">
-      <ObjectId>40960</ObjectId>
-      <Owner>postgres</Owner>
-    </database>
-    <database id="3" parent="1" name="laravel_chess">
-      <ObjectId>90182</ObjectId>
-      <Owner>postgres</Owner>
-    </database>
-    <database id="4" parent="1" name="laravel_jetstream">
-      <ObjectId>90115</ObjectId>
-      <Owner>postgres</Owner>
-    </database>
-    <database id="5" parent="1" name="mctg">
+    <database id="2" parent="1" name="mctg">
       <ObjectId>16385</ObjectId>
       <Owner>postgres</Owner>
     </database>
-    <database id="6" parent="1" name="postgres">
+    <database id="3" parent="1" name="postgres">
       <ObjectId>12938</ObjectId>
       <Comment>default administrative connection database</Comment>
       <Owner>postgres</Owner>
     </database>
-    <database id="7" parent="1" name="scw">
+    <database id="4" parent="1" name="scw">
       <ObjectId>32768</ObjectId>
       <Grants>11||10|C|G
 11||-9223372036854775808|U|G
@@ -840,7 +828,7 @@ sequence|table|106584|106586|1
 sequence|table|106595|106597|1
 </Relations>
     </database>
-    <database id="8" parent="1" name="test">
+    <database id="5" parent="1" name="test">
       <ObjectId>16384</ObjectId>
       <Owner>postgres</Owner>
     </database>
