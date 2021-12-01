@@ -27,11 +27,20 @@
 
     <ng-template pTemplate="summary">
         <div class="p-d-flex">
+            <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success p-mr-2" (click)="openNew()"></button>
             <button type="button" pButton icon="pi pi-file-o" (click)="dt.exportCSV()" class="p-mr-2"></button>
             <button type="button" pButton pRipple icon="pi pi-file-pdf" (click)="exportPdf()" class="p-button-warning p-mr-2" pTooltip="PDF" tooltipPosition="bottom"></button>
             <button type="button" pButton pRipple icon="pi pi-file-excel" (click)="exportExcel()" class="p-button-success p-mr-2" pTooltip="XLS" tooltipPosition="bottom"></button>
             <button type="button" pButton pRipple icon="pi pi-filter" (click)="dt.exportCSV({selectionOnly:true})" class="p-button-info p-ml-auto" pTooltip="Selection Only" tooltipPosition="bottom"></button>
         </div>
+    </ng-template>
+    <ng-template pTemplate="header" let-cols>
+        <tr>
+            <th *ngFor="let col of cols" [pSortableColumn]="col.field">
+                <div class="p-d-flex p-jc-between p-ai-center">
+                    {{col.field}}
+                    <p-columnFilter type="text" field="{{col.field}}" display="menu"></p-columnFilter>
+                </div>
     </ng-template>
     <ng-template pTemplate="header" let-cols>
         <tr>
