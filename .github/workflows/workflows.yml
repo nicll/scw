@@ -15,46 +15,49 @@ jobs:
         working-directory: ./src/Backend
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Check out the repo
+      uses: actions/checkout@v2
+
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.204
+
     - name: Install dependencies
       run: dotnet restore
+
     - name: Build
       run: dotnet build --configuration Release --no-restore
+
     - name: Test
       run: dotnet test ScwSvc.Tests.Unit --no-restore --verbosity normal
 
   push_to_registry:
     name: Push Docker image to Docker Hub
+    needs: build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./src/Backend/ScwSvc
 
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-      
+
       - name: Log in to Docker Hub
         if: github.event_name != 'pull_request'
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: if20b194/scw_backend
-      
+
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: .
+          context: ./src/Backend/ScwSvc
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
