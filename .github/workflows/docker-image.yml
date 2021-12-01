@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file src/Backend/ScwSvc/Dockerfile --tag scw_backend:$(date +%s)
+      run: docker build src/Backend/ScwSvc/. --tag scw_backend:$(date +%s)
