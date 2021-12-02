@@ -1,4 +1,5 @@
-﻿using static ScwSvc.Utils.Configuration;
+﻿using System.Collections.Generic;
+using static ScwSvc.Utils.Configuration;
 
 namespace ScwSvc
 {
@@ -62,6 +63,35 @@ namespace ScwSvc
             /// This functionality is available for managers and administrators only.
             /// </summary>
             public const string ManagerOrAdminOnly = nameof(ManagerOrAdminOnly);
+        }
+
+        /// <summary>
+        /// Configuration for CORS.
+        /// </summary>
+        internal static class CorsConfig
+        {
+            /// <summary>
+            /// URL for debugging.
+            /// </summary>
+            public const string DebugUrl = "http://localhost:4200";
+
+            /// <summary>
+            /// URLs for production systems.
+            /// </summary>
+            public static readonly string[] ProductionUrls;
+
+            static CorsConfig()
+            {
+                List<string> productionUrls = new();
+
+                for (int i = 1; i < 10; ++i)
+                {
+                    if (GetEnvironmentVariableOrNull("SCW1_FRONTEND_URL" + i) is string url and not null)
+                        productionUrls.Add(url);
+                }
+
+                ProductionUrls = productionUrls.ToArray();
+            }
         }
 
         /// <summary>

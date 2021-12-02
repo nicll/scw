@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ScwSvc.Models;
 using static ScwSvc.Globals.Authorization;
+using static ScwSvc.Globals.CorsConfig;
 using static ScwSvc.Globals.DbConnectionString;
 
 namespace ScwSvc
@@ -88,7 +91,7 @@ namespace ScwSvc
             app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseCors(b => b.WithOrigins("http://localhost:4200").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
+            app.UseCors(b => b.WithOrigins(new List<string>(ProductionUrls).Append(DebugUrl).ToArray()).AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
             app.UseAuthentication();
             app.UseAuthorization();
