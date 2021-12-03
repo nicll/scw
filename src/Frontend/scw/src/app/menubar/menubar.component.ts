@@ -1,16 +1,32 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {MenubarModule} from 'primeng/menubar';
 import {MenuItem} from 'primeng/api';
 import {MenuModule} from 'primeng/menu';
+import {UserService} from "../Services/user.service";
+import {Router} from "@angular/router";
 
 
+// @ts-ignore
 @Component({
   selector: 'app-menubar',
   templateUrl: './menubar.component.html',
   styleUrls: ['./menubar.component.scss']
 })
-export class MenubarComponent{
-  constructor(){}
+export class MenubarComponent implements OnInit {
+  adminItem: MenuItem[];
+  role: String;
+  constructor(private user:UserService, private router:Router) {
+    this.role = "";
+    this.adminItem = [{
+      label: 'Admin',
+      icon: 'pi pi-globe',
+      items: [
+        {label: 'User List', icon: 'pi pi-list', routerLink: ['/admin']},
+        {label: 'Feature2', icon: 'pi pi-download', routerLink: ['/pagename']},
+        {label: 'Feature3', icon: 'pi-arrow-circle-up', routerLink: ['/pagename']}
+      ]
+    }];
+  }
 
   items: MenuItem[] = [
     {
@@ -139,5 +155,13 @@ export class MenubarComponent{
       icon: 'pi pi-fw pi-power-off'
     }
   ];
+
+  ngOnInit(): void {
+    this.user.GetRolesOfUser().subscribe(role => {if (role.includes("Admin")) {
+      console.log(role);
+      this.items.push(this.adminItem[0]);
+    }});
+
+  }
 
 }

@@ -257,5 +257,19 @@ export class UserService {
         })
       );
   }
+
+  public  adminDeleteUser(userId: string) {
+    return this.http
+      .delete<Table>(this.baseUri + '/Admin/user/' + userId, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((err) => {
+          console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
+          return throwError(err);
+        }),
+      );
+  }
 }
 

@@ -6,6 +6,8 @@ import { SheetComponent } from './sheet/sheet.component';
 import { DatasetComponent } from './dataset/dataset.component';
 import {MenubarComponent} from "./menubar/menubar.component";
 import {SpreadjsComponent} from "./spreadjs/spreadjs.component";
+import {AllCollaborationsComponent} from "./all-collaborations/all-collaborations.component";
+import {AdminUserListComponent} from "./admin-user-list/admin-user-list.component";
 
 const routes: Routes =
   [
@@ -16,6 +18,7 @@ const routes: Routes =
     {path:'spreadjs',component:SpreadjsComponent},
     {path:'collabs',component:AllCollaborationsComponent},
     {path:'upload',component:MenubarComponent},
+    {path:'admin',component:AdminUserListComponent}
 
   ];
 

@@ -41,7 +41,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   data: any[];
   collaborators: User[]=[];
   cache: any[];
-
+  @Input() isCollab: boolean | undefined;
   completedColumns: any[];
   cols = [
     { field: 'A', header: 'A' },
@@ -56,7 +56,6 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   _selectedColumns: any[];
 
   @Input() tableId: string | undefined;
-  @Input() isCollab: boolean | undefined;
   contextMenuItems: any;
   matchModeOptions: any;
 
