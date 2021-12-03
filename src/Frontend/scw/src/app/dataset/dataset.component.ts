@@ -42,6 +42,8 @@ export class DatasetComponent implements AfterViewInit, OnInit{
   items: MenuItem[];
   data: any[];
   cache: any[];
+  collaborators: User[]=[];
+  @Input() isCollab: boolean | undefined;
   completedColumns: any[];
   cols = [{field: "A", header: "A"}, {field: "B", header: "B"}, {field: "C", header: "C"}, {field: "D", header: "D"}];
   dataset: Array<Array<any
@@ -197,12 +199,7 @@ export class DatasetComponent implements AfterViewInit, OnInit{
       type: EXCEL_TYPE
     });
     FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
-    let EXCEL_TYPE =
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-    let EXCEL_EXTENSION = '.xlsx';
-    const data: Blob = new Blob([buffer], {
-      type: EXCEL_TYPE,
-    });
+
     FileSaver.saveAs(
       data,
       fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION

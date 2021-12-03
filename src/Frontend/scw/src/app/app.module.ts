@@ -62,6 +62,10 @@ import { APOLLO_OPTIONS } from 'apollo-angular';
 import {HttpLink} from 'apollo-angular/http';
 import { AddColumnDialogComponent } from './Dialogs/add-column-dialog/add-column-dialog.component';
 import { DeleteColumnDialogComponent } from './Dialogs/delete-column-dialog/delete-column-dialog.component';
+import { AdminUserListComponent } from './admin-user-list/admin-user-list.component';
+import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {RadioButtonModule} from "primeng/radiobutton";
+import {InputNumberModule} from "primeng/inputnumber";
 
 @NgModule({
   declarations: [
@@ -77,7 +81,8 @@ import { DeleteColumnDialogComponent } from './Dialogs/delete-column-dialog/dele
     SpreadjsComponent,
     AllCollaborationsComponent,
     AddCollaboratorDialogComponent,
-    RemoveCollaborationsDialogComponent
+    RemoveCollaborationsDialogComponent,
+    AdminUserListComponent
   ],
   imports: [
     DesignerModule,
@@ -122,7 +127,10 @@ import { DeleteColumnDialogComponent } from './Dialogs/delete-column-dialog/dele
     MenubarModule,
     InputTextModule,
     ButtonModule,
-    MatListModule
+    MatListModule,
+    ConfirmDialogModule,
+    RadioButtonModule,
+    InputNumberModule
   ],
   providers: [{
     provide: APOLLO_OPTIONS,
