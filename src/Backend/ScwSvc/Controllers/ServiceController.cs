@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Models;
-using ScwSvc.Repositories;
 using ScwSvc.SvcModels;
 using static ScwSvc.Utils.Authentication;
 
@@ -19,9 +19,9 @@ namespace ScwSvc.Controllers
     public class ServiceController : ControllerBase
     {
         private readonly ILogger<ServiceController> _logger;
-        private readonly DbSysContext _db;
+        private readonly ISysDbRepository _db;
 
-        public ServiceController(ILogger<ServiceController> logger, DbSysContext db)
+        public ServiceController(ILogger<ServiceController> logger, ISysDbRepository db)
         {
             _logger = logger;
             _db = db;
@@ -34,7 +34,7 @@ namespace ScwSvc.Controllers
         {
             _logger.LogInformation("Register attempt: user=\"" + loginCredentials.Username + "\"");
 
-            if (await _db.IsUsernameAssigned(loginCredentials.Username))
+            if (await _db.IsUserNameAssigned(loginCredentials.Username))
                 return BadRequest("User with this name already exists.");
 
             var newUserId = Guid.NewGuid();
@@ -45,10 +45,10 @@ namespace ScwSvc.Controllers
                 PasswordHash = HashUserPassword(newUserId, loginCredentials.Password),
                 Role = UserRole.Common
             });
-            await _db.SaveChangesAsync().ConfigureAwait(false);
+            await _db.SaveChanges().ConfigureAwait(false);
 
             var cp = new ClaimsPrincipal(new ClaimsIdentity(
-                    new[] { new Claim(ClaimTypes.Role, nameof(UserRole.Common)), new Claim(ClaimTypes.NameIdentifier, newUserId.ToNameString()) },
+                    new[] { new Claim(ClaimTypes.Role, nameof(UserRole.Common)), new Claim(ClaimTypes.NameIdentifier, newUserId.ToDbName()) },
                 CookieAuthenticationDefaults.AuthenticationScheme));
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
 
@@ -92,7 +92,7 @@ namespace ScwSvc.Controllers
             if (CompareHashes(enteredPassword, user.PasswordHash))
             {
                 var cp = new ClaimsPrincipal(new ClaimsIdentity(
-                        new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToNameString()) },
+                        new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToDbName()) },
                     CookieAuthenticationDefaults.AuthenticationScheme));
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
                 _logger.LogInformation("Login: user=\"" + loginCredentials.Username + "\"");
@@ -187,7 +187,7 @@ namespace ScwSvc.Controllers
                     });
                 }
 
-                await _db.SaveChangesAsync();
+                await _db.SaveChanges();
                 return Ok();
             }
             catch

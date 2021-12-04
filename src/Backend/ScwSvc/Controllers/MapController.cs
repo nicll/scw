@@ -4,8 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScwSvc.Repositories;
-using ScwSvc.SvcModels;
+using ScwSvc.DataAccess.Interfaces;
 using static ScwSvc.Utils.Authentication;
 
 namespace ScwSvc.Controllers
@@ -16,9 +15,9 @@ namespace ScwSvc.Controllers
     public class MapController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly DbSysContext _sysDb;
+        private readonly ISysDbRepository _sysDb;
 
-        public MapController(ILogger<UserController> logger, DbSysContext sysDb)
+        public MapController(ILogger<UserController> logger, ISysDbRepository sysDb)
         {
             _logger = logger;
             _sysDb = sysDb;

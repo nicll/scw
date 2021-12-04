@@ -5,9 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Models;
-using ScwSvc.Repositories;
-using ScwSvc.SvcModels;
 using static ScwSvc.Globals;
 using static ScwSvc.Utils.Authentication;
 
@@ -19,9 +18,9 @@ namespace ScwSvc.Controllers
     public class GraphQLTableController : ControllerBase
     {
         private readonly ILogger<GraphQLTableController> _logger;
-        private readonly DbSysContext _db;
+        private readonly ISysDbRepository _db;
 
-        public GraphQLTableController(ILogger<GraphQLTableController> logger, DbSysContext db)
+        public GraphQLTableController(ILogger<GraphQLTableController> logger, ISysDbRepository db)
         {
             _logger = logger;
             _db = db;
@@ -64,7 +63,7 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
 
-            return Ok(tableRef.LookupName.ToNameString());
+            return Ok(tableRef.LookupName.ToDbName());
         }
 
         /// <summary>
@@ -100,7 +99,7 @@ namespace ScwSvc.Controllers
 
             _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
 
-            return Ok(tableRef.LookupName.ToNameString());
+            return Ok(tableRef.LookupName.ToDbName());
         }
     }
 }

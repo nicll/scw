@@ -8,8 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ScwSvc.DataAccess.Impl;
+using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Models;
-using ScwSvc.SvcModels;
 using static ScwSvc.Globals.Authorization;
 using static ScwSvc.Globals.CorsConfig;
 using static ScwSvc.Globals.DbConnectionString;
@@ -36,8 +37,11 @@ namespace ScwSvc
 
             services.AddControllers()
                 .AddNewtonsoftJson();
+
             services.AddDbContextPool<DbSysContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={SysUser}; Password={SysPass}; SearchPath=scw1_sys,public").UseLazyLoadingProxies());
             services.AddDbContextPool<DbDynContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={DynUser}; Password={DynPass}; SearchPath=scw1_dyn"));
+            services.AddScoped<ISysDbRepository, SysDbRepository>();
+            services.AddScoped<IDynDbRepository, DynDbRepository>();
 
             services
                 .AddGraphQLServer()

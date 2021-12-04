@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Exceptions;
 using ScwSvc.Models;
-using ScwSvc.Repositories;
 using ScwSvc.SvcModels;
 using static ScwSvc.Globals.Authorization;
 using static ScwSvc.Utils.Authentication;
@@ -26,10 +26,10 @@ namespace ScwSvc.Controllers
     public class AdminController : ControllerBase
     {
         private readonly ILogger<AdminController> _logger;
-        private readonly DbSysContext _sysDb;
-        private readonly DbDynContext _dynDb;
+        private readonly ISysDbRepository _sysDb;
+        private readonly IDynDbRepository _dynDb;
 
-        public AdminController(ILogger<AdminController> logger, DbSysContext sysDb, DbDynContext dynDb)
+        public AdminController(ILogger<AdminController> logger, ISysDbRepository sysDb, IDynDbRepository dynDb)
         {
             _logger = logger;
             _sysDb = sysDb;
@@ -38,7 +38,7 @@ namespace ScwSvc.Controllers
 
         [HttpGet("user")]
         public IQueryable<User> GetUsers()
-            => _sysDb.Users;
+            => _sysDb.GetUsers();
 
         [HttpGet("user/{userId}")]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
@@ -76,7 +76,7 @@ namespace ScwSvc.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-        public async ValueTask<IActionResult> ChangeUserRoles([FromRoute] Guid userId, [FromBody] string[] roles)
+        public async ValueTask<IActionResult> ChangeUserRole([FromRoute] Guid userId, [FromBody] UserRole role)
         {
             return BadRequest("Not yet implemented.");
         }
@@ -92,6 +92,7 @@ namespace ScwSvc.Controllers
         }
 
         [HttpDelete("user/{userId}")]
+        [Authorize(Policy = AdminOnly)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async ValueTask<IActionResult> DeleteUser([FromRoute] Guid userId)
@@ -106,7 +107,7 @@ namespace ScwSvc.Controllers
             foreach (var tableRef in user.OwnTables)
                 await _dynDb.RemoveTable(tableRef);
 
-            await _sysDb.SaveChangesAsync();
+            await _sysDb.SaveChanges();
             return Ok();
         }
 
@@ -138,15 +139,15 @@ namespace ScwSvc.Controllers
 
         [HttpGet("table")]
         public IQueryable<TableRef> GetTables()
-            => _sysDb.TableRefs;
+            => _sysDb.GetTables();
 
         [HttpGet("dataset")]
         public IQueryable<TableRef> GetDataSets()
-            => _sysDb.TableRefs.Where(t => t.TableType == TableType.DataSet);
+            => _sysDb.GetTables().Where(t => t.TableType == TableType.DataSet);
 
         [HttpGet("sheet")]
         public IQueryable<TableRef> GetSheets()
-            => _sysDb.TableRefs.Where(t => t.TableType == TableType.Sheet);
+            => _sysDb.GetTables().Where(t => t.TableType == TableType.Sheet);
 
         [HttpPost("dataset")]
         [Authorize(Policy = AdminOnly)]
@@ -184,8 +185,8 @@ namespace ScwSvc.Controllers
                 };
 
                 await _sysDb.AddTable(newTable);
-                await _dynDb.CreateDataSet(newTable);
-                await _sysDb.SaveChangesAsync();
+                await _dynDb.CreateTable(newTable);
+                await _sysDb.SaveChanges();
 
                 return Created("/api/data/dataset/" + newDsId, newTable);
             }
@@ -213,7 +214,7 @@ namespace ScwSvc.Controllers
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
-            var table = await _sysDb.GetTableRefById(tableRefId);
+            var table = await _sysDb.GetTableById(tableRefId);
 
             if (table is null)
                 return NotFound("This data set does not exist.");
@@ -224,8 +225,8 @@ namespace ScwSvc.Controllers
             _logger.LogInformation("Remove dataset: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
 
             await _sysDb.RemoveTable(table);
-            await _dynDb.RemoveDataSet(table);
-            await _sysDb.SaveChangesAsync();
+            await _dynDb.RemoveTable(table);
+            await _sysDb.SaveChanges();
 
             return Ok();
         }
@@ -259,8 +260,8 @@ namespace ScwSvc.Controllers
             };
 
             await _sysDb.AddTable(newTable);
-            await _dynDb.CreateSheet(newTable);
-            await _sysDb.SaveChangesAsync();
+            await _dynDb.CreateTable(newTable);
+            await _sysDb.SaveChanges();
 
             return Created("/api/data/sheet/" + newShId, newTable);
         }
@@ -283,7 +284,7 @@ namespace ScwSvc.Controllers
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
-            var table = await _sysDb.GetTableRefById(tableRefId);
+            var table = await _sysDb.GetTableById(tableRefId);
 
             if (table is null)
                 return NotFound("This sheet does not exist.");
@@ -294,8 +295,8 @@ namespace ScwSvc.Controllers
             _logger.LogInformation("Remove sheet: user=\"" + userInfo.Value.idStr + "\"; TableRefId=" + tableRefId + "; DisplayName=" + table.DisplayName + "; OwnerUserId=" + table.OwnerUserId);
 
             await _sysDb.RemoveTable(table);
-            await _dynDb.RemoveSheet(table);
-            await _sysDb.SaveChangesAsync();
+            await _dynDb.RemoveTable(table);
+            await _sysDb.SaveChanges();
 
             return Ok();
         }

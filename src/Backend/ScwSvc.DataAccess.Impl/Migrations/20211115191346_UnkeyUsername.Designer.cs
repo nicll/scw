@@ -6,22 +6,21 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScwSvc.Models;
-using ScwSvc.SvcModels;
 
-namespace ScwSvc.Migrations
+namespace ScwSvc.DataAccess.Impl.Migrations
 {
     [DbContext(typeof(DbSysContext))]
-    [Migration("20201204001355_RenameDbStoreContext")]
-    partial class RenameDbStoreContext
+    [Migration("20211115191346_UnkeyUsername")]
+    partial class UnkeyUsername
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("scw1_sys")
-                .UseIdentityByDefaultColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.0");
+                .HasAnnotation("ProductVersion", "5.0.4")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("ScwSvc.Models.DataSetColumn", b =>
                 {
@@ -68,7 +67,7 @@ namespace ScwSvc.Migrations
                     b.Property<Guid>("OwnerUserId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("TableType")
                         .HasColumnType("integer");
 
                     b.HasKey("TableRefId");
@@ -100,7 +99,8 @@ namespace ScwSvc.Migrations
 
                     b.HasKey("UserId");
 
-                    b.HasAlternateKey("Name");
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });

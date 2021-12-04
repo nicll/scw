@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace ScwSvc.SvcModels
+namespace ScwSvc.DataAccess.Impl
 {
     public class DbDynContext : DbContext
     {

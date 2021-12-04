@@ -101,7 +101,7 @@ namespace ScwSvc
             internal static byte[] HashUserPassword(Guid userId, in string pass)
             {
                 var hasher = SHA256.Create();
-                var combination = Encoding.UTF8.GetBytes(Pepper + userId.ToNameString() + pass);
+                var combination = Encoding.UTF8.GetBytes(Pepper + userId.ToDbName() + pass);
                 return hasher.ComputeHash(combination);
             }
 
@@ -157,46 +157,12 @@ namespace ScwSvc
             return source.All(hs.Add);
         }
 
-        internal static void EnsureValidColumnName(string columnName)
-        {
-            if (columnName.Length > 20)
-                throw new InvalidTableException("Name for column is too long: " + columnName);
-
-            if (columnName.Any(c => !Char.IsLetterOrDigit(c)))
-                throw new InvalidTableException("Invalid character(s) in column: " + columnName);
-
-            if (String.Equals(columnName, "_id", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidTableException("Invalid column name: " + columnName);
-        }
-
-        private static readonly Dictionary<ColumnType, (string typeName, string defaultValue)> _typeMap = new()
-        {
-            { ColumnType.Integer, ("bigint", "0") },
-            { ColumnType.Real, ("double precision", "0.0") },
-            { ColumnType.Timestamp, ("timestamp", "'1970-01-01'") },
-            { ColumnType.String, ("varchar(200)", "''") }
-        };
-
-        internal static string ConvertToSqlColumn(DataSetColumn column)
-        {
-            EnsureValidColumnName(column.Name);
-
-            if (!_typeMap.TryGetValue(column.Type, out var col))
-                throw new InvalidTableException("Invalid column type: " + column.Type);
-
-            return new StringBuilder().Append('"').Append(column.Name).Append('"')
-                .Append(' ')
-                .Append(col.typeName)
-                .Append(column.Nullable ? " null" : " not null default " + col.defaultValue)
-                .ToString();
-        }
-
         /// <summary>
         /// Turns a <see cref="Guid"/> into a <see cref="String"/> that can be used as a name.
         /// </summary>
         /// <param name="guid">The given <see cref="Guid"/>.</param>
         /// <returns>The ID as a normalized <see cref="String"/>.</returns>
-        internal static string ToNameString(this Guid guid)
+        internal static string ToDbName(this Guid guid)
             => guid.ToString("N");
 
         internal static ActionResult Forbidden(this ControllerBase controller, object value)

@@ -6,13 +6,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScwSvc.Models;
-using ScwSvc.SvcModels;
 
-namespace ScwSvc.Migrations
+namespace ScwSvc.DataAccess.Impl.Migrations
 {
     [DbContext(typeof(DbSysContext))]
-    [Migration("20201119173950_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20210123140248_RenameTableType")]
+    partial class RenameTableType
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -68,7 +67,7 @@ namespace ScwSvc.Migrations
                     b.Property<Guid>("OwnerUserId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("TableType")
                         .HasColumnType("integer");
 
                     b.HasKey("TableRefId");

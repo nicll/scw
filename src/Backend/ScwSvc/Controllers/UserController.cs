@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Exceptions;
 using ScwSvc.Models;
-using ScwSvc.Repositories;
 using ScwSvc.SvcModels;
 using static ScwSvc.Utils.Authentication;
 using static ScwSvc.Utils.DataConversion;
@@ -21,8 +21,8 @@ namespace ScwSvc.Controllers
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly DbSysContext _sysDb;
-        private readonly DbDynContext _dynDb;
+        private readonly ISysDbRepository _sysDb;
+        private readonly IDynDbRepository _dynDb;
 
         /// <summary>
         /// Maximum amount of data sets one user may own at any time.
@@ -40,7 +40,7 @@ namespace ScwSvc.Controllers
         /// </remarks>
         public const int MaxSheetsPerUser = 20;
 
-        public UserController(ILogger<UserController> logger, DbSysContext sysDb, DbDynContext dynDb)
+        public UserController(ILogger<UserController> logger, ISysDbRepository sysDb, IDynDbRepository dynDb)
         {
             _logger = logger;
             _sysDb = sysDb;
@@ -81,12 +81,17 @@ namespace ScwSvc.Controllers
             if (user is null)
                 return Unauthorized("You are logged in with a non-existent user.");
 
-            if (await _sysDb.IsUsernameAssigned(username))
-                return BadRequest("User with this name already exists.");
-
             try
             {
-                await _sysDb.ModifyUser(user, username: username);
+                if (String.IsNullOrEmpty(username) || username.Length > 20)
+                    throw new UserChangeException("Invalid username given.") { UserId = user.UserId, OldValue = user.Name, NewValue = username };
+
+                if (await _sysDb.IsUserNameAssigned(username))
+                    throw new UserChangeException("Username is already in use.") { UserId = user.UserId, OldValue = user.Name, NewValue = username };
+
+                user.Name = username;
+                await _sysDb.ModifyUser(user);
+                await _sysDb.SaveChanges();
                 return Ok();
             }
             catch (UserChangeException e)
@@ -113,7 +118,12 @@ namespace ScwSvc.Controllers
 
             try
             {
-                await _sysDb.ModifyUser(user, password: password);
+                if (String.IsNullOrEmpty(password) || password.Length < 4) // ToDo: change to more sensible value when testing is finished
+                    throw new UserChangeException("Passwort empty or too short.") { UserId = user.UserId, OldValue = "(old password)", NewValue = "(new password)" };
+
+                user.PasswordHash = HashUserPassword(user.UserId, password);
+                await _sysDb.ModifyUser(user);
+                await _sysDb.SaveChanges();
                 return Ok();
             }
             catch (UserChangeException e)
@@ -307,8 +317,8 @@ namespace ScwSvc.Controllers
                 };
 
                 await _sysDb.AddTable(newTable);
-                await _dynDb.CreateDataSet(newTable);
-                await _sysDb.SaveChangesAsync();
+                await _dynDb.CreateTable(newTable);
+                await _sysDb.SaveChanges();
 
                 return Created("/api/data/dataset/" + newDsId, newTable);
             }
@@ -348,8 +358,8 @@ namespace ScwSvc.Controllers
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
 
             await _sysDb.RemoveTable(tableRef);
-            await _dynDb.RemoveDataSet(tableRef);
-            await _sysDb.SaveChangesAsync();
+            await _dynDb.RemoveTable(tableRef);
+            await _sysDb.SaveChanges();
 
             return Ok();
         }
@@ -388,9 +398,27 @@ namespace ScwSvc.Controllers
             if (columnName != column.Name)
                 return BadRequest("Column name does not match.");
 
-            var dsColumn = await _sysDb.AddColumnToDataSet(tableRef, column, commit: false);
-            await _dynDb.AddColumnToDataSet(tableRef, dsColumn);
-            await _sysDb.SaveChangesAsync();
+            if (tableRef.Columns.Count >= Byte.MaxValue)
+                throw new InvalidTableException("Too many columns in table.");
+
+            if (!tableRef.Columns.Select(c => c.Name).Append(column.Name).AllUnique())
+                throw new InvalidTableException("Column names not unique.");
+
+            var dsColumn = new DataSetColumn()
+            {
+                TableRefId = tableRef.TableRefId,
+                TableRef = tableRef,
+                Name = column.Name,
+                Type = column.Type,
+                Nullable = column.Nullable,
+                Position = (byte)(tableRef.Columns.Max(c => c.Position) + 1)
+            };
+
+            tableRef.Columns.Add(dsColumn);
+
+            await _sysDb.ModifyTable(tableRef);
+            await _dynDb.AddDataSetColumn(tableRef, dsColumn);
+            await _sysDb.SaveChanges();
 
             return Ok();
         }
@@ -428,9 +456,9 @@ namespace ScwSvc.Controllers
             if (tableRef.Columns.Count(c => c.Name == columnName) != 1)
                 return BadRequest("Column does not exist.");
 
-            await _sysDb.RemoveColumnFromDataSet(tableRef, columnName, commit: false);
-            await _dynDb.RemoveColumnFromDataSet(tableRef, columnName);
-            await _sysDb.SaveChangesAsync();
+            await _sysDb.ModifyTable(tableRef);
+            await _dynDb.RemoveDataSetColumn(tableRef, columnName);
+            await _sysDb.SaveChanges();
 
             return Ok();
         }
@@ -616,8 +644,8 @@ namespace ScwSvc.Controllers
             };
 
             await _sysDb.AddTable(newTable);
-            await _dynDb.CreateSheet(newTable);
-            await _sysDb.SaveChangesAsync();
+            await _dynDb.CreateTable(newTable);
+            await _sysDb.SaveChanges();
 
             return Created("/api/data/sheet/" + newShId, newTable);
         }
@@ -652,8 +680,8 @@ namespace ScwSvc.Controllers
                 return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
 
             await _sysDb.RemoveTable(tableRef);
-            await _dynDb.RemoveSheet(tableRef);
-            await _sysDb.SaveChangesAsync();
+            await _dynDb.RemoveTable(tableRef);
+            await _sysDb.SaveChanges();
 
             return Ok();
         }
@@ -792,7 +820,9 @@ namespace ScwSvc.Controllers
             if (tableRef.Collaborators.Any(u => u.UserId == collaborator.UserId))
                 return BadRequest("Collaborator has already been added to table.");
 
-            await _sysDb.AddCollaborator(tableRef, collaborator);
+            tableRef.Collaborators.Add(collaborator);
+            await _sysDb.ModifyTable(tableRef);
+            await _sysDb.SaveChanges();
             return Ok();
         }
 
@@ -835,7 +865,9 @@ namespace ScwSvc.Controllers
             if (!tableRef.Collaborators.Any(u => u.UserId == collaborator.UserId))
                 return BadRequest("User is not a collaborator of this table.");
 
-            await _sysDb.RemoveCollaborator(tableRef, collaborator);
+            tableRef.Collaborators.Remove(collaborator);
+            await _sysDb.ModifyTable(tableRef);
+            await _sysDb.SaveChanges();
             return Ok();
         }
     }

@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
+using ScwSvc.DataAccess.Impl;
 using ScwSvc.Models;
-using ScwSvc.Repositories;
-using ScwSvc.SvcModels;
 
 namespace ScwSvc.Tests.Unit
 {
@@ -16,7 +15,7 @@ namespace ScwSvc.Tests.Unit
             CommonUserId = "00000000-0000-0000-0000-000000000001",
             ManagerUserId = "00000000-0000-0000-0000-000000000002",
             AdminUserId = "00000000-0000-0000-0000-000000000003";
-        private DbSysContext _sysDb;
+        private SysDbRepository _sysDb;
         private readonly User
             _commonUser = new() { Name = "CommonUser", Role = UserRole.Common, UserId = Guid.Parse(CommonUserId), PasswordHash = new byte[32], Collaborations = new List<TableRef>() },
             _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.Parse(ManagerUserId), Collaborations = new List<TableRef>(), OwnTables = Array.Empty<TableRef>() },
@@ -28,7 +27,7 @@ namespace ScwSvc.Tests.Unit
         [OneTimeSetUp]
         public void SetupOnce()
         {
-            _sysDb = new DbSysContext(new DbContextOptionsBuilder<DbSysContext>().UseInMemoryDatabase("test").UseLazyLoadingProxies().Options);
+            _sysDb = new(new(new DbContextOptionsBuilder<DbSysContext>().UseInMemoryDatabase("test").UseLazyLoadingProxies().Options));
             //_commonUser.OwnTables = new[] { _datasetTable, _sheetTable };
             _datasetTable.Owner = _commonUser;
             _sheetTable.Owner = _commonUser;
@@ -40,9 +39,8 @@ namespace ScwSvc.Tests.Unit
             var user = _commonUser;
 
             await _sysDb.AddUser(user);
-            await _sysDb.SaveChangesAsync();
 
-            Assert.Contains(_commonUser, await _sysDb.Users.ToArrayAsync());
+            Assert.Contains(_commonUser, await _sysDb.GetUsers().ToArrayAsync());
         }
 
         [Test, Order(2)]
@@ -52,7 +50,7 @@ namespace ScwSvc.Tests.Unit
 
             await _sysDb.AddUser(user);
 
-            Assert.Contains(_managerUser, await _sysDb.Users.ToArrayAsync());
+            Assert.Contains(_managerUser, await _sysDb.GetUsers().ToArrayAsync());
         }
 
         [Test, Order(3)]
@@ -62,7 +60,7 @@ namespace ScwSvc.Tests.Unit
 
             await _sysDb.AddUser(user);
 
-            Assert.Contains(_adminUser, await _sysDb.Users.ToArrayAsync());
+            Assert.Contains(_adminUser, await _sysDb.GetUsers().ToArrayAsync());
         }
 
         [Test, Order(4)]
@@ -92,15 +90,16 @@ namespace ScwSvc.Tests.Unit
         [Test, Order(7)]
         public async Task AreUsernamesAssigned()
         {
-            Assert.IsTrue(await _sysDb.IsUsernameAssigned(_commonUser.Name));
-            Assert.IsTrue(await _sysDb.IsUsernameAssigned(_managerUser.Name));
-            Assert.IsTrue(await _sysDb.IsUsernameAssigned(_adminUser.Name));
+            Assert.IsTrue(await _sysDb.IsUserNameAssigned(_commonUser.Name));
+            Assert.IsTrue(await _sysDb.IsUserNameAssigned(_managerUser.Name));
+            Assert.IsTrue(await _sysDb.IsUserNameAssigned(_adminUser.Name));
         }
 
         [Test, Order(8)]
         public async Task ModifyUserUsername()
         {
-            await _sysDb.ModifyUser(_commonUser, commit: true, username: nameof(_commonUser));
+            _commonUser.Name = nameof(_commonUser);
+            await _sysDb.ModifyUser(_commonUser);
 
             var foundUser = await _sysDb.GetUserByName(_commonUser.Name);
 
@@ -113,7 +112,9 @@ namespace ScwSvc.Tests.Unit
         {
             var oldPasswordHash = _commonUser.PasswordHash;
 
-            await _sysDb.ModifyUser(_commonUser, commit: true, password: nameof(_commonUser));
+            // HashUserPassword(_commonUser.UserId, nameof(_commonUser));
+            _commonUser.PasswordHash = new byte[] { 5, 151, 164, 243, 40, 228, 107, 12, 246, 162, 198, 41, 71, 76, 176, 50, 77, 117, 102, 254, 3, 142, 134, 121, 1, 131, 222, 69, 251, 251, 86, 25 };
+            await _sysDb.ModifyUser(_commonUser);
 
             var foundUser = await _sysDb.GetUserByName(_commonUser.Name);
 
@@ -124,7 +125,7 @@ namespace ScwSvc.Tests.Unit
         [Test, Order(10)]
         public async Task RemoveUser()
         {
-            await _sysDb.RemoveUser(_managerUser, commit: true);
+            await _sysDb.RemoveUser(_managerUser);
 
             Assert.IsNull(await _sysDb.GetUserById(_managerUser.UserId));
             Assert.IsNull(await _sysDb.GetUserByName(_managerUser.Name));
@@ -136,9 +137,9 @@ namespace ScwSvc.Tests.Unit
         {
             var tableRef = _datasetTable;
 
-            await _sysDb.AddTable(tableRef, commit: true);
+            await _sysDb.AddTable(tableRef);
 
-            Assert.AreEqual(tableRef, await _sysDb.GetTableRefById(tableRef.TableRefId));
+            Assert.AreEqual(tableRef, await _sysDb.GetTableById(tableRef.TableRefId));
         }
 
         [Test, Order(12)]
@@ -146,9 +147,9 @@ namespace ScwSvc.Tests.Unit
         {
             var tableRef = _sheetTable;
 
-            await _sysDb.AddTable(tableRef, commit: true);
+            await _sysDb.AddTable(tableRef);
 
-            Assert.AreEqual(tableRef, await _sysDb.GetTableRefById(tableRef.TableRefId));
+            Assert.AreEqual(tableRef, await _sysDb.GetTableById(tableRef.TableRefId));
         }
 
         [Test, Order(13)]
@@ -156,9 +157,9 @@ namespace ScwSvc.Tests.Unit
         {
             var tableRef = _datasetTable;
 
-            await _sysDb.RemoveTable(tableRef, commit: true);
+            await _sysDb.RemoveTable(tableRef);
 
-            Assert.IsNull(await _sysDb.GetTableRefById(tableRef.TableRefId));
+            Assert.IsNull(await _sysDb.GetTableById(tableRef.TableRefId));
         }
 
         [Test, Order(14)]
@@ -166,9 +167,9 @@ namespace ScwSvc.Tests.Unit
         {
             var tableRef = _sheetTable;
 
-            await _sysDb.RemoveTable(tableRef, commit: true);
+            await _sysDb.RemoveTable(tableRef);
 
-            Assert.IsNull(await _sysDb.GetTableRefById(tableRef.TableRefId));
+            Assert.IsNull(await _sysDb.GetTableById(tableRef.TableRefId));
         }
     }
 }

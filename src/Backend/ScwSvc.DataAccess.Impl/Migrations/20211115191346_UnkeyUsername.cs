@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace ScwSvc.Migrations
+namespace ScwSvc.DataAccess.Impl.Migrations
 {
     public partial class UnkeyUsername : Migration
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ScwSvc.Models;
 
-namespace ScwSvc.SvcModels
+namespace ScwSvc.DataAccess.Impl
 {
     public class DbSysContext : DbContext
     {
