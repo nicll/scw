@@ -1,14 +1,16 @@
 <app-menubar></app-menubar>
-<p-table #dt [value]="users" dataKey="userId" [(selection)]="selectedUsers" [rowHover]="true"
+<p-toast></p-toast>
+<p-contextMenu #cm [model]="items"></p-contextMenu>
+<p-table #dt [value]="users" [(contextMenuSelection)]="selectedUser" dataKey="userId" [(selection)]="selectedUsers" [rowHover]="true"
          [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]"
          [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-         [filterDelay]="0" [globalFilterFields]="['userId','name','role']">>
+         [filterDelay]="0" [globalFilterFields]="['userId','name','role']" [contextMenu]="cm"> >
   <ng-template pTemplate="caption">
     <div class="table-header">
       List of Customers
       <span class="p-input-icon-left">
                         <i class="pi pi-search"></i>
-                        <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                        <input pInputText type="text" (input)="dt.filterGlobal($any($event).target.value, 'contains')"
                                placeholder="Global Search"/>
                     </span>
     </div>
@@ -17,12 +19,15 @@
     <tr>
      <th style="width: 3rem"></th>
       <th pSortableColumn="userId"> UserId
+        <p-columnFilter type="text" field="userId" display="menu"></p-columnFilter>
         <p-sortIcon field="userId"></p-sortIcon>
       </th>
       <th pSortableColumn="name">Name
+        <p-columnFilter type="text" field="name" display="menu"></p-columnFilter>
         <p-sortIcon field="name"></p-sortIcon>
       </th>
       <th pSortableColumn="role">Role
+        <p-columnFilter type="text" field="role" display="menu"></p-columnFilter>
         <p-sortIcon field="role"></p-sortIcon>
       </th>
       <th></th>
@@ -44,7 +49,7 @@
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-user>
-    <tr>
+    <tr [pContextMenuRow]="user">
       <td style="max-width: 10px">
         <p-tableCheckbox [value]="user" ></p-tableCheckbox>
       </td>
@@ -90,6 +95,17 @@
       </div>
     </div>
 
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveUser()"></button>
+  </ng-template>
+</p-dialog>
+
+
+<p-dialog [(visible)]="viewUserDialog" [style]="{width: '450px'}" header="User Details" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
   </ng-template>
 
   <ng-template pTemplate="footer">

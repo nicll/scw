@@ -4,7 +4,9 @@ import {ApolloService} from '../Services/apollo.service';
 import {CollaborationsService} from "../Services/collaborations.service";
 import {User} from "../Models/User";
 import {Table, TableModule} from 'primeng/table';
-import {ConfirmationService, MessageService} from "primeng/api";
+import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
+import GC from "@grapecity/spread-sheets";
+import Tables = GC.Spread.Sheets.Tables;
 
 
 @Component({
@@ -22,18 +24,28 @@ import {ConfirmationService, MessageService} from "primeng/api";
 })
 export class AdminUserListComponent implements OnInit {
   userDialog: boolean;
+  viewUserDialog: boolean;
   users: User[];
   user: User;
   submitted: boolean;
   selectedUsers: any;
+  selectedUser: User;
+  items: MenuItem[];
 
   @ViewChild('dt') table: Table | undefined;
 
-  constructor(public userservice: UserService, public apollo: ApolloService, public collab: CollaborationsService,  private messageService: MessageService, private confirmationService: ConfirmationService) {
+  constructor(public userservice: UserService, public apollo: ApolloService, public collab: CollaborationsService, private messageService: MessageService, private confirmationService: ConfirmationService) {
+    this.selectedUser = new User("defaultName", "defaultUserId", 0, "defaultRole");
+    this.items = [
+      {label: 'View Details', icon: 'pi pi-fw pi-search', command: () => this.viewUser(this.selectedUser)},
+      {label: 'Feature2', icon: 'pi pi-fw pi-times'}
+    ];
     this.user = new User("defaultName", "defaultUserId", 0, "defaultRole");
     this.userDialog = false;
+    this.viewUserDialog = false;
     this.submitted = false;
     this.users = []
+
     this.userservice.GetAllUsersAdmin().subscribe((user: User[]) => {
       this.users = user
       console.log(this.users);
@@ -48,6 +60,19 @@ export class AdminUserListComponent implements OnInit {
     this.userDialog = true;
   }
 
+  viewUser(user: User) {
+    this.userservice.AdminGetTablesOfUser(user.userId).subscribe(tables=> {
+      this.userservice.AdminGetCollabsOfUser(user.userId).subscribe(collabs => {
+        //this.viewUserDialog = true;
+        this.messageService.add({
+          severity: 'info',
+          summary: 'User Selected',
+          detail: String("this User owns " + tables.length + " tables and collaborates on " + collabs.length + " tables")
+        });
+      })
+    })
+  }
+
   hideDialog() {
     this.userDialog = false;
     this.submitted = false;
@@ -57,28 +82,6 @@ export class AdminUserListComponent implements OnInit {
   ngOnInit() {
   }
 
-  onActivityChange(event: { target: { value: any; }; }) {
-    const value = event.target.value;
-    if (value && value.trim().length) {
-      const activity = parseInt(value);
-
-      if (!isNaN(activity)) {
-        // @ts-ignore
-        this.table.filter(activity, 'activity', 'gte');
-      }
-    }
-  }
-
-  /* async ngOnInit() {
-     this.users = await this.fetchUsers();
-     console.log(this.users)
-   }
-
-   async fetchUsers() {
-     const cache = this.user.GetAllUsersAdmin();
-     console.log(cache);
-     return cache;
-   }*/
 
   editUser(user: User) {
     this.user = {...user};
@@ -93,9 +96,17 @@ export class AdminUserListComponent implements OnInit {
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.userservice.adminDeleteUser(user.userId).subscribe(() => {
-          this.messageService.add({severity: 'success', summary: 'User deleted', detail: 'User ' + user.name + ' deleted'});
+          this.messageService.add({
+            severity: 'success',
+            summary: 'User deleted',
+            detail: 'User ' + user.name + ' deleted'
+          });
         }, error => {
-          this.messageService.add({severity: 'error', summary: 'User not deleted', detail: 'User ' + user.name + ' not deleted'});
+          this.messageService.add({
+            severity: 'error',
+            summary: 'User not deleted',
+            detail: 'User ' + user.name + ' not deleted'
+          });
         })
       }
     });
@@ -106,8 +117,7 @@ export class AdminUserListComponent implements OnInit {
     this.submitted = true;
     if (this.user.name.trim()) {
       if (this.user.userId) {
-          //TODO add api call
-
+        console.log(this.user.userId)
       }
     }
   }
