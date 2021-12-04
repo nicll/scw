@@ -1,11 +1,12 @@
-using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
-using ScwSvc.Repositories;
-using ScwSvc.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
+using ScwSvc.Models;
+using ScwSvc.Repositories;
+using ScwSvc.SvcModels;
 
 namespace ScwSvc.Tests.Unit
 {
@@ -17,12 +18,12 @@ namespace ScwSvc.Tests.Unit
             AdminUserId = "00000000-0000-0000-0000-000000000003";
         private DbSysContext _sysDb;
         private readonly User
-            _commonUser =  new() { Name = "CommonUser",  Role = UserRole.Common,  UserId = Guid.Parse(CommonUserId), PasswordHash = new byte[32], Collaborations = new List<TableRef>() },
+            _commonUser = new() { Name = "CommonUser", Role = UserRole.Common, UserId = Guid.Parse(CommonUserId), PasswordHash = new byte[32], Collaborations = new List<TableRef>() },
             _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.Parse(ManagerUserId), Collaborations = new List<TableRef>(), OwnTables = Array.Empty<TableRef>() },
-            _adminUser =   new() { Name = "AdminUser",   Role = UserRole.Admin,   UserId = Guid.Parse(AdminUserId), Collaborations = new List<TableRef>(), OwnTables = Array.Empty<TableRef>() };
+            _adminUser = new() { Name = "AdminUser", Role = UserRole.Admin, UserId = Guid.Parse(AdminUserId), Collaborations = new List<TableRef>(), OwnTables = Array.Empty<TableRef>() };
         private readonly TableRef
             _datasetTable = new() { TableRefId = Guid.NewGuid(), TableType = TableType.DataSet, OwnerUserId = Guid.Parse(CommonUserId) },
-            _sheetTable =   new() { TableRefId = Guid.NewGuid(), TableType = TableType.Sheet, OwnerUserId = Guid.Parse(CommonUserId) };
+            _sheetTable = new() { TableRefId = Guid.NewGuid(), TableType = TableType.Sheet, OwnerUserId = Guid.Parse(CommonUserId) };
 
         [OneTimeSetUp]
         public void SetupOnce()
@@ -99,8 +100,6 @@ namespace ScwSvc.Tests.Unit
         [Test, Order(8)]
         public async Task ModifyUserUsername()
         {
-            throw new InconclusiveException("Known defect: see ToDo in DbSysContext.cs");
-
             await _sysDb.ModifyUser(_commonUser, commit: true, username: nameof(_commonUser));
 
             var foundUser = await _sysDb.GetUserByName(_commonUser.Name);

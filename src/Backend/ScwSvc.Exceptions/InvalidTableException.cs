@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ScwSvc
+namespace ScwSvc.Exceptions
 {
     /// <summary>
     /// This exception is thrown when an invalid table is encountered.

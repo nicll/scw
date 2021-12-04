@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ScwSvc.Models;
+using ScwSvc.SvcModels;
 using static ScwSvc.Globals.Authorization;
 using static ScwSvc.Globals.CorsConfig;
 using static ScwSvc.Globals.DbConnectionString;
@@ -49,6 +50,7 @@ namespace ScwSvc
                     opts.Cookie.Name = "ScwSession";
                     opts.Cookie.IsEssential = true;
                     opts.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+                    opts.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
                     opts.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/api/service/unauthorized");
                     opts.LoginPath = new Microsoft.AspNetCore.Http.PathString("/api/service/unauthenticated");
                     opts.LogoutPath = new Microsoft.AspNetCore.Http.PathString("/api/service/logout");

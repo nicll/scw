@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc;
-using ScwSvc.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using ScwSvc.Exceptions;
+using ScwSvc.Models;
+using ScwSvc.SvcModels;
 
 namespace ScwSvc
 {
@@ -169,10 +171,10 @@ namespace ScwSvc
 
         private static readonly Dictionary<ColumnType, (string typeName, string defaultValue)> _typeMap = new()
         {
-            { ColumnType.Integer,   ("bigint", "0")               },
-            { ColumnType.Real,      ("double precision", "0.0")   },
+            { ColumnType.Integer, ("bigint", "0") },
+            { ColumnType.Real, ("double precision", "0.0") },
             { ColumnType.Timestamp, ("timestamp", "'1970-01-01'") },
-            { ColumnType.String,    ("varchar(200)", "''")        }
+            { ColumnType.String, ("varchar(200)", "''") }
         };
 
         internal static string ConvertToSqlColumn(DataSetColumn column)

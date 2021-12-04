@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScwSvc.Repositories;
 using ScwSvc.Models;
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using ScwSvc.Repositories;
+using ScwSvc.SvcModels;
 using static ScwSvc.Utils.Authentication;
 
 namespace ScwSvc.Controllers

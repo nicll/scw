@@ -1,13 +1,11 @@
-﻿using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using System.Text.Json.Serialization;
 
 namespace ScwSvc.Models
 {
     /// <summary>
     /// The different kinds of data types that a column may contain.
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ColumnType
     {
         /// <summary>

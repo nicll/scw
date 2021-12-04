@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ScwSvc.Models;
 
-namespace ScwSvc.Models
+namespace ScwSvc.SvcModels
 {
     public class DbSysContext : DbContext
     {

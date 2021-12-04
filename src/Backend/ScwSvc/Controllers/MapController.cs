@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScwSvc.Models;
 using ScwSvc.Repositories;
+using ScwSvc.SvcModels;
 using static ScwSvc.Utils.Authentication;
 
 namespace ScwSvc.Controllers

@@ -31,5 +31,14 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="5.6.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ScwSvc.BusinessLogic.Impl\ScwSvc.BusinessLogic.Impl.csproj" />
+    <ProjectReference Include="..\ScwSvc.BusinessLogic.Interfaces\ScwSvc.BusinessLogic.Interfaces.csproj" />
+    <ProjectReference Include="..\ScwSvc.DataAccess.Impl\ScwSvc.DataAccess.Impl.csproj" />
+    <ProjectReference Include="..\ScwSvc.DataAccess.Interfaces\ScwSvc.DataAccess.Interfaces.csproj" />
+    <ProjectReference Include="..\ScwSvc.Exceptions\ScwSvc.Exceptions.csproj" />
+    <ProjectReference Include="..\ScwSvc.Models\ScwSvc.Models.csproj" />
+  </ItemGroup>
+
 
 </Project>

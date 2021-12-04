@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using ScwSvc.Models;
+using ScwSvc.SvcModels;
 
 namespace ScwSvc.Tests.Unit
 {

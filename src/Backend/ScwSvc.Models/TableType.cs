@@ -1,13 +1,11 @@
-﻿using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using System.Text.Json.Serialization;
 
 namespace ScwSvc.Models
 {
     /// <summary>
     /// Lists the different kinds of tables.
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum TableType
     {
         /// <summary>

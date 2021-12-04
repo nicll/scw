@@ -1,7 +1,7 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using ScwSvc.Models;
 
-namespace ScwSvc.Models
+namespace ScwSvc.SvcModels
 {
     /// <summary>
     /// This class specifies the necessary information of each column.

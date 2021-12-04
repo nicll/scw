@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScwSvc.BusinessLogic.Interfaces\ScwSvc.BusinessLogic.Interfaces.csproj" />
+    <ProjectReference Include="..\ScwSvc.DataAccess.Interfaces\ScwSvc.DataAccess.Interfaces.csproj" />
+    <ProjectReference Include="..\ScwSvc.Exceptions\ScwSvc.Exceptions.csproj" />
+    <ProjectReference Include="..\ScwSvc.Models\ScwSvc.Models.csproj" />
+  </ItemGroup>
+
+</Project>

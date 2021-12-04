@@ -1,7 +1,6 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace ScwSvc.Models
+namespace ScwSvc.SvcModels
 {
     /// <summary>
     /// This class specifies which information is required for creating a new data set.

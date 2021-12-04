@@ -1,7 +1,7 @@
-﻿using HotChocolate;
+﻿using System.Linq;
+using HotChocolate;
 using ScwSvc.Models;
-using System;
-using System.Linq;
+using ScwSvc.SvcModels;
 
 namespace ScwSvc.GraphQL
 {

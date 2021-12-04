@@ -1,7 +1,7 @@
 ﻿using System;
 using ScwSvc.Models;
 
-namespace ScwSvc
+namespace ScwSvc.Exceptions
 {
     /// <summary>
     /// This exception is thrown when an invalid change made was to a <see cref="User"/>.
