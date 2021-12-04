@@ -153,7 +153,7 @@ namespace ScwSvc.Controllers
         /// </summary>
         /// <returns>200 always</returns>
         [HttpGet("[action]")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string[]), StatusCodes.Status200OK)]
         public ActionResult<string[]> MyRoles()
             => Ok(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray());
 
@@ -163,7 +163,7 @@ namespace ScwSvc.Controllers
         /// </summary>
         /// <returns>200 always</returns>
         [HttpGet("[action]")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string[]), StatusCodes.Status200OK)]
         public ActionResult<string[]> MyClaims()
             => Ok(User.Claims.Select(c => c.Value).ToArray());
 #endif

@@ -53,6 +53,44 @@ namespace ScwSvc.Controllers
             return Ok(user);
         }
 
+        [HttpPost("user")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async ValueTask<IActionResult> AddUser([FromBody] AuthenticationCredentials credentials)
+        {
+            return BadRequest("Not yet implemented.");
+        }
+
+        [HttpPut("user/{userId}/username")]
+        [Authorize(Policy = AdminOnly)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> ChangeUserName([FromRoute] Guid userId, [FromBody] string username)
+        {
+            return BadRequest("Not yet implemented.");
+        }
+
+        [HttpPut("user/{userId}/roles")]
+        [Authorize(Policy = AdminOnly)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> ChangeUserRoles([FromRoute] Guid userId, [FromBody] string[] roles)
+        {
+            return BadRequest("Not yet implemented.");
+        }
+
+        [HttpPut("user/{userId}/password")]
+        [Authorize(Policy = AdminOnly)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        public async ValueTask<IActionResult> ChangeUserPassword([FromRoute] Guid userId, [FromBody] string password)
+        {
+            return BadRequest("Not yet implemented.");
+        }
+
         [HttpDelete("user/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
