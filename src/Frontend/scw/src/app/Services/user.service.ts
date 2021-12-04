@@ -17,6 +17,7 @@ export class UserService {
     this.handleError = httpErrorHandler.createHandleError('UserService');
   }
 
+
   private readonly handleError: HandleError;
   baseUri: string = environment.aspUri+'/api';
   username: string = "";
@@ -295,7 +296,7 @@ export class UserService {
       );
   }
 
-  public  adminDeleteUser(userId: string) {
+  public adminDeleteUser(userId: string) {
     return this.http
       .delete<Table>(this.baseUri + '/Admin/user/' + userId, {
         withCredentials: true,
@@ -306,6 +307,58 @@ export class UserService {
           console.error(err);
           return throwError(err);
         }),
+      );
+  }
+
+  public AdminGetTablesOfUser(id: string): Observable<Table[]> {
+    return this.http
+      .get<Table[]>(this.baseUri + '/Admin/user/' + id + '/table', { withCredentials: true })
+      .pipe(
+        catchError((err) => {
+          this.handleError('AdminGetTablesOfUser');
+          console.error(err);
+          return throwError(err);
+        }),
+        map((sheet) => {
+          console.log(id);
+          console.log(sheet);
+          return sheet;
+        })
+      );
+  }
+
+  public AdminGetCollabsOfUser(id: string): Observable<Table[]> {
+    return this.http
+      .get<Table[]>(this.baseUri + '/Admin/user/' + id + '/collaboration', { withCredentials: true })
+      .pipe(
+        catchError((err) => {
+          this.handleError('AdminGetCollabsOfUser');
+          console.error(err);
+          return throwError(err);
+        }),
+        map((sheet) => {
+          console.log(id);
+          console.log(sheet);
+          return sheet;
+        })
+      );
+  }
+
+  public AdminUpdateUsername(userId: string, username: string): Observable<any> {
+    return this.http
+      .patch<string>(this.baseUri + '/Admin/user/' + userId +'/username', {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((err) => {
+          this.handleError('AdminUpdateUsername', userId);
+          console.error(err);
+          return throwError(err);
+        }),
+        map((_) => {
+          this.username = username;
+          return username;
+        })
       );
   }
 }
