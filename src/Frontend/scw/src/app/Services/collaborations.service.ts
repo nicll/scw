@@ -3,7 +3,6 @@ import { User } from './../Models/User';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of, pipe, throwError } from 'rxjs';
-import { HandleError, HttpErrorHandler } from '../http-error-handler.service';
 import { catchError, map } from 'rxjs/operators';
 import { Table } from '../Models/Table';
 
@@ -13,10 +12,8 @@ import { Table } from '../Models/Table';
 export class CollaborationsService {
 
   private baseUri: string = environment.aspUri+'/api';
-  private readonly handleError: HandleError;
 
-  constructor(private http: HttpClient,httpErrorHandler: HttpErrorHandler) {
-    this.handleError = httpErrorHandler.createHandleError('UserService');
+  constructor(private http: HttpClient) {
   }
   public AddCollaborator(tableid: string, userid: string): Observable<void> {
     console.log(this.baseUri + '/my/table/'+tableid+"/collaborator/"+userid)
@@ -26,7 +23,6 @@ export class CollaborationsService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('AddCollaborator');
           console.error(err);
           return throwError(err);
         }),
@@ -39,7 +35,6 @@ export class CollaborationsService {
       .get<Table[]>(this.baseUri + '/my/table/collaborations', { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('GetCollabs');
           console.error(err);
           return throwError(err);
         }),
@@ -53,7 +48,6 @@ export class CollaborationsService {
       .get<User[]>(this.baseUri + '/my/table/' + tableId+'/collaborator', { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('GetCollabs');
           console.error(err);
           return throwError(err);
         }),
@@ -69,7 +63,6 @@ export class CollaborationsService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('RemoveCollaborator');
           console.error(err);
           return throwError(err);
         }),

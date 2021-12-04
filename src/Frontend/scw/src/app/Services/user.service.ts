@@ -3,7 +3,6 @@ import { User } from '../Models/User';
 import { Roles } from '../Models/Roles';
 import { Observable, of, pipe, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { HandleError, HttpErrorHandler } from '../http-error-handler.service';
 import { HttpClient } from '@angular/common/http';
 import { Table } from '../Models/Table';
 import { Column } from '../Models/Column';
@@ -13,11 +12,9 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class UserService {
-  constructor(private http: HttpClient, httpErrorHandler: HttpErrorHandler) {
-    this.handleError = httpErrorHandler.createHandleError('UserService');
+  constructor(private http: HttpClient) {
   }
 
-  private readonly handleError: HandleError;
   baseUri: string = environment.aspUri+'/api';
   username: string = "";
 
@@ -31,7 +28,6 @@ export class UserService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('Login');
           console.error(err);
           return throwError(err);
         }),
@@ -48,11 +44,11 @@ export class UserService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('Login', us);
           console.error(err);
           return throwError(err);
         }),
         map((_) => {
+          console.log("login successful")
           this.username=us.username;
           return us;
         })
@@ -66,7 +62,6 @@ export class UserService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('SignUp', user);
           console.error(err);
           return throwError(err);
         }),
@@ -90,7 +85,6 @@ export class UserService {
       .get<Table[]>(this.baseUri + '/my/dataset', { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('GetDataSets');
           console.error(err);
           return throwError(err);
         }),
@@ -104,7 +98,6 @@ export class UserService {
       .get<Table>(this.baseUri + '/my/dataset/' + id, { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('GetDataset');
           console.error(err);
           return throwError(err);
         }),
@@ -121,7 +114,6 @@ export class UserService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('PostDataSet');
           console.error(err);
           return throwError(err);
         }),
@@ -137,7 +129,6 @@ export class UserService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('DeleteDataSet');
           console.error(err);
           return throwError(err);
         }),
@@ -154,7 +145,6 @@ export class UserService {
       .get<Table[]>(this.baseUri + '/my/sheet', { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('GetSheets');
           console.error(err);
           return throwError(err);
         }),
@@ -168,7 +158,6 @@ export class UserService {
       .get<Table>(this.baseUri + '/my/sheet/' + id, { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('GetSheet');
           console.error(err);
           return throwError(err);
         }),
@@ -182,7 +171,6 @@ export class UserService {
       .post<Table>(this.baseUri + '/my/sheet', name, { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('PostSheet');
           console.error(err);
           return throwError(err);
         }),
@@ -198,7 +186,6 @@ export class UserService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('DeleteSheet');
           console.error(err);
           return throwError(err);
         }),
@@ -221,7 +208,6 @@ export class UserService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('PostSheet');
           console.error(err);
           return throwError(err);
         }),
@@ -237,7 +223,6 @@ export class UserService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('PostSheet');
           console.error(err);
           return throwError(err);
         }),
@@ -252,7 +237,6 @@ export class UserService {
       .get(this.baseUri + '/Map/name2id/'+username, { responseType: 'text', withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('GetSheet');
           console.error(err);
           return throwError(err);
         }),
