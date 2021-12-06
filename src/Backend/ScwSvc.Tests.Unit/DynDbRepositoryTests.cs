@@ -2,22 +2,21 @@
 using NUnit.Framework;
 using ScwSvc.DataAccess.Impl;
 
-namespace ScwSvc.Tests.Unit
+namespace ScwSvc.Tests.Unit;
+
+public class DynDbRepositoryTests
 {
-    public class DynDbRepositoryTests
+    private DbDynContext _dynDb;
+
+    [OneTimeSetUp]
+    public void SetupOnce()
     {
-        private DbDynContext _dynDb;
+        _dynDb = new DbDynContext(new DbContextOptionsBuilder<DbDynContext>().UseInMemoryDatabase("test").UseLazyLoadingProxies().Options);
+    }
 
-        [OneTimeSetUp]
-        public void SetupOnce()
-        {
-            _dynDb = new DbDynContext(new DbContextOptionsBuilder<DbDynContext>().UseInMemoryDatabase("test").UseLazyLoadingProxies().Options);
-        }
-
-        [Test]
-        public void Test1()
-        {
-            Assert.Pass();
-        }
+    [Test]
+    public void Test1()
+    {
+        Assert.Pass();
     }
 }

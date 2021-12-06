@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ScwSvc.SvcModels
-{
-    public class AuthenticationCredentials
-    {
-        [Required]
-        public string Username { get; set; }
+namespace ScwSvc.SvcModels;
 
-        [Required]
-        public string Password { get; set; }
-    }
+public class AuthenticationCredentials
+{
+    [Required]
+    public string Username { get; set; }
+
+    [Required]
+    public string Password { get; set; }
 }

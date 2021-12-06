@@ -1,21 +1,20 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ScwSvc.Models
+namespace ScwSvc.Models;
+
+/// <summary>
+/// Lists the different kinds of tables.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum TableType
 {
     /// <summary>
-    /// Lists the different kinds of tables.
+    /// A table that is directly mapped to the database.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum TableType
-    {
-        /// <summary>
-        /// A table that is directly mapped to the database.
-        /// </summary>
-        DataSet,
+    DataSet,
 
-        /// <summary>
-        /// A spreadsheet table.
-        /// </summary>
-        Sheet
-    }
+    /// <summary>
+    /// A spreadsheet table.
+    /// </summary>
+    Sheet
 }

@@ -1,16 +1,15 @@
 ﻿using System.Threading.Tasks;
 using ScwSvc.Models;
 
-namespace ScwSvc.DataAccess.Interfaces
+namespace ScwSvc.DataAccess.Interfaces;
+
+public interface IDynDbRepository
 {
-    public interface IDynDbRepository
-    {
-        Task CreateTable(TableRef table);
+    Task CreateTable(TableRef table);
 
-        Task RemoveTable(TableRef table);
+    Task RemoveTable(TableRef table);
 
-        Task AddDataSetColumn(TableRef table, DataSetColumn column);
+    Task AddDataSetColumn(TableRef table, DataSetColumn column);
 
-        Task RemoveDataSetColumn(TableRef table, string columnName);
-    }
+    Task RemoveDataSetColumn(TableRef table, string columnName);
 }

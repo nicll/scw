@@ -1,36 +1,35 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace ScwSvc.DataAccess.Impl.Migrations
+namespace ScwSvc.DataAccess.Impl.Migrations;
+
+public partial class UnkeyUsername : Migration
 {
-    public partial class UnkeyUsername : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropUniqueConstraint(
-                name: "AK_Users_Name",
-                schema: "scw1_sys",
-                table: "Users");
+        migrationBuilder.DropUniqueConstraint(
+            name: "AK_Users_Name",
+            schema: "scw1_sys",
+            table: "Users");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_Name",
-                schema: "scw1_sys",
-                table: "Users",
-                column: "Name",
-                unique: true);
-        }
+        migrationBuilder.CreateIndex(
+            name: "IX_Users_Name",
+            schema: "scw1_sys",
+            table: "Users",
+            column: "Name",
+            unique: true);
+    }
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropIndex(
-                name: "IX_Users_Name",
-                schema: "scw1_sys",
-                table: "Users");
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropIndex(
+            name: "IX_Users_Name",
+            schema: "scw1_sys",
+            table: "Users");
 
-            migrationBuilder.AddUniqueConstraint(
-                name: "AK_Users_Name",
-                schema: "scw1_sys",
-                table: "Users",
-                column: "Name");
-        }
+        migrationBuilder.AddUniqueConstraint(
+            name: "AK_Users_Name",
+            schema: "scw1_sys",
+            table: "Users",
+            column: "Name");
     }
 }
