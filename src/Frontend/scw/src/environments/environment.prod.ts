@@ -1,3 +1,5 @@
 export const environment = {
-  production: true
+  production: true,
+  graphqlUri: "SCW1_GRAPHQLURI",
+  aspUri: "SCW1_ASPURI"
 };

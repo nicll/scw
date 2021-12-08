@@ -1,0 +1,14 @@
+<br>
+<mat-form-field>
+  <mat-label>Choose column: </mat-label>
+  <mat-select [(ngModel)]="name">
+    <mat-option *ngFor="let tmp of data.columns" [value]="tmp">{{tmp}}</mat-option>
+  </mat-select>
+</mat-form-field>
+<br>
+<small>{{message}}
+    <br>
+</small>
+<br>
+<button mat-raised-button (click)="Ok()" >Ok</button>
+<button mat-raised-button (click)="Cancel()" style="float: right">Cancel</button>

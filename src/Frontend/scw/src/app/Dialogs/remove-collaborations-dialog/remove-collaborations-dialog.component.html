@@ -1,0 +1,15 @@
+<p>Remove Collaborator</p>
+<mat-form-field>
+  <mat-label>Collaborators</mat-label>
+  <mat-select [(ngModel)]="selectedCollaborator" name="username">
+    <mat-option *ngFor="let user of collaborators" [value]="user">{{user.name}}</mat-option>
+  </mat-select>
+
+</mat-form-field>
+<br>
+<small>{{errormessage}}
+  <br>
+</small>
+<br>
+<button mat-raised-button (click)="Ok()" >Ok</button>
+<button mat-raised-button (click)="Cancel()" style="float: right">Cancel</button>

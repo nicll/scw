@@ -1,0 +1,21 @@
+FROM node:17-slim
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY public ./public/
+
+COPY NodeServer.js ./
+
+EXPOSE 80/tcp
+
+EXPOSE 443/tcp
+
+EXPOSE 4000/tcp
+
+ENTRYPOINT [ "node", "NodeServer.js" ]
+
+

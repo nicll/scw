@@ -1,0 +1,26 @@
+Column Dialog
+<br>
+<mat-form-field>
+    <mat-label>Enter columnname: </mat-label>
+    <input matInput [(ngModel)]="columnname">
+</mat-form-field>
+<br>
+<mat-form-field>
+  <mat-label>Enter column type: </mat-label>
+  <mat-select [(ngModel)]="type">
+    <mat-option value="Integer">Integer</mat-option>
+    <mat-option value="Real">Real number</mat-option>
+    <mat-option value="String">String</mat-option>
+    <mat-option value="Timestamp">Timestamp</mat-option>
+  </mat-select>
+</mat-form-field>
+<br>
+<mat-label>Enter if column can be empty: </mat-label><br><br>
+<mat-checkbox [(ngModel)]="nullable"> Can be empty</mat-checkbox><br><br>
+
+<small>{{message}}
+    <br>
+</small>
+<br>
+<button mat-raised-button (click)="Ok()" >Ok</button>
+<button mat-raised-button (click)="Cancel()" style="float: right">Cancel</button>
