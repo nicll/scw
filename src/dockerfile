@@ -14,6 +14,8 @@ EXPOSE 80/tcp
 
 EXPOSE 443/tcp
 
+EXPOSE 4000/tcp
+
 ENTRYPOINT [ "node", "NodeServer.js" ]
 
 
