@@ -23,6 +23,9 @@ jobs:
 
     - name: npm/yarn/pnpm install
       uses: Jaid/action-npm-install@v1.2.4
+      
+    - name: install dependencies
+      run: npm install
 
     - name: Build
       run: ng build --configuration production
