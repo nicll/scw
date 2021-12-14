@@ -1,16 +1,15 @@
-﻿using HotChocolate;
+﻿using System.Linq;
+using HotChocolate;
+using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Models;
-using System;
-using System.Linq;
 
-namespace ScwSvc.GraphQL
+namespace ScwSvc.GraphQL;
+
+public class AdminQuery
 {
-    public class AdminQuery
-    {
-        public IQueryable<User> GetUsers([Service] DbSysContext sysDb)
-            => sysDb.Users;
+    public IQueryable<User> GetUsers([Service] ISysDbRepository sysDb)
+        => sysDb.GetUsers();
 
-        public IQueryable<TableRef> GetTableRefs([Service] DbSysContext sysDb)
-            => sysDb.TableRefs;
-    }
+    public IQueryable<TableRef> GetTableRefs([Service] ISysDbRepository sysDb)
+        => sysDb.GetTables();
 }

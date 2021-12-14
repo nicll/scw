@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>ace9a1ec-ceb2-4c89-ba31-324aa89e30e8</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <StartupObject>ScwSvc.Program</StartupObject>
@@ -16,21 +16,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HotChocolate.AspNetCore" Version="11.2.2" />
-    <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="11.2.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.13" />
-    <PackageReference Include="Microsoft.AspNetCore.OData" Version="7.5.7" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.4">
+    <PackageReference Include="HotChocolate.AspNetCore" Version="12.3.2" />
+    <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="12.3.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="5.6.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScwSvc.BusinessLogic.Impl\ScwSvc.Procedures.Impl.csproj" />
+    <ProjectReference Include="..\ScwSvc.BusinessLogic.Interfaces\ScwSvc.Procedures.Interfaces.csproj" />
+    <ProjectReference Include="..\ScwSvc.DataAccess.Impl\ScwSvc.DataAccess.Impl.csproj" />
+    <ProjectReference Include="..\ScwSvc.DataAccess.Interfaces\ScwSvc.DataAccess.Interfaces.csproj" />
+    <ProjectReference Include="..\ScwSvc.Exceptions\ScwSvc.Exceptions.csproj" />
+    <ProjectReference Include="..\ScwSvc.Models\ScwSvc.Models.csproj" />
+    <ProjectReference Include="..\ScwSvc.Operations.Impl\ScwSvc.Operations.Impl.csproj" />
+    <ProjectReference Include="..\ScwSvc.Operations.Interfaces\ScwSvc.Operations.Interfaces.csproj" />
   </ItemGroup>
 
 
