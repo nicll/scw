@@ -43,7 +43,8 @@ public class ServiceController : ControllerBase
             UserId = newUserId,
             Name = loginCredentials.Username,
             PasswordHash = HashUserPassword(newUserId, loginCredentials.Password),
-            Role = UserRole.Common
+            Role = UserRole.Common,
+            CreationDate = DateTime.UtcNow
         });
         await _db.SaveChanges().ConfigureAwait(false);
 
@@ -183,7 +184,8 @@ public class ServiceController : ControllerBase
                     UserId = userId,
                     Name = "test" + i,
                     Role = (UserRole)i,
-                    PasswordHash = HashUserPassword(userId, "test")
+                    PasswordHash = HashUserPassword(userId, "test"),
+                    CreationDate = DateTime.UtcNow
                 });
             }
 

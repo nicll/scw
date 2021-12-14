@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ScwSvc.BusinessLogic.Impl;
-using ScwSvc.BusinessLogic.Interfaces;
+using ScwSvc.Procedures.Impl;
+using ScwSvc.Procedures.Interfaces;
 using ScwSvc.DataAccess.Impl;
 using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Models;
@@ -31,14 +31,9 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-        services.Configure<KestrelServerOptions>(o =>
-        {
-            o.AddServerHeader = false;
-            //o.AllowSynchronousIO = true; // for Json.NET compatibility
-        });
+        services.Configure<KestrelServerOptions>(o => o.AddServerHeader = false);
 
-        services.AddControllers()
-            .AddNewtonsoftJson();
+        services.AddControllers();
 
         services.AddDbContextPool<DbSysContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={SysUser}; Password={SysPass}; SearchPath=scw1_sys,public").UseLazyLoadingProxies());
         services.AddDbContextPool<DbDynContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={DynUser}; Password={DynPass}; SearchPath=scw1_dyn"));
@@ -57,8 +52,8 @@ public class Startup
             {
                 opts.Cookie.Name = "ScwSession";
                 opts.Cookie.IsEssential = true;
-                opts.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
-                opts.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+                opts.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+                opts.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
                 opts.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/api/service/unauthorized");
                 opts.LoginPath = new Microsoft.AspNetCore.Http.PathString("/api/service/unauthenticated");
                 opts.LogoutPath = new Microsoft.AspNetCore.Http.PathString("/api/service/logout");
@@ -78,7 +73,6 @@ public class Startup
 
 #if DEBUG
         services.AddSwaggerGen(opts => opts.SwaggerDoc("v0", new Microsoft.OpenApi.Models.OpenApiInfo() { Title = "Spreadsheet Components for Web-Based Projects API", Version = "v0" }));
-        services.AddSwaggerGenNewtonsoftSupport();
 #endif
     }
 

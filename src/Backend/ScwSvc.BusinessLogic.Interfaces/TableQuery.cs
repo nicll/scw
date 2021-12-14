@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ScwSvc.BusinessLogic.Interfaces;
+namespace ScwSvc.Procedures.Interfaces;
 
 [Flags]
 public enum TableQuery

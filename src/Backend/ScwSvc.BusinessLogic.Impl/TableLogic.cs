@@ -1,7 +1,7 @@
-﻿using ScwSvc.BusinessLogic.Interfaces;
+﻿using ScwSvc.Procedures.Interfaces;
 using ScwSvc.DataAccess.Interfaces;
 
-namespace ScwSvc.BusinessLogic.Impl;
+namespace ScwSvc.Procedures.Impl;
 
 public class TableLogic : ITableLogic
 {

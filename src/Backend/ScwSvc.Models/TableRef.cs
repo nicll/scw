@@ -32,6 +32,12 @@ public class TableRef
     public TableType TableType { get; set; }
 
     /// <summary>
+    /// Date when this table was created.
+    /// </summary>
+    [Required]
+    public DateTime CreationDate { get; set; }
+
+    /// <summary>
     /// The table's name in the database.
     /// </summary>
     /// <remarks>

@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScwSvc.BusinessLogic.Interfaces;
+using ScwSvc.Procedures.Interfaces;
+using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Exceptions;
 using ScwSvc.Models;
 using ScwSvc.SvcModels;
@@ -23,12 +24,20 @@ public class UserController : ControllerBase
     private readonly ILogger<UserController> _logger;
     private readonly IUserLogic _user;
     private readonly ITableLogic _table;
+    // following is TEMPORARY
+    private readonly ISysDbRepository _sysDb;
+    private readonly IDynDbRepository _dynDb;
+    public const int MaxDataSetsPerUser = 20;
+    public const int MaxSheetsPerUser = 20;
 
-    public UserController(ILogger<UserController> logger, IUserLogic user, ITableLogic table)
+    public UserController(ILogger<UserController> logger, IUserLogic user, ITableLogic table, ISysDbRepository sysDb, IDynDbRepository dynDb)
     {
         _logger = logger;
         _user = user;
         _table = table;
+
+        _sysDb = sysDb;
+        _dynDb = dynDb;
     }
 
     [HttpGet("username")]
@@ -41,7 +50,7 @@ public class UserController : ControllerBase
         if (!userInfo.HasValue)
             return Unauthorized("You are logged in with an invalid user.");
 
-        var user = await _user.GetUserById(userInfo.Value);
+        var user = await _sysDb.GetUserById(userInfo.Value);
 
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
@@ -60,7 +69,7 @@ public class UserController : ControllerBase
         if (!userInfo.HasValue)
             return Unauthorized("You are logged in with an invalid user.");
 
-        var user = await _user.GetUserById(userInfo.Value);
+        var user = await _sysDb.GetUserById(userInfo.Value);
 
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
@@ -74,7 +83,7 @@ public class UserController : ControllerBase
                 throw new UserChangeException("Username is already in use.") { UserId = user.UserId, OldValue = user.Name, NewValue = username };
 
             user.Name = username;
-            await _user.ModifyUser(user);
+            await _sysDb.ModifyUser(user);
             await _sysDb.SaveChanges();
             return Ok();
         }
@@ -95,7 +104,7 @@ public class UserController : ControllerBase
         if (!userInfo.HasValue)
             return Unauthorized("You are logged in with an invalid user.");
 
-        var user = await _user.GetUserById(userInfo.Value);
+        var user = await _sysDb.GetUserById(userInfo.Value);
 
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");

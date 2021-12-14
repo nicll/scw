@@ -34,6 +34,12 @@ public class User
     public byte[] PasswordHash { get; set; }
 
     /// <summary>
+    /// Date when this user was created.
+    /// </summary>
+    [Required]
+    public DateTime CreationDate { get; set; }
+
+    /// <summary>
     /// Tables that this user owns.
     /// </summary>
     [JsonIgnore]

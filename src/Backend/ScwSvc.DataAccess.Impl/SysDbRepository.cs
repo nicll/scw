@@ -77,7 +77,7 @@ public class SysDbRepository : ISysDbRepository
 
     public async Task RemoveTable(TableRef table)
     {
-        await foreach (var user in _sysDb.Users.ConfigureAwait(false))
+        await foreach (var user in _sysDb.Users.AsAsyncEnumerable().ConfigureAwait(false))
             user.Collaborations.Remove(table);
 
         table.Owner.OwnTables.Remove(table);

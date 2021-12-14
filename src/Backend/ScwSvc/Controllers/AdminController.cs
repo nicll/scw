@@ -37,8 +37,8 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("user")]
-    public IQueryable<User> GetUsers()
-        => _sysDb.GetUsers();
+    public ICollection<User> GetUsers()
+        => _sysDb.GetUsers().ToArray();
 
     [HttpGet("user/{userId}")]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
@@ -138,16 +138,16 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("table")]
-    public IQueryable<TableRef> GetTables()
-        => _sysDb.GetTables();
+    public ICollection<TableRef> GetTables()
+        => _sysDb.GetTables().ToArray();
 
     [HttpGet("dataset")]
-    public IQueryable<TableRef> GetDataSets()
-        => _sysDb.GetTables().Where(t => t.TableType == TableType.DataSet);
+    public ICollection<TableRef> GetDataSets()
+        => _sysDb.GetTables().Where(t => t.TableType == TableType.DataSet).ToArray();
 
     [HttpGet("sheet")]
-    public IQueryable<TableRef> GetSheets()
-        => _sysDb.GetTables().Where(t => t.TableType == TableType.Sheet);
+    public ICollection<TableRef> GetSheets()
+        => _sysDb.GetTables().Where(t => t.TableType == TableType.Sheet).ToArray();
 
     [HttpPost("dataset")]
     [Authorize(Policy = AdminOnly)]

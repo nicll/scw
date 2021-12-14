@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScwSvc.BusinessLogic.Interfaces\ScwSvc.Procedures.Interfaces.csproj" />
+    <ProjectReference Include="..\ScwSvc.Exceptions\ScwSvc.Exceptions.csproj" />
+    <ProjectReference Include="..\ScwSvc.Models\ScwSvc.Models.csproj" />
+    <ProjectReference Include="..\ScwSvc.Operations.Interfaces\ScwSvc.Operations.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>
