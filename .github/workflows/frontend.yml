@@ -31,7 +31,7 @@ jobs:
       run: node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng build --configuration production
       
     - name: Copy directory
-      run: cp /dist/scw/* ../../public
+      run: cp ./src/Frontend/scw/dist/scw/* ./src/public
 
   push_to_registry:
     name: Push Docker image to Docker Hub
