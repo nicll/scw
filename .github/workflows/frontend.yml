@@ -28,7 +28,7 @@ jobs:
       run: npm install
 
     - name: Build
-      run: ng build --configuration production
+      run: node --max_old_space_size=8192 ng build --configuration production
 
   push_to_registry:
     name: Push Docker image to Docker Hub
