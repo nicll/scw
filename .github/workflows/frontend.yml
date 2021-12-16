@@ -37,7 +37,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: angular-frontend-build
-        path: ./dist/scw/
+        path: ./dist/scw
 
   push_to_registry:
     name: Push Docker image to Docker Hub
