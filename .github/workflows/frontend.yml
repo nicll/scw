@@ -30,11 +30,8 @@ jobs:
     - name: Build
       run: node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng build --configuration production
       
-    - name: Copy file
-      uses: MadaraUchiha/copy-action@0.0.1
-      with:
-        source: dist
-        target: ../../public
+    - name: Copy directory
+      run: cp /dist/scw/* ../../public
 
   push_to_registry:
     name: Push Docker image to Docker Hub
