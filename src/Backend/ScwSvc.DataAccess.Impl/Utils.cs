@@ -34,7 +34,7 @@ internal static class Utils
         EnsureValidColumnName(column.Name);
 
         if (!_typeMap.TryGetValue(column.Type, out var col))
-            throw new InvalidTableException("Invalid column type: " + column.Type);
+            throw new TableColumnException("Invalid column type: " + column.Type);
 
         return new StringBuilder().Append('"').Append(column.Name).Append('"')
             .Append(' ')

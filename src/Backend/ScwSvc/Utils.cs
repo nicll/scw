@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using ScwSvc.Exceptions;
 using ScwSvc.Models;
+using ScwSvc.Procedures.Interfaces;
 using ScwSvc.SvcModels;
 
 namespace ScwSvc;
@@ -86,6 +88,34 @@ internal static class Utils
             {
                 return null;
             }
+        }
+
+        internal static async Task<SessionResult> GetUserOrError(IAuthProcedures authProc, ClaimsPrincipal cpUser)
+        {
+            var userInfo = Authentication.GetUserIdAsGuidOrNull(cpUser);
+
+            if (!userInfo.HasValue)
+                return SessionResult.Invalid(new UnauthorizedObjectResult("You are logged in with an invalid user."));
+
+            var user = await authProc.(userInfo.Value);
+
+            if (user is null)
+                return SessionResult.Invalid(new UnauthorizedObjectResult("You are logged in with a non-existent user."));
+
+            return SessionResult.Valid(user);
+        }
+
+        internal abstract record SessionResult
+        {
+            private SessionResult() { }
+
+            internal static ValidSession Valid(User user) => new ValidSession(user);
+
+            internal static InvalidSession Invalid(IActionResult error) => new InvalidSession(error);
+
+            internal record ValidSession(User User) : SessionResult { }
+
+            internal record InvalidSession(IActionResult Error) : SessionResult { }
         }
     }
 

@@ -1,13 +1,7 @@
-﻿using ScwSvc.Procedures.Interfaces;
-using ScwSvc.DataAccess.Interfaces;
-
-namespace ScwSvc.Procedures.Impl;
+﻿namespace ScwSvc.Procedures.Impl;
 
 public class TableProcedures : ITableProcedures
 {
-    private readonly ISysDbRepository _sysDb;
-    private readonly IDynDbRepository _dynDb;
-
     /// <summary>
     /// Maximum amount of data sets one user may own at any time.
     /// </summary>

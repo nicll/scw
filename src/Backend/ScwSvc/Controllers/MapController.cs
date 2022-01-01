@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScwSvc.DataAccess.Interfaces;
+using ScwSvc.Procedures.Interfaces;
 using static ScwSvc.Utils.Authentication;
 
 namespace ScwSvc.Controllers;
@@ -14,13 +14,15 @@ namespace ScwSvc.Controllers;
 [Authorize]
 public class MapController : ControllerBase
 {
-    private readonly ILogger<UserController> _logger;
-    private readonly ISysDbRepository _sysDb;
+    private readonly ILogger<MapController> _logger;
+    private readonly IAuthProcedures _authProc;
+    private readonly IMapProcedures _mapProc;
 
-    public MapController(ILogger<UserController> logger, ISysDbRepository sysDb)
+    public MapController(ILogger<MapController> logger, IAuthProcedures authProc, IMapProcedures mapProc)
     {
         _logger = logger;
-        _sysDb = sysDb;
+        _authProc = authProc;
+        _mapProc = mapProc;
     }
 
     [HttpGet("id2name/{userId}")]
@@ -29,22 +31,15 @@ public class MapController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> UserIdToName([FromRoute] Guid userId)
     {
-        var userInfo = GetUserIdAsGuidOrNull(User);
+        if (await GetUserOrError(_authProc, User) is SessionResult.InvalidSession sessionError)
+            return sessionError.Error;
 
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
+        var name = await _mapProc.UserIdToName(userId);
 
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var otherUser = await _sysDb.GetUserById(userId);
-
-        if (otherUser is null)
+        if (name is null)
             return NotFound("User could not be found.");
 
-        return Ok(otherUser.Name);
+        return Ok(name);
     }
 
     [HttpGet("name2id/{name}")]
@@ -53,21 +48,14 @@ public class MapController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> UserNameToId([FromRoute] string name)
     {
-        var userInfo = GetUserIdAsGuidOrNull(User);
+        if (await GetUserOrError(_authProc, User) is SessionResult.InvalidSession sessionError)
+            return sessionError.Error;
 
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
+        var id = await _mapProc.UserNameToId(name);
 
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var otherUser = await _sysDb.GetUserByName(name);
-
-        if (otherUser is null)
+        if (!id.HasValue)
             return NotFound("User could not be found.");
 
-        return Ok(otherUser.UserId.ToString());
+        return Ok(id.Value);
     }
 }

@@ -32,7 +32,7 @@ public class SysDbRepository : ISysDbRepository
     public async Task<User?> GetUserByName(string name)
         => await _sysDb.Users.FirstOrDefaultAsync(u => u.Name == name).ConfigureAwait(false);
 
-    public async Task<IEnumerable<User>> GetUsersByRole(UserRole role)
+    public async Task<ICollection<User>> GetUsersByRole(UserRole role)
         => await _sysDb.Users.Where(u => u.Role == role).ToArrayAsync().ConfigureAwait(false);
 
     public async Task<bool> IsUserNameAssigned(string name)
