@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScwSvc.DataAccess.Interfaces;
+using ScwSvc.Exceptions;
 using ScwSvc.Models;
+using ScwSvc.Operations.Interfaces;
+using ScwSvc.Procedures.Interfaces;
 using ScwSvc.SvcModels;
-using static ScwSvc.Utils.Authentication;
 
 namespace ScwSvc.Controllers;
 
@@ -19,42 +20,53 @@ namespace ScwSvc.Controllers;
 public class ServiceController : ControllerBase
 {
     private readonly ILogger<ServiceController> _logger;
-    private readonly ISysDbRepository _db;
+    private readonly IServiceProcedures _service;
+#if DEBUG
+    private readonly IUserOperations _debugUser;
+#endif
 
-    public ServiceController(ILogger<ServiceController> logger, ISysDbRepository db)
+    public ServiceController(ILogger<ServiceController> logger, IServiceProcedures service)
     {
         _logger = logger;
-        _db = db;
+        _service = service;
     }
+
+#if DEBUG
+    [Microsoft.Extensions.DependencyInjection.ActivatorUtilitiesConstructor]
+    public ServiceController(ILogger<ServiceController> logger, IServiceProcedures service, IUserOperations user)
+        : this(logger, service)
+        => _debugUser = user;
+#endif
 
     [HttpPost("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async ValueTask<IActionResult> Register([FromBody] AuthenticationCredentials loginCredentials)
     {
-        _logger.LogInformation("Register attempt: user=\"" + loginCredentials.Username + "\"");
+        _logger.LogInformation($"Register attempt: user='{loginCredentials.Username}'");
 
-        if (await _db.IsUserNameAssigned(loginCredentials.Username))
-            return BadRequest("User with this name already exists.");
-
-        var newUserId = Guid.NewGuid();
-        await _db.AddUser(new User()
+        try
         {
-            UserId = newUserId,
-            Name = loginCredentials.Username,
-            PasswordHash = HashUserPassword(newUserId, loginCredentials.Password),
-            Role = UserRole.Common,
-            CreationDate = DateTime.UtcNow
-        });
-        await _db.SaveChanges().ConfigureAwait(false);
+            var userId = await _service.RegisterUser(loginCredentials.Username, loginCredentials.Password);
 
-        var cp = new ClaimsPrincipal(new ClaimsIdentity(
-                new[] { new Claim(ClaimTypes.Role, nameof(UserRole.Common)), new Claim(ClaimTypes.NameIdentifier, newUserId.ToDbName()) },
-            CookieAuthenticationDefaults.AuthenticationScheme));
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
+            var cp = new ClaimsPrincipal(new ClaimsIdentity(
+                    new[] { new Claim(ClaimTypes.Role, nameof(UserRole.Common)), new Claim(ClaimTypes.NameIdentifier, userId.ToCookieFormat()) },
+                CookieAuthenticationDefaults.AuthenticationScheme));
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
 
-        _logger.LogInformation("Register: user=\"" + loginCredentials.Username + "\"");
-        return Ok();
+            _logger.LogInformation($"Register success: user='{loginCredentials.Username}'");
+            return Ok();
+        }
+        catch (UserAlreadyExistsException ex)
+        {
+            _logger.LogInformation($"Register failed: user already exists; user='{loginCredentials.Username}'");
+            return BadRequest("User with this name already exists.");
+        }
+        catch (UserCredentialsInvalidException ex)
+        {
+            _logger.LogInformation($"Register failed: user='{loginCredentials.Username}'; err={ex.Message}");
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
@@ -81,28 +93,31 @@ public class ServiceController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async ValueTask<IActionResult> LoginWithDB([FromBody] AuthenticationCredentials loginCredentials)
     {
-        _logger.LogInformation("Login attempt: user=\"" + loginCredentials.Username + "\"");
+        _logger.LogInformation($"Login attempt: user='{loginCredentials.Username}'");
 
-        var user = await _db.GetUserByName(loginCredentials.Username);
-
-        if (user is null)
-            return BadRequest("User not found.");
-
-        var enteredPassword = HashUserPassword(user.UserId, loginCredentials.Password);
-
-        if (CompareHashes(enteredPassword, user.PasswordHash))
+        try
         {
+            var user = await _service.LoginUser(loginCredentials.Username, loginCredentials.Password);
+
+            if (user is null)
+            {
+                _logger.LogInformation($"Login fail: user='{loginCredentials.Username}'; password mismatch");
+                return BadRequest("Incorrect password.");
+            }
+
             var cp = new ClaimsPrincipal(new ClaimsIdentity(
-                    new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToDbName()) },
+                    new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToCookieFormat()) },
                 CookieAuthenticationDefaults.AuthenticationScheme));
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
-            _logger.LogInformation("Login: user=\"" + loginCredentials.Username + "\"");
+            _logger.LogInformation($"Login: user='{loginCredentials.Username}'");
 
             return Ok();
         }
-
-        _logger.LogInformation("Login fail: user=\"" + loginCredentials.Username + "\"");
-        return BadRequest("Incorrect password.");
+        catch (UserNotFoundException)
+        {
+            _logger.LogInformation($"Login fail: user='{loginCredentials.Username}'; user not found");
+            return BadRequest("Unknown username.");
+        }
     }
 
     /// <summary>
@@ -130,7 +145,7 @@ public class ServiceController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<string> Unauthenticated([FromQuery] string from)
     {
-        _logger.LogWarning("Unauthenticated: unauthenticated user tried accessing URL; remote=\"" + HttpContext.Connection.RemoteIpAddress + "\"; query=\"" + from + "\"");
+        _logger.LogWarning($"Unauthenticated: unauthenticated user tried accessing URL; remote='{HttpContext.Connection.RemoteIpAddress}'; query='{from}'");
         return StatusCode(StatusCodes.Status401Unauthorized, "You are currently not logged in.");
     }
 
@@ -145,7 +160,7 @@ public class ServiceController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public ActionResult<string> Unauthorized([FromQuery] string from)
     {
-        _logger.LogWarning("Unauthorized: user tried accessing forbidden URL; user=\"" + User.FindFirstValue(ClaimTypes.NameIdentifier) + "\"; query=\"" + from + "\"");
+        _logger.LogWarning($"Unauthorized: user tried accessing forbidden URL; user='{User.FindFirstValue(ClaimTypes.NameIdentifier)}'; query='{from}'");
         return StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to access this URL.");
     }
 
@@ -171,25 +186,16 @@ public class ServiceController : ControllerBase
 
 #if DEBUG
     // demo users for testing
-    [HttpPost("createDemoUsers")]
+    [HttpPost("debugonly_create_demo_users")]
     public async ValueTask<IActionResult> CreateDemoUsers()
     {
         try
         {
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < Enum.GetValues<UserRole>().Length; ++i)
             {
-                var userId = Guid.NewGuid();
-                await _db.AddUser(new User()
-                {
-                    UserId = userId,
-                    Name = "test" + i,
-                    Role = (UserRole)i,
-                    PasswordHash = HashUserPassword(userId, "test"),
-                    CreationDate = DateTime.UtcNow
-                });
+                var userId = await _debugUser.AddUser("test" + i, "test");
+                await _debugUser.ModifyUser(userId, null, null, (UserRole)i);
             }
-
-            await _db.SaveChanges();
             return Ok();
         }
         catch

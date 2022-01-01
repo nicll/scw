@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ScwSvc.Procedures.Impl;
-using ScwSvc.Procedures.Interfaces;
 using ScwSvc.DataAccess.Impl;
 using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Models;
+using ScwSvc.Operations.Impl;
+using ScwSvc.Operations.Interfaces;
+using ScwSvc.Procedures.Impl;
+using ScwSvc.Procedures.Interfaces;
 using static ScwSvc.Globals.Authorization;
 using static ScwSvc.Globals.CorsConfig;
 using static ScwSvc.Globals.DbConnectionString;
@@ -39,8 +41,11 @@ public class Startup
         services.AddDbContextPool<DbDynContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={DynUser}; Password={DynPass}; SearchPath=scw1_dyn"));
         services.AddScoped<ISysDbRepository, SysDbRepository>();
         services.AddScoped<IDynDbRepository, DynDbRepository>();
-        services.AddScoped<IUserLogic, UserLogic>();
-        services.AddScoped<ITableLogic, TableLogic>();
+        services.AddScoped<IUserOperations, UserOperations>();
+        services.AddScoped<ITableOperations, TableOperations>();
+        services.AddScoped<IUserProcedures, UserProcedures>();
+        services.AddScoped<ITableProcedures, TableProcedures>();
+        services.AddScoped<IServiceProcedures, ServiceProcedures>();
 
         services
             .AddGraphQLServer()

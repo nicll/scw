@@ -16,7 +16,7 @@ public class TableRef
     /// </summary>
     [Key]
     [Required]
-    public Guid TableRefId { get; set; }
+    public Guid TableId { get; set; }
 
     /// <summary>
     /// An optional display name.

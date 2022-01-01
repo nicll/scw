@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using ScwSvc.Exceptions;
@@ -14,11 +12,6 @@ namespace ScwSvc;
 
 internal static class Utils
 {
-    /// <summary>
-    /// The pepper used by the backend.
-    /// </summary>
-    private const string Pepper = "scw-";
-
     internal static class Configuration
     {
         /// <summary>
@@ -37,7 +30,7 @@ internal static class Utils
         /// </summary>
         /// <param name="name">Name of the environment variable.</param>
         /// <returns>The value of the variable or <see langword="null"/>.</returns>
-        internal static string GetEnvironmentVariableOrNull(string name)
+        internal static string? GetEnvironmentVariableOrNull(string name)
             => Environment.GetEnvironmentVariable(name);
     }
 
@@ -49,7 +42,7 @@ internal static class Utils
         /// </summary>
         /// <param name="user">The "User" object.</param>
         /// <returns>The user ID or <see langword="null"/>.</returns>
-        internal static string GetUserIdAsStringOrNull(ClaimsPrincipal user)
+        internal static string? GetUserIdAsStringOrNull(ClaimsPrincipal user)
             => user.FindFirstValue(ClaimTypes.NameIdentifier);
 
         /// <summary>
@@ -63,10 +56,13 @@ internal static class Utils
             try
             {
                 var owner = GetUserIdAsStringOrNull(user);
-                var ownerId = Guid.Parse(owner);
-                return ownerId;
+
+                if (owner is null)
+                    return null;
+
+                return Guid.Parse(owner);
             }
-            catch
+            catch (FormatException)
             {
                 return null;
             }
@@ -91,29 +87,6 @@ internal static class Utils
                 return null;
             }
         }
-
-        /// <summary>
-        /// Hashes a users's password.
-        /// </summary>
-        /// <param name="userId">ID of the user.</param>
-        /// <param name="pass">Password of the user.</param>
-        /// <returns>Hashed password of the user.</returns>
-        internal static byte[] HashUserPassword(Guid userId, in string pass)
-        {
-            var hasher = SHA256.Create();
-            var combination = Encoding.UTF8.GetBytes(Pepper + userId.ToDbName() + pass);
-            return hasher.ComputeHash(combination);
-        }
-
-        /// <summary>
-        /// Compare two memory areas for equal content.
-        /// Basically like memcmp().
-        /// </summary>
-        /// <param name="left">First memory area.</param>
-        /// <param name="right">Second memory area.</param>
-        /// <returns>Whether or not the two areas contain the same content.</returns>
-        internal static bool CompareHashes(in ReadOnlySpan<byte> left, in ReadOnlySpan<byte> right)
-            => left.SequenceEqual(right);
     }
 
     internal static class DataConversion
@@ -151,19 +124,14 @@ internal static class Utils
         }
     }
 
+    internal static string ToCookieFormat(this Guid userId)
+    => userId.ToString("N");
+
     internal static bool AllUnique<T>(this IEnumerable<T> source)
     {
         var hs = new HashSet<T>();
         return source.All(hs.Add);
     }
-
-    /// <summary>
-    /// Turns a <see cref="Guid"/> into a <see cref="String"/> that can be used as a name.
-    /// </summary>
-    /// <param name="guid">The given <see cref="Guid"/>.</param>
-    /// <returns>The ID as a normalized <see cref="String"/>.</returns>
-    internal static string ToDbName(this Guid guid)
-        => guid.ToString("N");
 
     internal static ActionResult Forbidden(this ControllerBase controller, object value)
         => controller.Forbid(CookieAuthenticationDefaults.AuthenticationScheme);

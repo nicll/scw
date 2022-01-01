@@ -38,7 +38,7 @@ public class AdminController : ControllerBase
 
     [HttpGet("user")]
     public ICollection<User> GetUsers()
-        => _sysDb.GetUsers().ToArray();
+        => _sysDb.CreateUsersQuery().ToArray();
 
     [HttpGet("user/{userId}")]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
@@ -139,15 +139,15 @@ public class AdminController : ControllerBase
 
     [HttpGet("table")]
     public ICollection<TableRef> GetTables()
-        => _sysDb.GetTables().ToArray();
+        => _sysDb.CreateTablesQuery().ToArray();
 
     [HttpGet("dataset")]
     public ICollection<TableRef> GetDataSets()
-        => _sysDb.GetTables().Where(t => t.TableType == TableType.DataSet).ToArray();
+        => _sysDb.CreateTablesQuery().Where(t => t.TableType == TableType.DataSet).ToArray();
 
     [HttpGet("sheet")]
     public ICollection<TableRef> GetSheets()
-        => _sysDb.GetTables().Where(t => t.TableType == TableType.Sheet).ToArray();
+        => _sysDb.CreateTablesQuery().Where(t => t.TableType == TableType.Sheet).ToArray();
 
     [HttpPost("dataset")]
     [Authorize(Policy = AdminOnly)]
@@ -176,7 +176,7 @@ public class AdminController : ControllerBase
             var newDsId = Guid.NewGuid();
             var newTable = new TableRef()
             {
-                TableRefId = newDsId,
+                TableId = newDsId,
                 TableType = TableType.DataSet,
                 DisplayName = dsModel.DisplayName,
                 Owner = user,
@@ -252,7 +252,7 @@ public class AdminController : ControllerBase
         var newShId = Guid.NewGuid();
         var newTable = new TableRef()
         {
-            TableRefId = newShId,
+            TableId = newShId,
             TableType = TableType.Sheet,
             DisplayName = shModel.DisplayName,
             Owner = user,

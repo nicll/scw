@@ -6,7 +6,7 @@ namespace ScwSvc.Exceptions;
 /// <summary>
 /// This exception is thrown when an invalid change made was to a <see cref="User"/>.
 /// </summary>
-public class UserChangeException : Exception
+public class UserChangeException : InvalidUserException
 {
     /// <summary>
     /// Contains the <see cref="User.UserId"/>.

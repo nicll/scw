@@ -604,7 +604,7 @@ public class IntegrationTests
         HttpResponseMessage responseTask = null;
         foreach (var tableref in TableRefList.Where(x => x.TableType == TableType.Sheet))
         {
-            string url = $"/api/admin/sheet/{tableref.TableRefId}";
+            string url = $"/api/admin/sheet/{tableref.TableId}";
             responseTask = await _client.DeleteAsync(url);
             var response = await responseTask.Content.ReadAsStringAsync();
 
@@ -618,7 +618,7 @@ public class IntegrationTests
         HttpResponseMessage responseTask = null;
         foreach (var tableref in TableRefList.Where(x => x.TableType == TableType.DataSet))
         {
-            string url = $"/api/admin/dataset/{tableref.TableRefId}";
+            string url = $"/api/admin/dataset/{tableref.TableId}";
             responseTask = await _client.DeleteAsync(url);
             var response = await responseTask.Content.ReadAsStringAsync();
 

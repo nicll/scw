@@ -21,8 +21,8 @@ public class SysDbRepositoryTests
         _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.Parse(ManagerUserId), Collaborations = new List<TableRef>(), OwnTables = Array.Empty<TableRef>() },
         _adminUser = new() { Name = "AdminUser", Role = UserRole.Admin, UserId = Guid.Parse(AdminUserId), Collaborations = new List<TableRef>(), OwnTables = Array.Empty<TableRef>() };
     private readonly TableRef
-        _datasetTable = new() { TableRefId = Guid.NewGuid(), TableType = TableType.DataSet, OwnerUserId = Guid.Parse(CommonUserId) },
-        _sheetTable = new() { TableRefId = Guid.NewGuid(), TableType = TableType.Sheet, OwnerUserId = Guid.Parse(CommonUserId) };
+        _datasetTable = new() { TableId = Guid.NewGuid(), TableType = TableType.DataSet, OwnerUserId = Guid.Parse(CommonUserId) },
+        _sheetTable = new() { TableId = Guid.NewGuid(), TableType = TableType.Sheet, OwnerUserId = Guid.Parse(CommonUserId) };
 
     [OneTimeSetUp]
     public void SetupOnce()
@@ -40,7 +40,7 @@ public class SysDbRepositoryTests
 
         await _sysDb.AddUser(user);
 
-        Assert.Contains(_commonUser, await _sysDb.GetUsers().ToArrayAsync());
+        Assert.Contains(_commonUser, await _sysDb.CreateUsersQuery().ToArrayAsync());
     }
 
     [Test, Order(2)]
@@ -50,7 +50,7 @@ public class SysDbRepositoryTests
 
         await _sysDb.AddUser(user);
 
-        Assert.Contains(_managerUser, await _sysDb.GetUsers().ToArrayAsync());
+        Assert.Contains(_managerUser, await _sysDb.CreateUsersQuery().ToArrayAsync());
     }
 
     [Test, Order(3)]
@@ -60,7 +60,7 @@ public class SysDbRepositoryTests
 
         await _sysDb.AddUser(user);
 
-        Assert.Contains(_adminUser, await _sysDb.GetUsers().ToArrayAsync());
+        Assert.Contains(_adminUser, await _sysDb.CreateUsersQuery().ToArrayAsync());
     }
 
     [Test, Order(4)]
@@ -139,7 +139,7 @@ public class SysDbRepositoryTests
 
         await _sysDb.AddTable(tableRef);
 
-        Assert.AreEqual(tableRef, await _sysDb.GetTableById(tableRef.TableRefId));
+        Assert.AreEqual(tableRef, await _sysDb.GetTableById(tableRef.TableId));
     }
 
     [Test, Order(12)]
@@ -149,7 +149,7 @@ public class SysDbRepositoryTests
 
         await _sysDb.AddTable(tableRef);
 
-        Assert.AreEqual(tableRef, await _sysDb.GetTableById(tableRef.TableRefId));
+        Assert.AreEqual(tableRef, await _sysDb.GetTableById(tableRef.TableId));
     }
 
     [Test, Order(13)]
@@ -159,7 +159,7 @@ public class SysDbRepositoryTests
 
         await _sysDb.RemoveTable(tableRef);
 
-        Assert.IsNull(await _sysDb.GetTableById(tableRef.TableRefId));
+        Assert.IsNull(await _sysDb.GetTableById(tableRef.TableId));
     }
 
     [Test, Order(14)]
@@ -169,6 +169,6 @@ public class SysDbRepositoryTests
 
         await _sysDb.RemoveTable(tableRef);
 
-        Assert.IsNull(await _sysDb.GetTableById(tableRef.TableRefId));
+        Assert.IsNull(await _sysDb.GetTableById(tableRef.TableId));
     }
 }

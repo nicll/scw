@@ -22,15 +22,15 @@ namespace ScwSvc.Controllers;
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
-    private readonly IUserLogic _user;
-    private readonly ITableLogic _table;
+    private readonly IUserProcedures _user;
+    private readonly ITableProcedures _table;
     // following is TEMPORARY
     private readonly ISysDbRepository _sysDb;
     private readonly IDynDbRepository _dynDb;
     public const int MaxDataSetsPerUser = 20;
     public const int MaxSheetsPerUser = 20;
 
-    public UserController(ILogger<UserController> logger, IUserLogic user, ITableLogic table, ISysDbRepository sysDb, IDynDbRepository dynDb)
+    public UserController(ILogger<UserController> logger, IUserProcedures user, ITableProcedures table, ISysDbRepository sysDb, IDynDbRepository dynDb)
     {
         _logger = logger;
         _user = user;
@@ -257,8 +257,8 @@ public class UserController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId)
-            ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId)
+            ?? user.Collaborations.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not allowed to access this table or it does not exist.");
@@ -301,7 +301,7 @@ public class UserController : ControllerBase
             var newDsId = Guid.NewGuid();
             var newTable = new TableRef()
             {
-                TableRefId = newDsId,
+                TableId = newDsId,
                 TableType = TableType.DataSet,
                 DisplayName = dsModel.DisplayName,
                 Owner = user,
@@ -342,7 +342,7 @@ public class UserController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not authorized to view this table or it does not exist.");
@@ -380,7 +380,7 @@ public class UserController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not authorized to view this table or it does not exist.");
@@ -399,7 +399,7 @@ public class UserController : ControllerBase
 
         var dsColumn = new DataSetColumn()
         {
-            TableRefId = tableRef.TableRefId,
+            TableRefId = tableRef.TableId,
             TableRef = tableRef,
             Name = column.Name,
             Type = column.Type,
@@ -438,7 +438,7 @@ public class UserController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not authorized to view this table or it does not exist.");
@@ -588,8 +588,8 @@ public class UserController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId)
-            ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId)
+            ?? user.Collaborations.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not allowed to access this table or it does not exist.");
@@ -629,7 +629,7 @@ public class UserController : ControllerBase
         var newShId = Guid.NewGuid();
         var newTable = new TableRef()
         {
-            TableRefId = newShId,
+            TableId = newShId,
             TableType = TableType.Sheet,
             DisplayName = shModel.DisplayName,
             Owner = user,
@@ -664,7 +664,7 @@ public class UserController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not authorized to view this table or it does not exist.");
@@ -766,7 +766,7 @@ public class UserController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not authorized to view this table or it does not exist.");
@@ -797,7 +797,7 @@ public class UserController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not authorized to view this table or it does not exist.");
@@ -842,7 +842,7 @@ public class UserController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not authorized to view this table or it does not exist.");

@@ -70,6 +70,9 @@ public class DynDbRepository : IDynDbRepository
 
     public async Task RemoveDataSetColumn(TableRef table, string columnName)
     {
+        if (columnName == "_id")
+            throw new TableColumnException("Cannot delete ID column.");
+
         using var conn = _dynDb.Database.GetDbConnection();
         await conn.OpenAsync().ConfigureAwait(false);
         using var cmd = conn.CreateCommand();

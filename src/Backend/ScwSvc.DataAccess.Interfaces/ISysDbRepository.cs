@@ -1,18 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ScwSvc.Models;
+﻿using ScwSvc.Models;
 
 namespace ScwSvc.DataAccess.Interfaces;
 
 public interface ISysDbRepository
 {
-    IQueryable<User> GetUsers();
+    bool AutoSave { get; set; }
 
-    Task<User> GetUserById(Guid userId);
+    Task<ICollection<User>> GetAllUsers();
 
-    Task<User> GetUserByName(string name);
+    IQueryable<User> CreateUsersQuery();
+
+    Task<ICollection<User>> ExecuteUsersQuery(IQueryable<User> query);
+
+    Task<User?> GetUserById(Guid userId);
+
+    Task<User?> GetUserByName(string name);
 
     Task<IEnumerable<User>> GetUsersByRole(UserRole role);
 
@@ -24,9 +26,13 @@ public interface ISysDbRepository
 
     Task ModifyUser(User user);
 
-    IQueryable<TableRef> GetTables();
+    Task<ICollection<TableRef>> GetAllTables();
 
-    Task<TableRef> GetTableById(Guid tableId);
+    IQueryable<TableRef> CreateTablesQuery();
+
+    Task<ICollection<TableRef>> ExecuteTablesQuery(IQueryable<TableRef> query);
+
+    Task<TableRef?> GetTableById(Guid tableId);
 
     Task AddTable(TableRef table);
 

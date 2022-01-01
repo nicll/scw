@@ -3,7 +3,7 @@ using ScwSvc.DataAccess.Interfaces;
 
 namespace ScwSvc.Procedures.Impl;
 
-public class TableLogic : ITableLogic
+public class TableProcedures : ITableProcedures
 {
     private readonly ISysDbRepository _sysDb;
     private readonly IDynDbRepository _dynDb;

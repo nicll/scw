@@ -31,9 +31,9 @@ public class GraphQLTableController : ControllerBase
         => RedirectPreserveMethod(PostgraphileBaseUrl);
 
     /// <summary>
-    /// Queries the <see cref="TableRef.LookupName"/> for a data set's <see cref="TableRef.TableRefId"/>.
+    /// Queries the <see cref="TableRef.LookupName"/> for a data set's <see cref="TableRef.TableId"/>.
     /// </summary>
-    /// <param name="tableRefId">The incoming <see cref="TableRef.TableRefId"/>.</param>
+    /// <param name="tableRefId">The incoming <see cref="TableRef.TableId"/>.</param>
     /// <returns>The corresponding <see cref="TableRef.LookupName"/>.</returns>
     [HttpGet("dataset/{tableRefId}/lookup")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -52,8 +52,8 @@ public class GraphQLTableController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId)
-            ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId)
+            ?? user.Collaborations.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not authorized to view this table or it does not exist.");
@@ -61,15 +61,15 @@ public class GraphQLTableController : ControllerBase
         if (tableRef.TableType != TableType.DataSet)
             return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
 
-        _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
+        _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableId + "\"");
 
         return Ok(tableRef.LookupName.ToDbName());
     }
 
     /// <summary>
-    /// Queries the <see cref="TableRef.LookupName"/> for a sheet's <see cref="TableRef.TableRefId"/>.
+    /// Queries the <see cref="TableRef.LookupName"/> for a sheet's <see cref="TableRef.TableId"/>.
     /// </summary>
-    /// <param name="tableRefId">The incoming <see cref="TableRef.TableRefId"/>.</param>
+    /// <param name="tableRefId">The incoming <see cref="TableRef.TableId"/>.</param>
     /// <returns>The corresponding <see cref="TableRef.LookupName"/>.</returns>
     [HttpGet("sheet/{tableRefId}/lookup")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -88,8 +88,8 @@ public class GraphQLTableController : ControllerBase
         if (user is null)
             return Unauthorized("You are logged in with a non-existent user.");
 
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableRefId == tableRefId)
-            ?? user.Collaborations.FirstOrDefault(t => t.TableRefId == tableRefId);
+        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId)
+            ?? user.Collaborations.FirstOrDefault(t => t.TableId == tableRefId);
 
         if (tableRef is null)
             return this.Forbidden("You are not authorized to view this table or it does not exist.");
@@ -97,7 +97,7 @@ public class GraphQLTableController : ControllerBase
         if (tableRef.TableType != TableType.Sheet)
             return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
 
-        _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableRefId + "\"");
+        _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableId + "\"");
 
         return Ok(tableRef.LookupName.ToDbName());
     }

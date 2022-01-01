@@ -5,6 +5,7 @@
     <UserSecretsId>ace9a1ec-ceb2-4c89-ba31-324aa89e30e8</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <StartupObject>ScwSvc.Program</StartupObject>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ScwSvc.Models;
+﻿using ScwSvc.Models;
 
 namespace ScwSvc.DataAccess.Interfaces;
 

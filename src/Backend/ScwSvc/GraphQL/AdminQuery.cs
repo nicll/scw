@@ -8,8 +8,8 @@ namespace ScwSvc.GraphQL;
 public class AdminQuery
 {
     public IQueryable<User> GetUsers([Service] ISysDbRepository sysDb)
-        => sysDb.GetUsers();
+        => sysDb.CreateUsersQuery();
 
     public IQueryable<TableRef> GetTableRefs([Service] ISysDbRepository sysDb)
-        => sysDb.GetTables();
+        => sysDb.CreateTablesQuery();
 }

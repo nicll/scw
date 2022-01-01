@@ -1,16 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ScwSvc.DataAccess.Interfaces\ScwSvc.DataAccess.Interfaces.csproj" />
-    <ProjectReference Include="..\ScwSvc.Exceptions\ScwSvc.Exceptions.csproj" />
-    <ProjectReference Include="..\ScwSvc.Models\ScwSvc.Models.csproj" />
-    <ProjectReference Include="..\ScwSvc.Operations.Interfaces\ScwSvc.Operations.Interfaces.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ScwSvc.DataAccess.Interfaces\ScwSvc.DataAccess.Interfaces.csproj" />
+		<ProjectReference Include="..\ScwSvc.Exceptions\ScwSvc.Exceptions.csproj" />
+		<ProjectReference Include="..\ScwSvc.Models\ScwSvc.Models.csproj" />
+		<ProjectReference Include="..\ScwSvc.Operations.Interfaces\ScwSvc.Operations.Interfaces.csproj" />
+	</ItemGroup>
 
 </Project>

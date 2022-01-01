@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using ScwSvc.Models;
+﻿namespace ScwSvc.Procedures.Interfaces;
 
-namespace ScwSvc.Procedures.Interfaces;
-
-public interface IUserLogic
+public interface IUserProcedures
 {
     //Task<IEnumerable<User>> GetUsers();
 

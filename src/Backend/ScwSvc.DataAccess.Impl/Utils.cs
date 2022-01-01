@@ -20,13 +20,13 @@ internal static class Utils
     internal static void EnsureValidColumnName(string columnName)
     {
         if (columnName.Length > 20)
-            throw new InvalidTableException("Name for column is too long: " + columnName);
+            throw new TableColumnException("Name for column is too long: " + columnName);
 
         if (columnName.Any(c => !Char.IsLetterOrDigit(c)))
-            throw new InvalidTableException("Invalid character(s) in column: " + columnName);
+            throw new TableColumnException("Invalid character(s) in column: " + columnName);
 
         if (String.Equals(columnName, "_id", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidTableException("Invalid column name: " + columnName);
+            throw new TableColumnException("Invalid column name: " + columnName);
     }
 
     internal static string ConvertToSqlColumn(DataSetColumn column)

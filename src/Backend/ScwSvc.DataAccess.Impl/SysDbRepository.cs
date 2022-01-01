@@ -17,13 +17,19 @@ public class SysDbRepository : ISysDbRepository
     public SysDbRepository(DbSysContext sysDb)
         => _sysDb = sysDb;
 
-    public IQueryable<User> GetUsers()
+    public async Task<ICollection<User>> GetAllUsers()
+        => await _sysDb.Users.ToArrayAsync();
+
+    public IQueryable<User> CreateUsersQuery()
         => _sysDb.Users;
 
-    public async Task<User> GetUserById(Guid userId)
+    public async Task<ICollection<User>> ExecuteUsersQuery(IQueryable<User> query)
+        => await query.ToArrayAsync();
+
+    public async Task<User?> GetUserById(Guid userId)
         => await _sysDb.Users.FindAsync(userId).ConfigureAwait(false);
 
-    public async Task<User> GetUserByName(string name)
+    public async Task<User?> GetUserByName(string name)
         => await _sysDb.Users.FirstOrDefaultAsync(u => u.Name == name).ConfigureAwait(false);
 
     public async Task<IEnumerable<User>> GetUsersByRole(UserRole role)
@@ -37,7 +43,7 @@ public class SysDbRepository : ISysDbRepository
         await _sysDb.Users.AddAsync(user).ConfigureAwait(false);
 
         if (AutoSave)
-            await SaveChanges();
+            await _SaveChanges();
     }
 
     public async Task RemoveUser(User user)
@@ -50,21 +56,27 @@ public class SysDbRepository : ISysDbRepository
         _sysDb.Users.Remove(user);
 
         if (AutoSave)
-            await SaveChanges();
+            await _SaveChanges();
     }
 
     public async Task ModifyUser(User user)
     {
-        _sysDb.Users.Update(user);
+        //_sysDb.Users.Update(user);
 
         if (AutoSave)
-            await SaveChanges();
+            await _SaveChanges();
     }
 
-    public IQueryable<TableRef> GetTables()
+    public async Task<ICollection<TableRef>> GetAllTables()
+        => await _sysDb.TableRefs.ToArrayAsync();
+
+    public IQueryable<TableRef> CreateTablesQuery()
         => _sysDb.TableRefs;
 
-    public async Task<TableRef> GetTableById(Guid tableId)
+    public async Task<ICollection<TableRef>> ExecuteTablesQuery(IQueryable<TableRef> query)
+        => await query.ToArrayAsync();
+
+    public async Task<TableRef?> GetTableById(Guid tableId)
         => await _sysDb.TableRefs.FindAsync(tableId).ConfigureAwait(false);
 
     public async Task AddTable(TableRef table)
@@ -72,7 +84,7 @@ public class SysDbRepository : ISysDbRepository
         await _sysDb.TableRefs.AddAsync(table).ConfigureAwait(false);
 
         if (AutoSave)
-            await SaveChanges();
+            await _SaveChanges();
     }
 
     public async Task RemoveTable(TableRef table)
@@ -84,17 +96,24 @@ public class SysDbRepository : ISysDbRepository
         _sysDb.TableRefs.Remove(table);
 
         if (AutoSave)
-            await SaveChanges();
+            await _SaveChanges();
     }
 
     public async Task ModifyTable(TableRef table)
     {
-        _sysDb.TableRefs.Update(table);
+        //_sysDb.TableRefs.Update(table);
 
         if (AutoSave)
-            await SaveChanges();
+            await _SaveChanges();
     }
 
+    // only actually saves when AutoSave is disabled
     public async Task SaveChanges()
+    {
+        if (!AutoSave)
+            await _SaveChanges();
+    }
+
+    private async Task _SaveChanges()
         => await _sysDb.SaveChangesAsync();
 }
