@@ -35,9 +35,9 @@ public interface ISysDbRepository
     /// Get a user by ID.
     /// Alternatively return <see langword="null"/> if not found.
     /// </summary>
-    /// <param name="userId">The user's ID.</param>
+    /// <param name="id">The user's ID.</param>
     /// <returns>The user object or <see langword="null"/>.</returns>
-    Task<User?> GetUserById(Guid userId);
+    Task<User?> GetUserById(Guid id);
 
     /// <summary>
     /// Get a user by name.

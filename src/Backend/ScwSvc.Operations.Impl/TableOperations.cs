@@ -16,6 +16,40 @@ public class TableOperations : ITableOperations
 
     public int MaxNumberOfColumns => _MaxNumberOfColumns;
 
+    public async Task<TableRef?> GetTable(Guid tableId)
+        => await _sysDb.GetTableById(tableId);
+
+    public async Task<ICollection<TableRef>> GetTables()
+        => await _sysDb.GetAllTables();
+
+    public async Task<ICollection<TableRef>> GetTables(Guid userId, TableQuery query)
+    {
+        var user = await _sysDb.GetUserById(userId)
+            ?? throw new UserNotFoundException("User with this ID was not found.") { UserId = userId };
+
+        var userTables = (query & TableQuery.TableTypeMask) switch
+        {
+            TableQuery.Own | TableQuery.Collaborations
+                => _sysDb.CreateTablesQuery()
+                    .Where(table => table.Owner.UserId == userId || table.Collaborators.Contains(user)),
+            TableQuery.Own
+                => _sysDb.CreateTablesQuery()
+                    .Where(table => table.Owner.UserId == userId),
+            TableQuery.Collaborations
+                => _sysDb.CreateTablesQuery()
+                    .Where(table => table.Collaborators.Contains(user)),
+            _ => throw new ArgumentException("Unknown kind of table query: " + query, nameof(query))
+        };
+
+        if (query.HasFlag(TableQuery.DataSet))
+            userTables = userTables.Where(t => t.TableType == TableType.DataSet);
+
+        if (query.HasFlag(TableQuery.Sheet))
+            userTables = userTables.Where(t => t.TableType == TableType.Sheet);
+
+        return await _sysDb.ExecuteTablesQuery(userTables);
+    }
+
     public async Task AddTable(TableRef table)
     {
         // is name set?
@@ -134,39 +168,5 @@ public class TableOperations : ITableOperations
         await _dynDb.RemoveDataSetColumn(table, columnName);
         await _sysDb.ModifyTable(table);
         await _sysDb.SaveChanges();
-    }
-
-    public async Task<TableRef?> GetTable(Guid tableId)
-        => await _sysDb.GetTableById(tableId);
-
-    public async Task<ICollection<TableRef>> GetTables()
-        => await _sysDb.GetAllTables();
-
-    public async Task<ICollection<TableRef>> GetTables(Guid userId, TableQuery query)
-    {
-        var user = await _sysDb.GetUserById(userId)
-            ?? throw new UserNotFoundException("User with this ID was not found.") { UserId = userId };
-
-        var userTables = (query & TableQuery.DataSourcesMask) switch
-        {
-            TableQuery.Own | TableQuery.Collaborations
-                => _sysDb.CreateTablesQuery()
-                    .Where(table => table.Owner.UserId == userId || table.Collaborators.Contains(user)),
-            TableQuery.Own
-                => _sysDb.CreateTablesQuery()
-                    .Where(table => table.Owner.UserId == userId),
-            TableQuery.Collaborations
-                => _sysDb.CreateTablesQuery()
-                    .Where(table => table.Collaborators.Contains(user)),
-            _ => throw new ArgumentException("Unknown kind of table query: " + query, nameof(query))
-        };
-
-        if (query.HasFlag(TableQuery.DataSet))
-            userTables = userTables.Where(t => t.TableType == TableType.DataSet);
-
-        if (query.HasFlag(TableQuery.Sheet))
-            userTables = userTables.Where(t => t.TableType == TableType.Sheet);
-
-        return await _sysDb.ExecuteTablesQuery(userTables);
     }
 }
