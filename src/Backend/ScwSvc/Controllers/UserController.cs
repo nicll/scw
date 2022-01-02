@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ScwSvc.Procedures.Interfaces;
-using ScwSvc.DataAccess.Interfaces;
 using ScwSvc.Exceptions;
 using ScwSvc.Models;
 using ScwSvc.SvcModels;
@@ -22,108 +21,84 @@ namespace ScwSvc.Controllers;
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
-    private readonly IUserProcedures _user;
-    private readonly ITableProcedures _table;
+    private readonly IAuthProcedures _authProc;
+    private readonly IUserProcedures _userProc;
+    private readonly IAdminProcedures _tableProc;
     // following is TEMPORARY
-    private readonly ISysDbRepository _sysDb;
-    private readonly IDynDbRepository _dynDb;
     public const int MaxDataSetsPerUser = 20;
     public const int MaxSheetsPerUser = 20;
 
-    public UserController(ILogger<UserController> logger, IUserProcedures user, ITableProcedures table, ISysDbRepository sysDb, IDynDbRepository dynDb)
+    public UserController(ILogger<UserController> logger, IAuthProcedures authProc, IUserProcedures userProc, IAdminProcedures tableProc)
     {
         _logger = logger;
-        _user = user;
-        _table = table;
-
-        _sysDb = sysDb;
-        _dynDb = dynDb;
+        _authProc = authProc;
+        _userProc = userProc;
+        _tableProc = tableProc;
     }
 
     [HttpGet("username")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyUsername()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.Name);
-    }
+        => await AuthenticateAndRun(_authProc, User, user => Ok(user.Name));
 
     [HttpPatch("username")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> ChangeUsername([FromBody] string username)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        try
+        => await AuthenticateAndRun(_authProc, User, async user =>
         {
-            if (String.IsNullOrEmpty(username) || username.Length > 20)
-                throw new UserChangeException("Invalid username given.") { UserId = user.UserId, OldValue = user.Name, NewValue = username };
-
-            if (await _sysDb.IsUserNameAssigned(username))
-                throw new UserChangeException("Username is already in use.") { UserId = user.UserId, OldValue = user.Name, NewValue = username };
-
-            user.Name = username;
-            await _sysDb.ModifyUser(user);
-            await _sysDb.SaveChanges();
-            return Ok();
-        }
-        catch (UserChangeException e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
+            try
+            {
+                await _userProc.ChangeUserName(user, username);
+                return Ok();
+            }
+            catch (UserNotFoundException)
+            {
+                return BadRequest("This user does not exist.");
+            }
+            catch (UserAlreadyExistsException)
+            {
+                return BadRequest("A user with this name already exists.");
+            }
+            catch (UserChangeException e)
+            {
+                return BadRequest($"The change was invalid: {e.OldValue} -> {e.NewValue}; {e.Message}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred while changing user name.");
+                throw;
+            }
+        });
 
     [HttpPatch("password")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> ChangePassword([FromBody] string password)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        try
+        => await AuthenticateAndRun(_authProc, User, async user =>
         {
-            if (String.IsNullOrEmpty(password) || password.Length < 4) // ToDo: change to more sensible value when testing is finished
-                throw new UserChangeException("Passwort empty or too short.") { UserId = user.UserId, OldValue = "(old password)", NewValue = "(new password)" };
-
-            user.PasswordHash = HashUserPassword(user.UserId, password);
-            await _sysDb.ModifyUser(user);
-            await _sysDb.SaveChanges();
-            return Ok();
-        }
-        catch (UserChangeException e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
+            try
+            {
+                await _userProc.ChangeUserPassword(user, password);
+                return Ok();
+            }
+            catch (UserNotFoundException)
+            {
+                return BadRequest("This user does not exist.");
+            }
+            catch (UserChangeException e)
+            {
+                return BadRequest($"The change was invalid: {e.OldValue} -> {e.NewValue}; {e.Message}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred while changing user password.");
+                throw;
+            }
+        });
 
     /// <summary>
     /// Queries a collection of all data sets that the user may access.
@@ -133,19 +108,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsAll()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.OwnTables.Concat(user.Collaborations).Where(t => t.TableType == TableType.DataSet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(user.OwnTables.Concat(user.Collaborations).Where(t => t.TableType == TableType.DataSet)));
 
     /// <summary>
     /// Queries a collection of all data sets that the user owns.
@@ -155,19 +119,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsOwn()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.OwnTables.Where(t => t.TableType == TableType.DataSet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(user.OwnTables.Where(t => t.TableType == TableType.DataSet)));
 
     /// <summary>
     /// Queries the number of all data sets that the user owns.
@@ -177,19 +130,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsOwnCount()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.OwnTables.Count(t => t.TableType == TableType.DataSet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(user.OwnTables.Count(t => t.TableType == TableType.DataSet)));
 
     /// <summary>
     /// Queries the remaining number of data sets that the user can create.
@@ -199,19 +141,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsOwnRemaining()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(MaxDataSetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.DataSet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(MaxDataSetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.DataSet)));
 
     /// <summary>
     /// Queries a collection of other people's data sets that the user may access.
@@ -221,19 +152,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsCollaborations()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.Collaborations.Where(t => t.TableType == TableType.DataSet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(user.Collaborations.Where(t => t.TableType == TableType.DataSet)));
 
     /// <summary>
     /// Queries a single data set that a user may access.
@@ -464,19 +384,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsAll()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.OwnTables.Concat(user.Collaborations).Where(t => t.TableType == TableType.Sheet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(user.OwnTables.Concat(user.Collaborations).Where(t => t.TableType == TableType.Sheet)));
 
     /// <summary>
     /// Queries a collection of all sheets that the user owns.
@@ -486,19 +395,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsOwn()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.OwnTables.Where(t => t.TableType == TableType.Sheet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(user.OwnTables.Where(t => t.TableType == TableType.Sheet)));
 
     /// <summary>
     /// Queries the number of all sheets that the user owns.
@@ -508,19 +406,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsOwnCount()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.OwnTables.Count(t => t.TableType == TableType.Sheet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(user.OwnTables.Count(t => t.TableType == TableType.Sheet)));
 
     /// <summary>
     /// Queries the remaining number of sheets that the user can create.
@@ -530,19 +417,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsOwnRemaining()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(MaxSheetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.Sheet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(MaxSheetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.Sheet)));
 
     /// <summary>
     /// Queries a collection of other people's sheets that the user may access.
@@ -552,19 +428,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsCollaborations()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.Collaborations.Where(t => t.TableType == TableType.Sheet));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(user.Collaborations.Where(t => t.TableType == TableType.Sheet)));
 
     /// <summary>
     /// Queries a single sheet that a user may access.
@@ -687,19 +552,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyTablesAll()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.OwnTables.Concat(user.Collaborations));
-    }
+        => await AuthenticateAndRun(_authProc, User,
+            user => Ok(user.OwnTables.Concat(user.Collaborations)));
 
     /// <summary>
     /// Queries a collection of all tables (datasets and sheets) that the user owns.
@@ -709,19 +563,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyTablesOwn()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.OwnTables);
-    }
+        => await AuthenticateAndRun(_authProc, User, user => Ok(user.OwnTables));
 
     /// <summary>
     /// Queries a collection of other people's tables (datasets and sheets) that the user may access.
@@ -731,19 +573,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyTablesCollaborations()
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        return Ok(user.Collaborations);
-    }
+        => await AuthenticateAndRun(_authProc, User, user => Ok(user.Collaborations));
 
     /// <summary>
     /// Queries a collection of collaborators for a table that the user posesses.
@@ -755,24 +585,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async ValueTask<IActionResult> GetCollaborators([FromRoute] Guid tableRefId)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not authorized to view this table or it does not exist.");
-
-        return Ok(tableRef.Collaborators);
-    }
+        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetCollaborators(user, tableRefId)));
 
     /// <summary>
     /// Adds a user as a collaborator to a table.
@@ -786,38 +599,31 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> AddCollaborator([FromRoute] Guid tableRefId, [FromRoute] Guid userId)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not authorized to view this table or it does not exist.");
-
-        var collaborator = await _sysDb.GetUserById(userId);
-
-        if (collaborator is null)
-            return NotFound("User was not found.");
-
-        if (user.UserId == collaborator.UserId)
-            return BadRequest("Cannot add yourself as a collaborator.");
-
-        if (tableRef.Collaborators.Any(u => u.UserId == collaborator.UserId))
-            return BadRequest("Collaborator has already been added to table.");
-
-        tableRef.Collaborators.Add(collaborator);
-        await _sysDb.ModifyTable(tableRef);
-        await _sysDb.SaveChanges();
-        return Ok();
-    }
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                await _userProc.AddCollaborator(user, tableRefId, userId);
+                return Ok();
+            }
+            catch (TableNotFoundException)
+            {
+                return BadRequest("This table does not exist.");
+            }
+            catch (UserNotFoundException)
+            {
+                return BadRequest("This user does not exist.");
+            }
+            catch (TableCollaboratorException e)
+            {
+                return BadRequest($"Collaborator was invalid: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred while adding collaborator.");
+                throw;
+            }
+        });
 
     /// <summary>
     /// Removes a user as a collaborator from a table.
@@ -831,36 +637,29 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> RemoveCollaborator([FromRoute] Guid tableRefId, [FromRoute] Guid userId)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not authorized to view this table or it does not exist.");
-
-        var collaborator = await _sysDb.GetUserById(userId);
-
-        if (collaborator is null)
-            return NotFound("User was not found.");
-
-        if (user.UserId == collaborator.UserId)
-            return BadRequest("Cannot remove yourself as a collaborator.");
-
-        if (!tableRef.Collaborators.Any(u => u.UserId == collaborator.UserId))
-            return BadRequest("User is not a collaborator of this table.");
-
-        tableRef.Collaborators.Remove(collaborator);
-        await _sysDb.ModifyTable(tableRef);
-        await _sysDb.SaveChanges();
-        return Ok();
-    }
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                await _userProc.RemoveCollaborator(user, tableRefId, userId);
+                return Ok();
+            }
+            catch (TableNotFoundException)
+            {
+                return BadRequest("This table does not exist.");
+            }
+            catch (UserNotFoundException)
+            {
+                return BadRequest("This user does not exist.");
+            }
+            catch (TableCollaboratorException e)
+            {
+                return BadRequest($"Collaborator was invalid: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred while removing collaborator.");
+                throw;
+            }
+        });
 }

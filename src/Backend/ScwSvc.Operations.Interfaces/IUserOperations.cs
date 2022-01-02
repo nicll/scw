@@ -35,6 +35,7 @@ public interface IUserOperations
     /// <param name="password">The optional new password of the user.</param>
     /// <param name="role">The optional new role of the user.</param>
     /// <exception cref="UserNotFoundException">Thrown if the user was not found.</exception>
+    /// <exception cref="UserAlreadyExistsException">Thrown if a user with the same name as the new one already exists.</exception>
     /// <exception cref="UserChangeException">Thrown if an invalid change was made.</exception>
     /// <exception cref="DatabaseException">Thrown if a any database error occurs.</exception>
     Task ModifyUser(Guid id, string? name, string? password, UserRole? role);

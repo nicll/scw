@@ -44,7 +44,7 @@ public class Startup
         services.AddScoped<IUserOperations, UserOperations>();
         services.AddScoped<ITableOperations, TableOperations>();
         services.AddScoped<IUserProcedures, UserProcedures>();
-        services.AddScoped<ITableProcedures, TableProcedures>();
+        services.AddScoped<IAdminProcedures, AdminProcedures>();
         services.AddScoped<IServiceProcedures, ServiceProcedures>();
 
         services

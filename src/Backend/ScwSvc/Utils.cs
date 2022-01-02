@@ -97,13 +97,29 @@ internal static class Utils
             if (!userInfo.HasValue)
                 return SessionResult.Invalid(new UnauthorizedObjectResult("You are logged in with an invalid user."));
 
-            var user = await authProc.(userInfo.Value);
+            var user = await authProc.GetUserById(userInfo.Value);
 
             if (user is null)
                 return SessionResult.Invalid(new UnauthorizedObjectResult("You are logged in with a non-existent user."));
 
             return SessionResult.Valid(user);
         }
+
+        internal static async Task<IActionResult> AuthenticateAndRun(IAuthProcedures authProc, ClaimsPrincipal cpUser, Func<User, IActionResult> code)
+            => await GetUserOrError(authProc, cpUser) switch
+            {
+                SessionResult.InvalidSession error => error.Error,
+                SessionResult.ValidSession user => code(user.User),
+                var result => throw new InvalidOperationException($"Invalid result from {nameof(GetUserOrError)}: {result?.GetType().Name}")
+            };
+
+        internal static async Task<IActionResult> AuthenticateAndRun(IAuthProcedures authProc, ClaimsPrincipal cpUser, Func<User, Task<IActionResult>> code)
+            => await GetUserOrError(authProc, cpUser) switch
+            {
+                SessionResult.InvalidSession error => error.Error,
+                SessionResult.ValidSession user => await code(user.User),
+                var result => throw new InvalidOperationException($"Invalid result from {nameof(GetUserOrError)}: {result?.GetType().Name}")
+            };
 
         internal abstract record SessionResult
         {

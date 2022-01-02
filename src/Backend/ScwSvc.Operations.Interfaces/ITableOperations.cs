@@ -11,6 +11,11 @@ public interface ITableOperations
     int MaxNumberOfColumns { get; }
 
     /// <summary>
+    /// Specifies the maximum number of collaborators (<see cref="TableRef.Collaborators"/>) a single table may have.
+    /// </summary>
+    int MaxNumberOfCollaborators { get; }
+
+    /// <summary>
     /// Get a table by its ID.
     /// </summary>
     /// <param name="tableId">The ID of the table.</param>
@@ -71,4 +76,24 @@ public interface ITableOperations
     /// <exception cref="TableColumnException">Thrown if the column was not found.</exception>
     /// <exception cref="DatabaseException">Thrown if a general database error occurs.</exception>
     Task DeleteColumn(Guid tableId, string columnName);
+
+    /// <summary>
+    /// Add a collaborator to a table.
+    /// </summary>
+    /// <param name="tableId">The ID of the table to add to.</param>
+    /// <param name="user">The user to add.</param>
+    /// <exception cref="TableNotFoundException">Thrown if the table was not found.</exception>
+    /// <exception cref="TableCollaboratorException">Thrown if the collaborator was invalid.</exception>
+    /// <exception cref="DatabaseException">Thrown if a general database error occurs.</exception>
+    Task AddCollaborator(Guid tableId, User user);
+
+    /// <summary>
+    /// Remove a collaborator from a table.
+    /// </summary>
+    /// <param name="tableId">The ID of the table to remove from.</param>
+    /// <param name="user">The user to remove.</param>
+    /// <exception cref="TableNotFoundException">Thrown if the table was not found.</exception>
+    /// <exception cref="TableCollaboratorException">Thrown if the collaborator was invalid.</exception>
+    /// <exception cref="DatabaseException">Thrown if a general database error occurs.</exception>
+    Task RemoveCollaborator(Guid tableId, User user);
 }

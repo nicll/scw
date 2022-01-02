@@ -4,7 +4,7 @@ namespace ScwSvc.Operations.Impl;
 
 public class TableOperations : ITableOperations
 {
-    private const int _MaxNumberOfColumns = 250;
+    private const int _MaxNumberOfColumns = 250, _MaxNumberOfCollaborators = 64;
     private readonly ISysDbRepository _sysDb;
     private readonly IDynDbRepository _dynDb;
 
@@ -15,6 +15,8 @@ public class TableOperations : ITableOperations
     }
 
     public int MaxNumberOfColumns => _MaxNumberOfColumns;
+
+    public int MaxNumberOfCollaborators => _MaxNumberOfCollaborators;
 
     public async Task<TableRef?> GetTable(Guid tableId)
         => await _sysDb.GetTableById(tableId);
@@ -166,6 +168,43 @@ public class TableOperations : ITableOperations
 
         table.Columns.Remove(column);
         await _dynDb.RemoveDataSetColumn(table, columnName);
+        await _sysDb.ModifyTable(table);
+        await _sysDb.SaveChanges();
+    }
+
+    public async Task AddCollaborator(Guid tableId, User user)
+    {
+        var table = await GetTable(tableId)
+            ?? throw new TableNotFoundException("You are not authorized to view this table or it does not exist.") { TableId = tableId };
+
+        if (table.Owner.UserId == user.UserId)
+            throw new TableCollaboratorException("Owner of a table cannot be added as a collaborator.");
+
+        if (table.Collaborators.Any(c => c.UserId == user.UserId))
+            throw new TableCollaboratorException("Collaborated has already been added.");
+
+        if (table.Collaborators.Count >= _MaxNumberOfCollaborators)
+            throw new TableCollaboratorException("Maximum number of collaborators has been reached.");
+
+        table.Collaborators.Add(user);
+        await _sysDb.ModifyTable(table);
+        await _sysDb.SaveChanges();
+    }
+
+    public async Task RemoveCollaborator(Guid tableId, User user)
+    {
+        var table = await GetTable(tableId)
+            ?? throw new TableNotFoundException("You are not authorized to view this table or it does not exist.") { TableId = tableId };
+
+        if (table.Owner.UserId == user.UserId)
+            throw new TableCollaboratorException("Owner of a table cannot be removed as a collaborator.");
+
+        var userRef = table.Collaborators.FirstOrDefault(c => c.UserId == user.UserId);
+
+        if (userRef is null)
+            throw new TableCollaboratorException("Collaborator was not found.");
+
+        table.Collaborators.Remove(userRef);
         await _sysDb.ModifyTable(table);
         await _sysDb.SaveChanges();
     }

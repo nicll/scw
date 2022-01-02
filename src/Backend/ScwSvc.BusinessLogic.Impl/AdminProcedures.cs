@@ -1,6 +1,6 @@
 ﻿namespace ScwSvc.Procedures.Impl;
 
-public class TableProcedures : ITableProcedures
+public class AdminProcedures : IAdminProcedures
 {
     /// <summary>
     /// Maximum amount of data sets one user may own at any time.

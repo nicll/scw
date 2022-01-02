@@ -13,10 +13,7 @@ public class UserOperations : IUserOperations
 
     public async Task<Guid> AddUser(string name, string password)
     {
-        if (await _sysDb.IsUserNameAssigned(name))
-            throw new UserAlreadyExistsException("A user with this name already exists.");
-
-        EnsureUserNameValid(name);
+        await EnsureUserNameValid(name);
         EnsureUserPasswordValid(password);
 
         var userId = Guid.NewGuid();
@@ -66,7 +63,7 @@ public class UserOperations : IUserOperations
         {
             try
             {
-                EnsureUserNameValid(name);
+                await EnsureUserNameValid(name);
             }
             catch (UserCredentialsInvalidException e)
             {
@@ -108,13 +105,16 @@ public class UserOperations : IUserOperations
         return null;
     }
 
-    private static void EnsureUserNameValid(string name)
+    private async Task EnsureUserNameValid(string name)
     {
         if (name.Length < 4)
             throw new UserCredentialsInvalidException("User name is too short.") { InvalidValue = name };
 
         if (name.Length > 20)
             throw new UserCredentialsInvalidException("User name is too long.") { InvalidValue = name };
+
+        if (await _sysDb.IsUserNameAssigned(name))
+            throw new UserAlreadyExistsException("A user with this name already exists.");
     }
 
     private static void EnsureUserPasswordValid(string password)

@@ -20,22 +20,22 @@ namespace ScwSvc.Controllers;
 public class ServiceController : ControllerBase
 {
     private readonly ILogger<ServiceController> _logger;
-    private readonly IServiceProcedures _service;
+    private readonly IServiceProcedures _serviceProc;
 #if DEBUG
     private readonly IUserOperations _debugUser;
 #endif
 
-    public ServiceController(ILogger<ServiceController> logger, IServiceProcedures service)
+    public ServiceController(ILogger<ServiceController> logger, IServiceProcedures serviceProc)
     {
         _logger = logger;
-        _service = service;
+        _serviceProc = serviceProc;
     }
 
 #if DEBUG
     [Microsoft.Extensions.DependencyInjection.ActivatorUtilitiesConstructor]
-    public ServiceController(ILogger<ServiceController> logger, IServiceProcedures service, IUserOperations user)
-        : this(logger, service)
-        => _debugUser = user;
+    public ServiceController(ILogger<ServiceController> logger, IServiceProcedures serviceProc, IUserOperations userProc)
+        : this(logger, serviceProc)
+        => _debugUser = userProc;
 #endif
 
     [HttpPost("[action]")]
@@ -47,7 +47,7 @@ public class ServiceController : ControllerBase
 
         try
         {
-            var userId = await _service.RegisterUser(loginCredentials.Username, loginCredentials.Password);
+            var userId = await _serviceProc.RegisterUser(loginCredentials.Username, loginCredentials.Password);
 
             var cp = new ClaimsPrincipal(new ClaimsIdentity(
                     new[] { new Claim(ClaimTypes.Role, nameof(UserRole.Common)), new Claim(ClaimTypes.NameIdentifier, userId.ToCookieFormat()) },
@@ -97,7 +97,7 @@ public class ServiceController : ControllerBase
 
         try
         {
-            var user = await _service.LoginUser(loginCredentials.Username, loginCredentials.Password);
+            var user = await _serviceProc.LoginUser(loginCredentials.Username, loginCredentials.Password);
 
             if (user is null)
             {
