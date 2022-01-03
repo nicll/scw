@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ScwSvc.DataAccess.Interfaces;
+using ScwSvc.Exceptions;
 using ScwSvc.Models;
+using ScwSvc.Procedures.Interfaces;
 using static ScwSvc.Globals;
 using static ScwSvc.Utils.Authentication;
 
@@ -18,12 +18,14 @@ namespace ScwSvc.Controllers;
 public class GraphQLTableController : ControllerBase
 {
     private readonly ILogger<GraphQLTableController> _logger;
-    private readonly ISysDbRepository _db;
+    private readonly IAuthProcedures _authProc;
+    private readonly IGraphQLTableProcedures _graphqlProc;
 
-    public GraphQLTableController(ILogger<GraphQLTableController> logger, ISysDbRepository db)
+    public GraphQLTableController(ILogger<GraphQLTableController> logger, IAuthProcedures authProc, IGraphQLTableProcedures graphqlProc)
     {
         _logger = logger;
-        _db = db;
+        _authProc = authProc;
+        _graphqlProc = graphqlProc;
     }
 
     [HttpPost]
@@ -41,30 +43,21 @@ public class GraphQLTableController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async ValueTask<IActionResult> GetDataSetLookupName([FromRoute] Guid tableRefId)
-    {
-        var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
-
-        if (!ownerInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _db.GetUserById(ownerInfo.Value.id);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId)
-            ?? user.Collaborations.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not authorized to view this table or it does not exist.");
-
-        if (tableRef.TableType != TableType.DataSet)
-            return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
-
-        _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableId + "\"");
-
-        return Ok(tableRef.LookupName.ToSimplifiedFormat());
-    }
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                return Ok((await _graphqlProc.GetDataSetLookupName(user, tableRefId)).ToSimplifiedFormat());
+            }
+            catch (TableNotFoundException)
+            {
+                return NotFound("Table was not found.");
+            }
+            catch (TableMismatchException)
+            {
+                return BadRequest("Table was not a data set.");
+            }
+        });
 
     /// <summary>
     /// Queries the <see cref="Table.LookupName"/> for a sheet's <see cref="Table.TableId"/>.
@@ -77,28 +70,19 @@ public class GraphQLTableController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async ValueTask<IActionResult> GetSheetLookupName([FromRoute] Guid tableRefId)
-    {
-        var ownerInfo = GetUserIdAsGuidAndStringOrNull(User);
-
-        if (!ownerInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _db.GetUserById(ownerInfo.Value.id);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId)
-            ?? user.Collaborations.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not authorized to view this table or it does not exist.");
-
-        if (tableRef.TableType != TableType.Sheet)
-            return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
-
-        _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableId + "\"");
-
-        return Ok(tableRef.LookupName.ToSimplifiedFormat());
-    }
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                return Ok((await _graphqlProc.GetSheetLookupName(user, tableRefId)).ToSimplifiedFormat());
+            }
+            catch (TableNotFoundException)
+            {
+                return NotFound("Table was not found.");
+            }
+            catch (TableMismatchException)
+            {
+                return BadRequest("Table was not a sheet.");
+            }
+        });
 }

@@ -48,6 +48,7 @@ public class Startup
         services.AddScoped<IUserProcedures, UserProcedures>();
         services.AddScoped<IAdminProcedures, AdminProcedures>();
         services.AddScoped<IServiceProcedures, ServiceProcedures>();
+        services.AddScoped<IGraphQLTableProcedures, GraphQLTableProcedures>();
 
         services
             .AddGraphQLServer()
