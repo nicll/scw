@@ -30,12 +30,12 @@ public class UserOperations : IUserOperations
         return userId;
     }
 
-    public async Task DeleteUser(Guid id)
+    public async Task DeleteUser(Guid userId)
     {
-        var user = await _sysDb.GetUserById(id);
+        var user = await _sysDb.GetUserById(userId);
 
         if (user is null)
-            throw new UserNotFoundException("Could not find user to delete.") { UserId = id };
+            throw new UserNotFoundException("Could not find user to delete.") { UserId = userId };
 
         foreach (var table in user.OwnTables)
             await _dynDb.RemoveTable(table);
@@ -43,8 +43,8 @@ public class UserOperations : IUserOperations
         await _sysDb.RemoveUser(user);
     }
 
-    public async Task<User?> GetUserById(Guid id)
-        => await _sysDb.GetUserById(id);
+    public async Task<User?> GetUserById(Guid userId)
+        => await _sysDb.GetUserById(userId);
 
     public async Task<User?> GetUserByName(string name)
         => await _sysDb.GetUserByName(name);
@@ -52,12 +52,12 @@ public class UserOperations : IUserOperations
     public async Task<ICollection<User>> GetUsers()
         => await _sysDb.GetAllUsers();
 
-    public async Task ModifyUser(Guid id, string? name, string? password, UserRole? role)
+    public async Task ModifyUser(Guid userId, string? name, string? password, UserRole? role)
     {
-        var user = await _sysDb.GetUserById(id);
+        var user = await _sysDb.GetUserById(userId);
 
         if (user is null)
-            throw new UserNotFoundException("Could not find user to modify.") { UserId = id };
+            throw new UserNotFoundException("Could not find user to modify.") { UserId = userId };
 
         if (name is not null)
         {
@@ -67,7 +67,7 @@ public class UserOperations : IUserOperations
             }
             catch (UserCredentialsInvalidException e)
             {
-                throw new UserChangeException(e.Message) { UserId = id, OldValue = user.Name, NewValue = name };
+                throw new UserModificationException(e.Message) { UserId = userId, OldValue = user.Name, NewValue = name };
             }
 
             user.Name = name;
@@ -81,14 +81,19 @@ public class UserOperations : IUserOperations
             }
             catch (UserCredentialsInvalidException e)
             {
-                throw new UserChangeException(e.Message) { UserId = id, OldValue = "(old password)", NewValue = "(new password)" };
+                throw new UserModificationException(e.Message) { UserId = userId, OldValue = "(old password)", NewValue = "(new password)" };
             }
 
-            user.PasswordHash = HashUserPassword(id, password);
+            user.PasswordHash = HashUserPassword(userId, password);
         }
 
         if (role.HasValue && role != user.Role)
+        {
+            if (!Enum.IsDefined(role.Value))
+                throw new UserModificationException("The new role is unknown.") { OldValue = user.Role, NewValue = role };
+
             user.Role = role.Value;
+        }
 
         await _sysDb.ModifyUser(user);
         await _sysDb.SaveChanges();

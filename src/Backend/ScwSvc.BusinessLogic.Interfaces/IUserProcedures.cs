@@ -8,7 +8,7 @@ public interface IUserProcedures
     /// <summary>
     /// The maximum number of data sets a single user may have.
     /// This is only enforced when creating tables using
-    /// <see cref="CreateDataSet(Table)"/> and <see cref="CreateSheet(Table)"/>.
+    /// <see cref="CreateDataSet(User, Table)"/>.
     /// Has an automatically set default value.
     /// </summary>
     int MaxDataSetsPerUser { get; set; }
@@ -16,7 +16,7 @@ public interface IUserProcedures
     /// <summary>
     /// The maximum number of sheets a single user may have.
     /// This is only enforced when creating tables using
-    /// <see cref="CreateDataSet(Table)"/> and <see cref="CreateSheet(Table)"/>.
+    /// <see cref="CreateSheet(User, Table)"/>.
     /// Has an automatically set default value.
     /// </summary>
     int MaxSheetsPerUser { get; set; }
@@ -28,7 +28,7 @@ public interface IUserProcedures
     /// <param name="name">The new name.</param>
     /// <exception cref="UserNotFoundException">Thrown if the user was not found.</exception>
     /// <exception cref="UserAlreadyExistsException">Thrown if a user with the same name as the new one already exists.</exception>
-    /// <exception cref="UserChangeException">Thrown if the new name was invalid.</exception>
+    /// <exception cref="UserModificationException">Thrown if the new name was invalid.</exception>
     /// <exception cref="DatabaseException">Thrown if a general database error occurs.</exception>
     Task ChangeUserName(User user, string name);
 
@@ -38,25 +38,9 @@ public interface IUserProcedures
     /// <param name="user">The user.</param>
     /// <param name="password">The new password.</param>
     /// <exception cref="UserNotFoundException">Thrown if the user was not found.</exception>
-    /// <exception cref="UserChangeException">Thrown if the new password was invalid.</exception>
+    /// <exception cref="UserModificationException">Thrown if the new password was invalid.</exception>
     /// <exception cref="DatabaseException">Thrown if a general database error occurs.</exception>
     Task ChangeUserPassword(User user, string password);
-
-    //Task ChangeUserRole(User user, UserRole role);
-
-    //Task<IEnumerable<TableRef>> GetTables();
-
-    //Task<IEnumerable<TableRef>> GetUserTables(User user, TableQuery query);
-
-    //Task<TableRef> GetTable(User user, Guid tableId);
-
-    //Task CreateDataSet();
-
-    //Task DeleteDataSet();
-
-    //Task CreateSheet();
-
-    //Task DeleteSheet();
 
     /// <summary>
     /// Get the data set of a specific user with the corresponding ID.
@@ -81,7 +65,7 @@ public interface IUserProcedures
     /// <summary>
     /// Prepare a user-defined table object before creating it in the database.
     /// This method does not check for invalid data. All validation occurs in
-    /// <see cref="CreateDataSet(Table)"/> and <see cref="CreateSheet(Table)"/>.
+    /// <see cref="CreateDataSet(User, Table)"/>.
     /// </summary>
     /// <param name="owner">The owner of the table.</param>
     /// <param name="table">The table.</param>
@@ -91,7 +75,7 @@ public interface IUserProcedures
     /// <summary>
     /// Prepare a user-defined table object before creating it in the database.
     /// This method does not check for invalid data. All validation occurs in
-    /// <see cref="CreateDataSet(Table)"/> and <see cref="CreateSheet(Table)"/>.
+    /// <see cref="CreateSheet(User, Table)"/>.
     /// </summary>
     /// <param name="owner">The owner of the table.</param>
     /// <param name="table">The table.</param>
@@ -103,7 +87,7 @@ public interface IUserProcedures
     /// </summary>
     /// <param name="owner">The owner of the data set.</param>
     /// <param name="table">The data set specification.</param>
-    /// <exception cref="TableMismatchException">Thrown if the table type was mismatched.</exception>
+    /// <exception cref="TableMismatchException">Thrown if the table type was not <see cref="TableType.DataSet"/>.</exception>
     /// <exception cref="TableLimitExceededException">Thrown if a user owns too many data sets.</exception>
     /// <exception cref="TableDeclarationException">Thrown if a non-column-related part of the data set was invalid.</exception>
     /// <exception cref="TableColumnException">Thrown if a column-related part of the data set was invalid.</exception>
@@ -116,8 +100,8 @@ public interface IUserProcedures
     /// </summary>
     /// <param name="owner">The owner of the sheet.</param>
     /// <param name="table">The sheet specification.</param>
-    /// <exception cref="TableMismatchException">Thrown if the table type was mismatched.</exception>
-    /// <exception cref="TableLimitExceededException">Thrown if a user owns too many sheet.</exception>
+    /// <exception cref="TableMismatchException">Thrown if the table type was not <see cref="TableType.Sheet"/>.</exception>
+    /// <exception cref="TableLimitExceededException">Thrown if a user owns too many sheets.</exception>
     /// <exception cref="TableDeclarationException">Thrown if a non-column-related part of the sheet was invalid.</exception>
     /// <exception cref="TableColumnException">Thrown if a column-related part of the sheet was invalid.</exception>
     /// <exception cref="TableAlreadyExistsException">Thrown if a table with this <see cref="Table.TableId"/> already exists.</exception>

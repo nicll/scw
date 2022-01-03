@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using ScwSvc.Models;
 
 namespace ScwSvc.Procedures.Impl;
 

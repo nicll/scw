@@ -26,8 +26,8 @@ public class SysDbRepository : ISysDbRepository
     public async Task<ICollection<User>> ExecuteUsersQuery(IQueryable<User> query)
         => await query.ToArrayAsync();
 
-    public async Task<User?> GetUserById(Guid id)
-        => await _sysDb.Users.FindAsync(id).ConfigureAwait(false);
+    public async Task<User?> GetUserById(Guid userId)
+        => await _sysDb.Users.FindAsync(userId).ConfigureAwait(false);
 
     public async Task<User?> GetUserByName(string name)
         => await _sysDb.Users.FirstOrDefaultAsync(u => u.Name == name).ConfigureAwait(false);

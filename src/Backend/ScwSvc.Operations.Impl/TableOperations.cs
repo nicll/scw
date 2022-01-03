@@ -24,6 +24,22 @@ public class TableOperations : ITableOperations
     public async Task<ICollection<Table>> GetTables()
         => await _sysDb.GetAllTables();
 
+    public async Task<ICollection<Table>> GetTables(TableQuery query)
+    {
+        if ((query & TableQuery.TableRelationshipMask) != 0)
+            throw new ArgumentException("Query may not contain relationship restrictions.", nameof(query));
+
+        var tables = _sysDb.CreateTablesQuery();
+
+        if (query.HasFlag(TableQuery.DataSet))
+            tables = tables.Where(t => t.TableType == TableType.DataSet);
+
+        if (query.HasFlag(TableQuery.Sheet))
+            tables = tables.Where(t => t.TableType == TableType.Sheet);
+
+        return await _sysDb.ExecuteTablesQuery(tables);
+    }
+
     public async Task<ICollection<Table>> GetTables(Guid userId, TableQuery query)
     {
         var user = await _sysDb.GetUserById(userId)

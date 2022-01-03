@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ScwSvc.Exceptions;
-using ScwSvc.Models;
 
 namespace ScwSvc.Procedures.Impl;
 
@@ -54,37 +52,10 @@ public class UserProcedures : IUserProcedures
     }
 
     public Table PrepareDataSet(User owner, Table table)
-    {
-        PrepareBase(owner, table);
-        table.TableType = TableType.DataSet;
-
-        for (int i = 0; i < table.Columns.Count; ++i)
-        {
-            table.Columns[i].TableId = table.TableId;
-            table.Columns[i].Position = (byte)i;
-        }
-
-        return table;
-    }
+        => _PrepareDataSet(owner, table);
 
     public Table PrepareSheet(User owner, Table table)
-    {
-        PrepareBase(owner, table);
-        table.TableType = TableType.Sheet;
-        return table;
-    }
-
-    private static void PrepareBase(User owner, Table table)
-    {
-        table.TableId = Guid.NewGuid();
-        // table.DisplayName
-        // table.TableType
-        table.CreationDate = DateTime.UtcNow;
-        table.LookupName = Guid.NewGuid();
-        table.OwnerUserId = owner.UserId;
-        // table.Collaborators
-        // table.Columns
-    }
+        => _PrepareSheet(owner, table);
 
     public async Task CreateDataSet(User owner, Table table)
     {
@@ -110,16 +81,16 @@ public class UserProcedures : IUserProcedures
 
     public async Task DeleteDataSet(User owner, Guid tableId)
     {
-        var table = await GetDataSet(owner, tableId);
+        _ = await GetDataSet(owner, tableId);
 
-        await _table.DeleteTable(table.TableId);
+        await _table.DeleteTable(tableId);
     }
 
     public async Task DeleteSheet(User owner, Guid tableId)
     {
-        var table = await GetSheet(owner, tableId);
+        _ = await GetSheet(owner, tableId);
 
-        await _table.DeleteTable(table.TableId);
+        await _table.DeleteTable(tableId);
     }
 
     public async Task AddDataSetColumn(User owner, Guid tableId, DataSetColumn column)

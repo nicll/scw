@@ -30,32 +30,29 @@ public class MapController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> UserIdToName([FromRoute] Guid userId)
-    {
-        if (await GetUserOrError(_authProc, User) is SessionResult.InvalidSession sessionError)
-            return sessionError.Error;
+        => await AuthenticateAndRun(_authProc, User, async _ =>
+        {
+            var name = await _mapProc.UserIdToName(userId);
 
-        var name = await _mapProc.UserIdToName(userId);
+            if (name is null)
+                return NotFound("User could not be found.");
 
-        if (name is null)
-            return NotFound("User could not be found.");
-
-        return Ok(name);
-    }
+            return Ok(name);
+        });
 
     [HttpGet("name2id/{name}")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> UserNameToId([FromRoute] string name)
-    {
-        if (await GetUserOrError(_authProc, User) is SessionResult.InvalidSession sessionError)
-            return sessionError.Error;
 
-        var id = await _mapProc.UserNameToId(name);
+        => await AuthenticateAndRun(_authProc, User, async _ =>
+        {
+            var id = await _mapProc.UserNameToId(name);
 
-        if (!id.HasValue)
-            return NotFound("User could not be found.");
+            if (!id.HasValue)
+                return NotFound("User could not be found.");
 
-        return Ok(id.Value);
-    }
+            return Ok(id.Value);
+        });
 }

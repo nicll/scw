@@ -15,9 +15,9 @@ public interface IUserOperations
     /// Get a user by ID.
     /// Alternatively return <see langword="null"/> if not found.
     /// </summary>
-    /// <param name="id">The user's ID.</param>
+    /// <param name="userId">The user's ID.</param>
     /// <returns>The user object or <see langword="null"/>.</returns>
-    Task<User?> GetUserById(Guid id);
+    Task<User?> GetUserById(Guid userId);
 
     /// <summary>
     /// Get a user by name.
@@ -30,15 +30,15 @@ public interface IUserOperations
     /// <summary>
     /// Modify one or more parts of a user.
     /// </summary>
-    /// <param name="id">The user's ID.</param>
+    /// <param name="userId">The user's ID.</param>
     /// <param name="name">The optional new name of the user.</param>
     /// <param name="password">The optional new password of the user.</param>
     /// <param name="role">The optional new role of the user.</param>
     /// <exception cref="UserNotFoundException">Thrown if the user was not found.</exception>
     /// <exception cref="UserAlreadyExistsException">Thrown if a user with the same name as the new one already exists.</exception>
-    /// <exception cref="UserChangeException">Thrown if an invalid change was made.</exception>
+    /// <exception cref="UserModificationException">Thrown if an invalid change was made.</exception>
     /// <exception cref="DatabaseException">Thrown if a any database error occurs.</exception>
-    Task ModifyUser(Guid id, string? name, string? password, UserRole? role);
+    Task ModifyUser(Guid userId, string? name, string? password, UserRole? role);
 
     /// <summary>
     /// Add a user.
@@ -54,10 +54,10 @@ public interface IUserOperations
     /// <summary>
     /// Remove a user.
     /// </summary>
-    /// <param name="id">The ID of the user to remove.</param>
+    /// <param name="userId">The ID of the user to remove.</param>
     /// <exception cref="UserNotFoundException">Thrown if the user was not found.</exception>
     /// <exception cref="DatabaseException">Thrown if a any database error occurs.</exception>
-    Task DeleteUser(Guid id);
+    Task DeleteUser(Guid userId);
 
     /// <summary>
     /// Attempt to log a user in.

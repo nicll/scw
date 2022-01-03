@@ -21,14 +21,11 @@ namespace ScwSvc.Controllers;
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
-    private readonly Mapper _mapper;
+    private readonly IMapper _mapper;
     private readonly IAuthProcedures _authProc;
     private readonly IUserProcedures _userProc;
-    // following is TEMPORARY
-    public const int MaxDataSetsPerUser = 20;
-    public const int MaxSheetsPerUser = 20;
 
-    public UserController(ILogger<UserController> logger, Mapper mapper, IAuthProcedures authProc, IUserProcedures userProc)
+    public UserController(ILogger<UserController> logger, IMapper mapper, IAuthProcedures authProc, IUserProcedures userProc)
     {
         _logger = logger;
         _mapper = mapper;
@@ -46,6 +43,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> ChangeUsername([FromBody] string username)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
@@ -62,7 +60,7 @@ public class UserController : ControllerBase
             {
                 return BadRequest("A user with this name already exists.");
             }
-            catch (UserChangeException e)
+            catch (UserModificationException e)
             {
                 return BadRequest($"The change was invalid: {e.OldValue} -> {e.NewValue}; {e.Message}");
             }
@@ -77,6 +75,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> ChangePassword([FromBody] string password)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
@@ -89,7 +88,7 @@ public class UserController : ControllerBase
             {
                 return NotFound("This user does not exist.");
             }
-            catch (UserChangeException e)
+            catch (UserModificationException e)
             {
                 return BadRequest($"The change was invalid: {e.OldValue} -> {e.NewValue}; {e.Message}");
             }
@@ -142,7 +141,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsOwnRemaining()
         => await AuthenticateAndRun(_authProc, User,
-            user => Ok(MaxDataSetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.DataSet)));
+            user => Ok(_userProc.MaxDataSetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.DataSet)));
 
     /// <summary>
     /// Queries a collection of other people's data sets that the user may access.
@@ -164,7 +163,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(Table), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> MyDataSet([FromRoute] Guid tableRefId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
@@ -191,7 +190,6 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSet dsModel)
         => await AuthenticateAndRun(_authProc, User, async user =>
@@ -201,7 +199,7 @@ public class UserController : ControllerBase
                 var table = _mapper.Map<Table>(dsModel);
                 table = _userProc.PrepareDataSet(user, table);
                 await _userProc.CreateDataSet(user, table);
-                return Ok();
+                return Created("/api/data/dataset/" + table.TableId, table);
             }
             catch (TableLimitExceededException)
             {
@@ -234,7 +232,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> DeleteDataSet([FromRoute] Guid tableRefId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
@@ -268,7 +266,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> AddColumnToDataSet([FromRoute] Guid tableRefId, [FromRoute] string columnName, [FromBody] ColumnDefinition columnDef)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
@@ -306,7 +304,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> RemoveColumnFromDataSet([FromRoute] Guid tableRefId, [FromRoute] string columnName)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
@@ -376,7 +374,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsOwnRemaining()
         => await AuthenticateAndRun(_authProc, User,
-            user => Ok(MaxSheetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.Sheet)));
+            user => Ok(_userProc.MaxSheetsPerUser - user.OwnTables.Count(t => t.TableType == TableType.Sheet)));
 
     /// <summary>
     /// Queries a collection of other people's sheets that the user may access.
@@ -398,7 +396,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(Table), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> MySheet([FromRoute] Guid tableRefId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
@@ -423,8 +421,8 @@ public class UserController : ControllerBase
     /// <returns>The table reference for the new sheet.</returns>
     [HttpPost("sheet")]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheet shModel)
         => await AuthenticateAndRun(_authProc, User, async user =>
@@ -434,7 +432,7 @@ public class UserController : ControllerBase
                 var table = _mapper.Map<Table>(shModel);
                 table = _userProc.PrepareSheet(user, table);
                 await _userProc.CreateSheet(user, table);
-                return Ok();
+                return Created("/api/data/sheet/" + table.TableId, table);
             }
             catch (TableLimitExceededException)
             {
@@ -467,7 +465,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> DeleteSheet([FromRoute] Guid tableRefId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
@@ -532,7 +530,17 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async ValueTask<IActionResult> GetCollaborators([FromRoute] Guid tableRefId)
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetCollaborators(user, tableRefId)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                return Ok(await _userProc.GetCollaborators(user, tableRefId));
+            }
+            catch (TableNotFoundException)
+            {
+                return NotFound("Table was not found.");
+            }
+        });
 
     /// <summary>
     /// Adds a user as a collaborator to a table.
@@ -543,7 +551,6 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> AddCollaborator([FromRoute] Guid tableRefId, [FromRoute] Guid userId)
         => await AuthenticateAndRun(_authProc, User, async user =>
@@ -581,7 +588,6 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> RemoveCollaborator([FromRoute] Guid tableRefId, [FromRoute] Guid userId)
         => await AuthenticateAndRun(_authProc, User, async user =>

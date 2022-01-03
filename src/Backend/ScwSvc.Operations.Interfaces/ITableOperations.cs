@@ -29,6 +29,14 @@ public interface ITableOperations
     Task<ICollection<Table>> GetTables();
 
     /// <summary>
+    /// Get a collection of the all tables restricted by a filter.
+    /// Only table type filters may be applied.
+    /// </summary>
+    /// <param name="query">The filter as a bitmask.</param>
+    /// <returns>Collection of resulting tables.</returns>
+    Task<ICollection<Table>> GetTables(TableQuery query);
+
+    /// <summary>
     /// Get a collection of the user's tables restricted by a filter.
     /// </summary>
     /// <param name="userId">Which user's tables to fetch.</param>
