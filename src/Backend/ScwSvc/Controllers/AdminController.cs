@@ -12,7 +12,6 @@ using ScwSvc.Models;
 using ScwSvc.SvcModels;
 using static ScwSvc.Globals.Authorization;
 using static ScwSvc.Utils.Authentication;
-using static ScwSvc.Utils.DataConversion;
 
 namespace ScwSvc.Controllers;
 
@@ -112,7 +111,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("user/{userId}/table")]
-    [ProducesResponseType(typeof(ICollection<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ICollection<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> GetUserTables([FromRoute] Guid userId)
     {
@@ -125,7 +124,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("user/{userId}/collaboration")]
-    [ProducesResponseType(typeof(ICollection<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ICollection<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> GetUserCollaborations([FromRoute] Guid userId)
     {
@@ -138,15 +137,15 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("table")]
-    public ICollection<TableRef> GetTables()
+    public ICollection<Table> GetTables()
         => _sysDb.CreateTablesQuery().ToArray();
 
     [HttpGet("dataset")]
-    public ICollection<TableRef> GetDataSets()
+    public ICollection<Table> GetDataSets()
         => _sysDb.CreateTablesQuery().Where(t => t.TableType == TableType.DataSet).ToArray();
 
     [HttpGet("sheet")]
-    public ICollection<TableRef> GetSheets()
+    public ICollection<Table> GetSheets()
         => _sysDb.CreateTablesQuery().Where(t => t.TableType == TableType.Sheet).ToArray();
 
     [HttpPost("dataset")]
@@ -174,14 +173,14 @@ public class AdminController : ControllerBase
         try
         {
             var newDsId = Guid.NewGuid();
-            var newTable = new TableRef()
+            var newTable = new Table()
             {
                 TableId = newDsId,
                 TableType = TableType.DataSet,
                 DisplayName = dsModel.DisplayName,
                 Owner = user,
                 LookupName = Guid.NewGuid(),
-                Columns = ConvertColumns(dsModel.Columns, newDsId)
+                Columns = null//ConvertColumns(dsModel.Columns, newDsId)
             };
 
             await _sysDb.AddTable(newTable);
@@ -250,7 +249,7 @@ public class AdminController : ControllerBase
         _logger.LogInformation("Create sheet: user=\"" + userInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
 
         var newShId = Guid.NewGuid();
-        var newTable = new TableRef()
+        var newTable = new Table()
         {
             TableId = newShId,
             TableType = TableType.Sheet,

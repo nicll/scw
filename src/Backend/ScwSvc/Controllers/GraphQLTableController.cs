@@ -31,10 +31,10 @@ public class GraphQLTableController : ControllerBase
         => RedirectPreserveMethod(PostgraphileBaseUrl);
 
     /// <summary>
-    /// Queries the <see cref="TableRef.LookupName"/> for a data set's <see cref="TableRef.TableId"/>.
+    /// Queries the <see cref="Table.LookupName"/> for a data set's <see cref="Table.TableId"/>.
     /// </summary>
-    /// <param name="tableRefId">The incoming <see cref="TableRef.TableId"/>.</param>
-    /// <returns>The corresponding <see cref="TableRef.LookupName"/>.</returns>
+    /// <param name="tableRefId">The incoming <see cref="Table.TableId"/>.</param>
+    /// <returns>The corresponding <see cref="Table.LookupName"/>.</returns>
     [HttpGet("dataset/{tableRefId}/lookup")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -63,14 +63,14 @@ public class GraphQLTableController : ControllerBase
 
         _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableId + "\"");
 
-        return Ok(tableRef.LookupName.ToDbName());
+        return Ok(tableRef.LookupName.ToSimplifiedFormat());
     }
 
     /// <summary>
-    /// Queries the <see cref="TableRef.LookupName"/> for a sheet's <see cref="TableRef.TableId"/>.
+    /// Queries the <see cref="Table.LookupName"/> for a sheet's <see cref="Table.TableId"/>.
     /// </summary>
-    /// <param name="tableRefId">The incoming <see cref="TableRef.TableId"/>.</param>
-    /// <returns>The corresponding <see cref="TableRef.LookupName"/>.</returns>
+    /// <param name="tableRefId">The incoming <see cref="Table.TableId"/>.</param>
+    /// <returns>The corresponding <see cref="Table.LookupName"/>.</returns>
     [HttpGet("sheet/{tableRefId}/lookup")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -99,6 +99,6 @@ public class GraphQLTableController : ControllerBase
 
         _logger.LogInformation("Data set access: user=\"" + user.UserId + "\"; tableRefId=\"" + tableRef.TableId + "\"");
 
-        return Ok(tableRef.LookupName.ToDbName());
+        return Ok(tableRef.LookupName.ToSimplifiedFormat());
     }
 }

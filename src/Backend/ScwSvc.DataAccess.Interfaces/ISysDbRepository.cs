@@ -83,20 +83,20 @@ public interface ISysDbRepository
     /// Get a collection of all tables.
     /// </summary>
     /// <returns>Collection of all tables.</returns>
-    Task<ICollection<TableRef>> GetAllTables();
+    Task<ICollection<Table>> GetAllTables();
 
     /// <summary>
     /// Create a customizable table query.
     /// </summary>
     /// <returns><see cref="IQueryable{T}"/> of all tables.</returns>
-    IQueryable<TableRef> CreateTablesQuery();
+    IQueryable<Table> CreateTablesQuery();
 
     /// <summary>
     /// Execute the customized table query.
     /// </summary>
     /// <param name="query">The table query.</param>
     /// <returns>Collection of resulting tables.</returns>
-    Task<ICollection<TableRef>> ExecuteTablesQuery(IQueryable<TableRef> query);
+    Task<ICollection<Table>> ExecuteTablesQuery(IQueryable<Table> query);
 
     /// <summary>
     /// Get a table by ID.
@@ -104,25 +104,25 @@ public interface ISysDbRepository
     /// </summary>
     /// <param name="tableId">The user's ID.</param>
     /// <returns>The table object or <see langword="null"/>.</returns>
-    Task<TableRef?> GetTableById(Guid tableId);
+    Task<Table?> GetTableById(Guid tableId);
 
     /// <summary>
     /// Add a table to the SYS database.
     /// </summary>
     /// <param name="table">The table to add.</param>
-    Task AddTable(TableRef table);
+    Task AddTable(Table table);
 
     /// <summary>
     /// Remove a table from the SYS database.
     /// </summary>
     /// <param name="table">The table to remove.</param>
-    Task RemoveTable(TableRef table);
+    Task RemoveTable(Table table);
 
     /// <summary>
     /// Save at least the given table object to the SYS database.
     /// </summary>
     /// <param name="table">The table object to save.</param>
-    Task ModifyTable(TableRef table);
+    Task ModifyTable(Table table);
 
     /// <summary>
     /// Save all changes.

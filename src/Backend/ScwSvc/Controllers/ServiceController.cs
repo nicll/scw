@@ -50,7 +50,7 @@ public class ServiceController : ControllerBase
             var userId = await _serviceProc.RegisterUser(loginCredentials.Username, loginCredentials.Password);
 
             var cp = new ClaimsPrincipal(new ClaimsIdentity(
-                    new[] { new Claim(ClaimTypes.Role, nameof(UserRole.Common)), new Claim(ClaimTypes.NameIdentifier, userId.ToCookieFormat()) },
+                    new[] { new Claim(ClaimTypes.Role, nameof(UserRole.Common)), new Claim(ClaimTypes.NameIdentifier, userId.ToSimplifiedFormat()) },
                 CookieAuthenticationDefaults.AuthenticationScheme));
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
 
@@ -106,7 +106,7 @@ public class ServiceController : ControllerBase
             }
 
             var cp = new ClaimsPrincipal(new ClaimsIdentity(
-                    new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToCookieFormat()) },
+                    new[] { new Claim(ClaimTypes.Role, user.Role.ToString()), new Claim(ClaimTypes.NameIdentifier, user.UserId.ToSimplifiedFormat()) },
                 CookieAuthenticationDefaults.AuthenticationScheme));
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, cp, new AuthenticationProperties() { IsPersistent = true }).ConfigureAwait(false);
             _logger.LogInformation($"Login: user='{loginCredentials.Username}'");

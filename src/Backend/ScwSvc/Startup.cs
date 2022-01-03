@@ -37,6 +37,8 @@ public class Startup
 
         services.AddControllers();
 
+        services.AddAutoMapper(config => config.AddProfile<AutoMapperProfile>());
+
         services.AddDbContextPool<DbSysContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={SysUser}; Password={SysPass}; SearchPath=scw1_sys,public").UseLazyLoadingProxies());
         services.AddDbContextPool<DbDynContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={DynUser}; Password={DynPass}; SearchPath=scw1_dyn"));
         services.AddScoped<ISysDbRepository, SysDbRepository>();

@@ -24,7 +24,7 @@ public class IntegrationTests
     public string UserId;
     public string schema;
 
-    public List<TableRef> TableRefList = new List<TableRef>();
+    public List<Table> TableRefList = new List<Table>();
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
@@ -527,7 +527,7 @@ public class IntegrationTests
         var responseTask = await _client.GetAsync(url);
         var response = await responseTask.Content.ReadAsStringAsync();
 
-        var list = JsonConvert.DeserializeObject<List<TableRef>>(response);
+        var list = JsonConvert.DeserializeObject<List<Table>>(response);
         TableRefList.AddRange(list);
 
         Assert.That(responseTask.IsSuccessStatusCode && response.Length > 10);
@@ -582,7 +582,7 @@ public class IntegrationTests
         var responseTask = await _client.GetAsync(url);
         var response = await responseTask.Content.ReadAsStringAsync();
 
-        var list = JsonConvert.DeserializeObject<List<TableRef>>(response);
+        var list = JsonConvert.DeserializeObject<List<Table>>(response);
         TableRefList.AddRange(list);
 
         Assert.That(responseTask.IsSuccessStatusCode && !string.IsNullOrWhiteSpace(response));

@@ -43,13 +43,13 @@ public class User
     /// Tables that this user owns.
     /// </summary>
     [JsonIgnore]
-    public virtual ICollection<TableRef> OwnTables { get; set; }
+    public virtual ICollection<Table> OwnTables { get; set; }
 
     /// <summary>
     /// Tables that this user may edit.
     /// </summary>
     [JsonIgnore]
-    public virtual ICollection<TableRef> Collaborations { get; set; }
+    public virtual ICollection<Table> Collaborations { get; set; }
 
     /// <summary>
     /// The role of this user.

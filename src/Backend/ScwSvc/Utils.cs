@@ -135,42 +135,7 @@ internal static class Utils
         }
     }
 
-    internal static class DataConversion
-    {
-        /// <summary>
-        /// Converts the table reference ID and an array of <see cref="CreateDataSet.ColumnDefinition"/>
-        /// to an array of <see cref="DataSetColumn"/>.
-        /// </summary>
-        /// <param name="definition">The column definitions.</param>
-        /// <param name="tableRefId">The table reference ID.</param>
-        /// <returns>The converted definitions.</returns>
-        internal static DataSetColumn[] ConvertColumns(ColumnDefinition[] definition, Guid tableRefId)
-        {
-            if (definition.Length > Byte.MaxValue)
-                throw new InvalidTableException("Too many columns in table.");
-
-            if (!definition.Select(c => c.Name).AllUnique())
-                throw new InvalidTableException("Column names not unique.");
-
-            var result = new DataSetColumn[definition.Length];
-
-            for (int i = 0; i < definition.Length; ++i)
-            {
-                result[i] = new DataSetColumn()
-                {
-                    TableRefId = tableRefId,
-                    Position = (byte)i,
-                    Name = definition[i].Name,
-                    Nullable = definition[i].Nullable,
-                    Type = definition[i].Type
-                };
-            }
-
-            return result;
-        }
-    }
-
-    internal static string ToCookieFormat(this Guid userId)
+    internal static string ToSimplifiedFormat(this Guid userId)
     => userId.ToString("N");
 
     internal static bool AllUnique<T>(this IEnumerable<T> source)

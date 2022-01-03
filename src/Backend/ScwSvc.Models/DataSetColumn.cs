@@ -9,19 +9,21 @@ namespace ScwSvc.Models;
 /// </summary>
 public class DataSetColumn
 {
+    public const int MaxColumnNameLength = 20;
+
     /// <summary>
     /// The ID of the table reference.
     /// </summary>
     [Required]
     [JsonIgnore]
-    public Guid TableRefId { get; set; }
+    public Guid TableId { get; set; }
 
     /// <summary>
     /// A reference to the table reference.
     /// </summary>
     [Required]
     [JsonIgnore]
-    public virtual TableRef TableRef { get; set; }
+    public virtual Table Table { get; set; }
 
     /// <summary>
     /// The position of the column from left to right.
@@ -33,7 +35,7 @@ public class DataSetColumn
     /// The name of the column.
     /// </summary>
     [Required]
-    [StringLength(20)]
+    [StringLength(MaxColumnNameLength, MinimumLength = 1)]
     public string Name { get; set; }
 
     /// <summary>

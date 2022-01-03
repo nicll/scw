@@ -16,7 +16,7 @@ public class DynDbRepository : IDynDbRepository
     public DynDbRepository(DbDynContext dynDb)
         => _dynDb = dynDb;
 
-    public async Task CreateTable(TableRef table)
+    public async Task CreateTable(Table table)
     {
         switch (table.TableType)
         {
@@ -33,14 +33,14 @@ public class DynDbRepository : IDynDbRepository
         }
     }
 
-    private async ValueTask CreateDataSet(TableRef table)
+    private async ValueTask CreateDataSet(Table table)
     {
         try
         {
             using var conn = _dynDb.Database.GetDbConnection();
             await conn.OpenAsync().ConfigureAwait(false);
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = ConvertTableRefToCreateTable(table);
+            cmd.CommandText = ConvertTableToCreateTable(table);
             await cmd.ExecuteNonQueryAsync();
         }
         catch (DbException e)
@@ -49,7 +49,7 @@ public class DynDbRepository : IDynDbRepository
         }
     }
 
-    private async ValueTask CreateSheet(TableRef table)
+    private async ValueTask CreateSheet(Table table)
     {
         try
         {
@@ -65,7 +65,7 @@ public class DynDbRepository : IDynDbRepository
         }
     }
 
-    public async Task RemoveTable(TableRef table)
+    public async Task RemoveTable(Table table)
     {
         try
         {
@@ -81,7 +81,7 @@ public class DynDbRepository : IDynDbRepository
         }
     }
 
-    public async Task AddDataSetColumn(TableRef table, DataSetColumn column)
+    public async Task AddDataSetColumn(Table table, DataSetColumn column)
     {
         try
         {
@@ -97,7 +97,7 @@ public class DynDbRepository : IDynDbRepository
         }
     }
 
-    public async Task RemoveDataSetColumn(TableRef table, string columnName)
+    public async Task RemoveDataSetColumn(Table table, string columnName)
     {
         if (columnName == "_id")
             throw new TableColumnException("Cannot delete ID column.");
@@ -116,7 +116,7 @@ public class DynDbRepository : IDynDbRepository
         }
     }
 
-    private static string ConvertTableRefToCreateTable(TableRef table)
+    private static string ConvertTableToCreateTable(Table table)
     {
         var create = new StringBuilder();
         create.Append("CREATE TABLE \"")

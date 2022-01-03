@@ -67,19 +67,19 @@ public class SysDbRepository : ISysDbRepository
             await _SaveChanges();
     }
 
-    public async Task<ICollection<TableRef>> GetAllTables()
+    public async Task<ICollection<Table>> GetAllTables()
         => await _sysDb.TableRefs.ToArrayAsync();
 
-    public IQueryable<TableRef> CreateTablesQuery()
+    public IQueryable<Table> CreateTablesQuery()
         => _sysDb.TableRefs;
 
-    public async Task<ICollection<TableRef>> ExecuteTablesQuery(IQueryable<TableRef> query)
+    public async Task<ICollection<Table>> ExecuteTablesQuery(IQueryable<Table> query)
         => await query.ToArrayAsync();
 
-    public async Task<TableRef?> GetTableById(Guid tableId)
+    public async Task<Table?> GetTableById(Guid tableId)
         => await _sysDb.TableRefs.FindAsync(tableId).ConfigureAwait(false);
 
-    public async Task AddTable(TableRef table)
+    public async Task AddTable(Table table)
     {
         await _sysDb.TableRefs.AddAsync(table).ConfigureAwait(false);
 
@@ -87,7 +87,7 @@ public class SysDbRepository : ISysDbRepository
             await _SaveChanges();
     }
 
-    public async Task RemoveTable(TableRef table)
+    public async Task RemoveTable(Table table)
     {
         await foreach (var user in _sysDb.Users.AsAsyncEnumerable().ConfigureAwait(false))
             user.Collaborations.Remove(table);
@@ -99,7 +99,7 @@ public class SysDbRepository : ISysDbRepository
             await _SaveChanges();
     }
 
-    public async Task ModifyTable(TableRef table)
+    public async Task ModifyTable(Table table)
     {
         //_sysDb.TableRefs.Update(table);
 

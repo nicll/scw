@@ -9,7 +9,7 @@ namespace ScwSvc.Models;
 /// Contains information about a user-specified table including its name,
 /// columns and collaborators (users allowed to edit the table).
 /// </summary>
-public class TableRef
+public class Table
 {
     /// <summary>
     /// A unique ID to identify the table.

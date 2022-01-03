@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,6 @@ using ScwSvc.Exceptions;
 using ScwSvc.Models;
 using ScwSvc.SvcModels;
 using static ScwSvc.Utils.Authentication;
-using static ScwSvc.Utils.DataConversion;
 
 namespace ScwSvc.Controllers;
 
@@ -21,19 +21,19 @@ namespace ScwSvc.Controllers;
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
+    private readonly Mapper _mapper;
     private readonly IAuthProcedures _authProc;
     private readonly IUserProcedures _userProc;
-    private readonly IAdminProcedures _tableProc;
     // following is TEMPORARY
     public const int MaxDataSetsPerUser = 20;
     public const int MaxSheetsPerUser = 20;
 
-    public UserController(ILogger<UserController> logger, IAuthProcedures authProc, IUserProcedures userProc, IAdminProcedures tableProc)
+    public UserController(ILogger<UserController> logger, Mapper mapper, IAuthProcedures authProc, IUserProcedures userProc)
     {
         _logger = logger;
+        _mapper = mapper;
         _authProc = authProc;
         _userProc = userProc;
-        _tableProc = tableProc;
     }
 
     [HttpGet("username")]
@@ -56,7 +56,7 @@ public class UserController : ControllerBase
             }
             catch (UserNotFoundException)
             {
-                return BadRequest("This user does not exist.");
+                return NotFound("This user does not exist.");
             }
             catch (UserAlreadyExistsException)
             {
@@ -87,7 +87,7 @@ public class UserController : ControllerBase
             }
             catch (UserNotFoundException)
             {
-                return BadRequest("This user does not exist.");
+                return NotFound("This user does not exist.");
             }
             catch (UserChangeException e)
             {
@@ -105,7 +105,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>A collection of all accessible data sets.</returns>
     [HttpGet("dataset")]
-    [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsAll()
         => await AuthenticateAndRun(_authProc, User,
@@ -116,7 +116,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>A collection of all of the user's data sets.</returns>
     [HttpGet("dataset/own")]
-    [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsOwn()
         => await AuthenticateAndRun(_authProc, User,
@@ -149,7 +149,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>A collection of all of the data sets shared with the user.</returns>
     [HttpGet("dataset/collaborations")]
-    [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsCollaborations()
         => await AuthenticateAndRun(_authProc, User,
@@ -161,33 +161,26 @@ public class UserController : ControllerBase
     /// <param name="tableRefId">The table reference ID.</param>
     /// <returns>The table reference of the data set.</returns>
     [HttpGet("dataset/{tableRefId}")]
-    [ProducesResponseType(typeof(TableRef), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Table), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async ValueTask<IActionResult> MyDataSet([FromRoute] Guid tableRefId)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId)
-            ?? user.Collaborations.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not allowed to access this table or it does not exist.");
-
-        if (tableRef.TableType != TableType.DataSet)
-            return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
-
-        return Ok(tableRef);
-    }
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                return Ok(await _userProc.GetDataSet(user, tableRefId));
+            }
+            catch (TableNotFoundException)
+            {
+                return NotFound("No table with this ID was found.");
+            }
+            catch (TableMismatchException)
+            {
+                return BadRequest("Found table of different type.");
+            }
+        });
 
     /// <summary>
     /// Creates a new data set for a user.
@@ -199,47 +192,39 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public async ValueTask<IActionResult> CreateDataSet([FromBody] CreateDataSet dsModel)
-    {
-        var userInfo = GetUserIdAsGuidAndStringOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value.id);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        if (user.OwnTables.Count > MaxDataSetsPerUser)
-            return this.Forbidden("You cannot own more than " + MaxDataSetsPerUser + " data sets at any time.");
-
-        _logger.LogInformation("Create dataset: user=\"" + userInfo.Value.idStr + "\"; name=" + dsModel.DisplayName);
-
-        try
+        => await AuthenticateAndRun(_authProc, User, async user =>
         {
-            var newDsId = Guid.NewGuid();
-            var newTable = new TableRef()
+            try
             {
-                TableId = newDsId,
-                TableType = TableType.DataSet,
-                DisplayName = dsModel.DisplayName,
-                Owner = user,
-                LookupName = Guid.NewGuid(),
-                Columns = ConvertColumns(dsModel.Columns, newDsId)
-            };
-
-            await _sysDb.AddTable(newTable);
-            await _dynDb.CreateTable(newTable);
-            await _sysDb.SaveChanges();
-
-            return Created("/api/data/dataset/" + newDsId, newTable);
-        }
-        catch (InvalidTableException e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
+                var table = _mapper.Map<Table>(dsModel);
+                table = _userProc.PrepareDataSet(user, table);
+                await _userProc.CreateDataSet(user, table);
+                return Ok();
+            }
+            catch (TableLimitExceededException)
+            {
+                return BadRequest("You cannot create any more additional data sets.");
+            }
+            catch (TableAlreadyExistsException)
+            {
+                return Conflict("Try again.");
+            }
+            catch (TableDeclarationException e)
+            {
+                return BadRequest($"Table declaration invalid: {e.Message}");
+            }
+            catch (TableColumnException e)
+            {
+                return BadRequest($"Table column(s) invalid: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not create data set.");
+                throw;
+            }
+        });
 
     /// <summary>
     /// Deletes the data set of a user.
@@ -251,90 +236,66 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async ValueTask<IActionResult> DeleteDataSet([FromRoute] Guid tableRefId)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not authorized to view this table or it does not exist.");
-
-        if (tableRef.TableType != TableType.DataSet)
-            return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
-
-        await _sysDb.RemoveTable(tableRef);
-        await _dynDb.RemoveTable(tableRef);
-        await _sysDb.SaveChanges();
-
-        return Ok();
-    }
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                await _userProc.DeleteDataSet(user, tableRefId);
+                return Ok();
+            }
+            catch (TableNotFoundException)
+            {
+                return BadRequest("The data set could not be found in your tables.");
+            }
+            catch (TableMismatchException)
+            {
+                return BadRequest("The table was not a data set.");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not delete data set.");
+                throw;
+            }
+        });
 
     /// <summary>
     /// Adds a column to an existing table.
     /// </summary>
     /// <param name="tableRefId">The table reference ID.</param>
     /// <param name="columnName">The name of the new column.</param>
-    /// <param name="column">The definition of the new column.</param>
+    /// <param name="columnDef">The definition of the new column.</param>
     [HttpPost("dataset/{tableRefId}/{columnName}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
-    public async ValueTask<IActionResult> AddColumnToDataSet([FromRoute] Guid tableRefId, [FromRoute] string columnName, [FromBody] ColumnDefinition column)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not authorized to view this table or it does not exist.");
-
-        if (tableRef.TableType != TableType.DataSet)
-            return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
-
-        if (columnName != column.Name)
-            return BadRequest("Column name does not match.");
-
-        if (tableRef.Columns.Count >= Byte.MaxValue)
-            throw new InvalidTableException("Too many columns in table.");
-
-        if (!tableRef.Columns.Select(c => c.Name).Append(column.Name).AllUnique())
-            throw new InvalidTableException("Column names not unique.");
-
-        var dsColumn = new DataSetColumn()
+    public async ValueTask<IActionResult> AddColumnToDataSet([FromRoute] Guid tableRefId, [FromRoute] string columnName, [FromBody] ColumnDefinition columnDef)
+        => await AuthenticateAndRun(_authProc, User, async user =>
         {
-            TableRefId = tableRef.TableId,
-            TableRef = tableRef,
-            Name = column.Name,
-            Type = column.Type,
-            Nullable = column.Nullable,
-            Position = (byte)(tableRef.Columns.Max(c => c.Position) + 1)
-        };
-
-        tableRef.Columns.Add(dsColumn);
-
-        await _sysDb.ModifyTable(tableRef);
-        await _dynDb.AddDataSetColumn(tableRef, dsColumn);
-        await _sysDb.SaveChanges();
-
-        return Ok();
-    }
+            try
+            {
+                var column = _mapper.Map<DataSetColumn>(columnDef);
+                await _userProc.AddDataSetColumn(user, tableRefId, column);
+                return Ok();
+            }
+            catch (TableNotFoundException)
+            {
+                return NotFound("The table was not found in your tables.");
+            }
+            catch (TableMismatchException)
+            {
+                return BadRequest("The found table was not a data set.");
+            }
+            catch (TableColumnException e)
+            {
+                return BadRequest($"The column was invalid: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not add column to data set.");
+                throw;
+            }
+        });
 
     /// <summary>
     /// Removes a column from an existing table.
@@ -347,41 +308,38 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async ValueTask<IActionResult> RemoveColumnFromDataSet([FromRoute] Guid tableRefId, [FromRoute] string columnName)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not authorized to view this table or it does not exist.");
-
-        if (tableRef.TableType != TableType.DataSet)
-            return BadRequest("Tried to access a " + tableRef.TableType + " as a data set.");
-
-        if (tableRef.Columns.Count(c => c.Name == columnName) != 1)
-            return BadRequest("Column does not exist.");
-
-        await _sysDb.ModifyTable(tableRef);
-        await _dynDb.RemoveDataSetColumn(tableRef, columnName);
-        await _sysDb.SaveChanges();
-
-        return Ok();
-    }
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                await _userProc.RemoveDataSetColumn(user, tableRefId, columnName);
+                return Ok();
+            }
+            catch (TableNotFoundException)
+            {
+                return NotFound("The table was not found in your tables.");
+            }
+            catch (TableMismatchException)
+            {
+                return BadRequest("The found table was not a data set.");
+            }
+            catch (TableColumnException e)
+            {
+                return BadRequest($"The column was invalid: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not remove column from data set.");
+                throw;
+            }
+        });
 
     /// <summary>
     /// Queries a collection of all sheets that the user may access.
     /// </summary>
     /// <returns>A collection of all accessible sheets.</returns>
     [HttpGet("sheet")]
-    [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsAll()
         => await AuthenticateAndRun(_authProc, User,
@@ -392,7 +350,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>A collection of all of the user's sheets.</returns>
     [HttpGet("sheet/own")]
-    [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsOwn()
         => await AuthenticateAndRun(_authProc, User,
@@ -425,7 +383,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>A collection of all of the sheets shared with the user.</returns>
     [HttpGet("sheet/collaborations")]
-    [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsCollaborations()
         => await AuthenticateAndRun(_authProc, User,
@@ -437,33 +395,26 @@ public class UserController : ControllerBase
     /// <param name="tableRefId">The table reference ID.</param>
     /// <returns>The table reference of the sheet.</returns>
     [HttpGet("sheet/{tableRefId}")]
-    [ProducesResponseType(typeof(TableRef), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Table), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async ValueTask<IActionResult> MySheet([FromRoute] Guid tableRefId)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId)
-            ?? user.Collaborations.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not allowed to access this table or it does not exist.");
-
-        if (tableRef.TableType != TableType.Sheet)
-            return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
-
-        return Ok(tableRef);
-    }
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                return Ok(await _userProc.GetSheet(user, tableRefId));
+            }
+            catch (TableNotFoundException)
+            {
+                return NotFound("No table with this ID was found.");
+            }
+            catch (TableMismatchException)
+            {
+                return BadRequest("Found table of different type.");
+            }
+        });
 
     /// <summary>
     /// Creates a new sheet for a user.
@@ -474,39 +425,39 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public async ValueTask<IActionResult> CreateSheet([FromBody] CreateSheet shModel)
-    {
-        var userInfo = GetUserIdAsGuidAndStringOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value.id);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        if (user.OwnTables.Count > MaxSheetsPerUser)
-            return this.Forbidden("You cannot own more than " + MaxSheetsPerUser + " sheets at any time.");
-
-        _logger.LogInformation("Create sheet: user=\"" + userInfo.Value.idStr + "\"; name=" + shModel.DisplayName);
-
-        var newShId = Guid.NewGuid();
-        var newTable = new TableRef()
+        => await AuthenticateAndRun(_authProc, User, async user =>
         {
-            TableId = newShId,
-            TableType = TableType.Sheet,
-            DisplayName = shModel.DisplayName,
-            Owner = user,
-            LookupName = Guid.NewGuid()
-        };
-
-        await _sysDb.AddTable(newTable);
-        await _dynDb.CreateTable(newTable);
-        await _sysDb.SaveChanges();
-
-        return Created("/api/data/sheet/" + newShId, newTable);
-    }
+            try
+            {
+                var table = _mapper.Map<Table>(shModel);
+                table = _userProc.PrepareSheet(user, table);
+                await _userProc.CreateSheet(user, table);
+                return Ok();
+            }
+            catch (TableLimitExceededException)
+            {
+                return BadRequest("You cannot create any more additional sheets.");
+            }
+            catch (TableAlreadyExistsException)
+            {
+                return Conflict("Try again.");
+            }
+            catch (TableDeclarationException e)
+            {
+                return BadRequest($"Table declaration invalid: {e.Message}");
+            }
+            catch (TableColumnException e)
+            {
+                return BadRequest($"Table column(s) invalid: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not create sheet.");
+                throw;
+            }
+        });
 
     /// <summary>
     /// Deletes the sheet of a user.
@@ -518,38 +469,34 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async ValueTask<IActionResult> DeleteSheet([FromRoute] Guid tableRefId)
-    {
-        var userInfo = GetUserIdAsGuidOrNull(User);
-
-        if (!userInfo.HasValue)
-            return Unauthorized("You are logged in with an invalid user.");
-
-        var user = await _sysDb.GetUserById(userInfo.Value);
-
-        if (user is null)
-            return Unauthorized("You are logged in with a non-existent user.");
-
-        var tableRef = user.OwnTables.FirstOrDefault(t => t.TableId == tableRefId);
-
-        if (tableRef is null)
-            return this.Forbidden("You are not authorized to view this table or it does not exist.");
-
-        if (tableRef.TableType != TableType.Sheet)
-            return BadRequest("Tried to access a " + tableRef.TableType + " as a sheet.");
-
-        await _sysDb.RemoveTable(tableRef);
-        await _dynDb.RemoveTable(tableRef);
-        await _sysDb.SaveChanges();
-
-        return Ok();
-    }
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            try
+            {
+                await _userProc.DeleteSheet(user, tableRefId);
+                return Ok();
+            }
+            catch (TableNotFoundException)
+            {
+                return NotFound("The sheet could not be found in your tables.");
+            }
+            catch (TableMismatchException)
+            {
+                return BadRequest("The table was not a sheet.");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not delete sheet.");
+                throw;
+            }
+        });
 
     /// <summary>
     /// Queries a collection of all tables (datasets and sheets) that the user may access.
     /// </summary>
     /// <returns>A collection of all accessible tables.</returns>
     [HttpGet("table")]
-    [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyTablesAll()
         => await AuthenticateAndRun(_authProc, User,
@@ -560,7 +507,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>A collection of all of the user's tables.</returns>
     [HttpGet("table/own")]
-    [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyTablesOwn()
         => await AuthenticateAndRun(_authProc, User, user => Ok(user.OwnTables));
@@ -570,7 +517,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>A collection of all of the tables shared with the user.</returns>
     [HttpGet("table/collaborations")]
-    [ProducesResponseType(typeof(IEnumerable<TableRef>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyTablesCollaborations()
         => await AuthenticateAndRun(_authProc, User, user => Ok(user.Collaborations));
@@ -608,11 +555,11 @@ public class UserController : ControllerBase
             }
             catch (TableNotFoundException)
             {
-                return BadRequest("This table does not exist.");
+                return NotFound("This table does not exist.");
             }
             catch (UserNotFoundException)
             {
-                return BadRequest("This user does not exist.");
+                return NotFound("This user does not exist.");
             }
             catch (TableCollaboratorException e)
             {
@@ -646,11 +593,11 @@ public class UserController : ControllerBase
             }
             catch (TableNotFoundException)
             {
-                return BadRequest("This table does not exist.");
+                return NotFound("This table does not exist.");
             }
             catch (UserNotFoundException)
             {
-                return BadRequest("This user does not exist.");
+                return NotFound("This user does not exist.");
             }
             catch (TableCollaboratorException e)
             {
