@@ -54,3 +54,6 @@ Schema "scw1_sys" mit SCW1_DB_USER_SYS als Owner
 Schema "scw1_dyn" mit SCW1_DB_USER_SYS als Owner und USAGE und CREATE Berechtigungen für beide DB_USER
 Schema "public" für EF Core Migrations
 Schema "postgraphile_watch" wird von postgraphile einmalig angelegt, danach kann SCW1_DB_USER_SYS als Owner gesetzt werden
+
+Weiters, um eine neue Migration anzulegen müssen folgende Befehlsargumente angegeben werden:
+dotnet ef migrations add XXXX -s ScwSvc\ScwSvc.csproj --project ScwSvc.DataAccess.Impl\ScwSvc.DataAccess.Impl.csproj -c DbSysContext
