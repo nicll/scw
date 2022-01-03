@@ -10,6 +10,6 @@ public class AdminQuery
     public IQueryable<User> GetUsers([Service] ISysDbRepository sysDb)
         => sysDb.CreateUsersQuery();
 
-    public IQueryable<Table> GetTableRefs([Service] ISysDbRepository sysDb)
+    public IQueryable<Table> GetTables([Service] ISysDbRepository sysDb)
         => sysDb.CreateTablesQuery();
 }

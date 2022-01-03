@@ -7,7 +7,7 @@ public class DbSysContext : DbContext
 {
     public DbSet<User> Users { get; set; }
 
-    public DbSet<Table> TableRefs { get; set; }
+    public DbSet<Table> Tables { get; set; }
 
     public DbSysContext(DbContextOptions<DbSysContext> options) : base(options)
     {

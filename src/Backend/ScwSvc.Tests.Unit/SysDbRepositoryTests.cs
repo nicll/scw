@@ -135,40 +135,40 @@ public class SysDbRepositoryTests
     [Test, Order(11)]
     public async Task CreateDataSet()
     {
-        var tableRef = _datasetTable;
+        var table = _datasetTable;
 
-        await _sysDb.AddTable(tableRef);
+        await _sysDb.AddTable(table);
 
-        Assert.AreEqual(tableRef, await _sysDb.GetTableById(tableRef.TableId));
+        Assert.AreEqual(table, await _sysDb.GetTableById(table.TableId));
     }
 
     [Test, Order(12)]
     public async Task CreateSheet()
     {
-        var tableRef = _sheetTable;
+        var table = _sheetTable;
 
-        await _sysDb.AddTable(tableRef);
+        await _sysDb.AddTable(table);
 
-        Assert.AreEqual(tableRef, await _sysDb.GetTableById(tableRef.TableId));
+        Assert.AreEqual(table, await _sysDb.GetTableById(table.TableId));
     }
 
     [Test, Order(13)]
     public async Task DeleteDataSet()
     {
-        var tableRef = _datasetTable;
+        var table = _datasetTable;
 
-        await _sysDb.RemoveTable(tableRef);
+        await _sysDb.RemoveTable(table);
 
-        Assert.IsNull(await _sysDb.GetTableById(tableRef.TableId));
+        Assert.IsNull(await _sysDb.GetTableById(table.TableId));
     }
 
     [Test, Order(14)]
     public async Task DeleteSheet()
     {
-        var tableRef = _sheetTable;
+        var table = _sheetTable;
 
-        await _sysDb.RemoveTable(tableRef);
+        await _sysDb.RemoveTable(table);
 
-        Assert.IsNull(await _sysDb.GetTableById(tableRef.TableId));
+        Assert.IsNull(await _sysDb.GetTableById(table.TableId));
     }
 }

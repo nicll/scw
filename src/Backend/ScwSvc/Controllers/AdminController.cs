@@ -291,18 +291,18 @@ public class AdminController : ControllerBase
             }
         });
 
-    [HttpDelete("dataset/{tableRefId}")]
+    [HttpDelete("dataset/{tableId}")]
     [Authorize(Policy = AdminOnly)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> RemoveDataSet([FromRoute] Guid tableRefId)
+    public async ValueTask<IActionResult> RemoveDataSet([FromRoute] Guid tableId)
         => await AuthenticateAndRun(_authProc, User, async _ =>
         {
             try
             {
-                await _adminProc.DeleteDataSet(tableRefId);
+                await _adminProc.DeleteDataSet(tableId);
                 return Ok();
             }
             catch (TableNotFoundException)
@@ -355,18 +355,18 @@ public class AdminController : ControllerBase
             }
         });
 
-    [HttpDelete("sheet/{tableRefId}")]
+    [HttpDelete("sheet/{tableId}")]
     [Authorize(Policy = AdminOnly)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> RemoveSheet([FromRoute] Guid tableRefId)
+    public async ValueTask<IActionResult> RemoveSheet([FromRoute] Guid tableId)
         => await AuthenticateAndRun(_authProc, User, async _ =>
         {
             try
             {
-                await _adminProc.DeleteSheet(tableRefId);
+                await _adminProc.DeleteSheet(tableId);
                 return Ok();
             }
             catch (TableNotFoundException)

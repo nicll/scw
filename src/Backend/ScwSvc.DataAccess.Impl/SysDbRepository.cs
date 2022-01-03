@@ -48,11 +48,11 @@ public class SysDbRepository : ISysDbRepository
 
     public async Task RemoveUser(User user)
     {
-        await _sysDb.TableRefs
+        await _sysDb.Tables
             .Where(t => t.Collaborators.Contains(user))
             .ForEachAsync(t => t.Collaborators.Remove(user))
             .ConfigureAwait(false);
-        _sysDb.TableRefs.RemoveRange(user.OwnTables);
+        _sysDb.Tables.RemoveRange(user.OwnTables);
         _sysDb.Users.Remove(user);
 
         if (AutoSave)
@@ -68,20 +68,20 @@ public class SysDbRepository : ISysDbRepository
     }
 
     public async Task<ICollection<Table>> GetAllTables()
-        => await _sysDb.TableRefs.ToArrayAsync();
+        => await _sysDb.Tables.ToArrayAsync();
 
     public IQueryable<Table> CreateTablesQuery()
-        => _sysDb.TableRefs;
+        => _sysDb.Tables;
 
     public async Task<ICollection<Table>> ExecuteTablesQuery(IQueryable<Table> query)
         => await query.ToArrayAsync();
 
     public async Task<Table?> GetTableById(Guid tableId)
-        => await _sysDb.TableRefs.FindAsync(tableId).ConfigureAwait(false);
+        => await _sysDb.Tables.FindAsync(tableId).ConfigureAwait(false);
 
     public async Task AddTable(Table table)
     {
-        await _sysDb.TableRefs.AddAsync(table).ConfigureAwait(false);
+        await _sysDb.Tables.AddAsync(table).ConfigureAwait(false);
 
         if (AutoSave)
             await _SaveChanges();
@@ -93,7 +93,7 @@ public class SysDbRepository : ISysDbRepository
             user.Collaborations.Remove(table);
 
         table.Owner.OwnTables.Remove(table);
-        _sysDb.TableRefs.Remove(table);
+        _sysDb.Tables.Remove(table);
 
         if (AutoSave)
             await _SaveChanges();
@@ -101,7 +101,7 @@ public class SysDbRepository : ISysDbRepository
 
     public async Task ModifyTable(Table table)
     {
-        //_sysDb.TableRefs.Update(table);
+        //_sysDb.Tables.Update(table);
 
         if (AutoSave)
             await _SaveChanges();

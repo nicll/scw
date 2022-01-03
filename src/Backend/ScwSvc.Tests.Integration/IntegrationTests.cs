@@ -24,7 +24,7 @@ public class IntegrationTests
     public string UserId;
     public string schema;
 
-    public List<Table> TableRefList = new List<Table>();
+    public List<Table> TableList = new List<Table>();
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
@@ -528,7 +528,7 @@ public class IntegrationTests
         var response = await responseTask.Content.ReadAsStringAsync();
 
         var list = JsonConvert.DeserializeObject<List<Table>>(response);
-        TableRefList.AddRange(list);
+        TableList.AddRange(list);
 
         Assert.That(responseTask.IsSuccessStatusCode && response.Length > 10);
     }
@@ -583,7 +583,7 @@ public class IntegrationTests
         var response = await responseTask.Content.ReadAsStringAsync();
 
         var list = JsonConvert.DeserializeObject<List<Table>>(response);
-        TableRefList.AddRange(list);
+        TableList.AddRange(list);
 
         Assert.That(responseTask.IsSuccessStatusCode && !string.IsNullOrWhiteSpace(response));
     }
@@ -602,9 +602,9 @@ public class IntegrationTests
     public async Task RemoveSheets()
     {
         HttpResponseMessage responseTask = null;
-        foreach (var tableref in TableRefList.Where(x => x.TableType == TableType.Sheet))
+        foreach (var table in TableList.Where(x => x.TableType == TableType.Sheet))
         {
-            string url = $"/api/admin/sheet/{tableref.TableId}";
+            string url = $"/api/admin/sheet/{table.TableId}";
             responseTask = await _client.DeleteAsync(url);
             var response = await responseTask.Content.ReadAsStringAsync();
 
@@ -616,9 +616,9 @@ public class IntegrationTests
     public async Task RemoveDataSheet()
     {
         HttpResponseMessage responseTask = null;
-        foreach (var tableref in TableRefList.Where(x => x.TableType == TableType.DataSet))
+        foreach (var table in TableList.Where(x => x.TableType == TableType.DataSet))
         {
-            string url = $"/api/admin/dataset/{tableref.TableId}";
+            string url = $"/api/admin/dataset/{table.TableId}";
             responseTask = await _client.DeleteAsync(url);
             var response = await responseTask.Content.ReadAsStringAsync();
 

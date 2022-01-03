@@ -157,19 +157,19 @@ public class UserController : ControllerBase
     /// <summary>
     /// Queries a single data set that a user may access.
     /// </summary>
-    /// <param name="tableRefId">The table reference ID.</param>
+    /// <param name="tableId">The table reference ID.</param>
     /// <returns>The table reference of the data set.</returns>
-    [HttpGet("dataset/{tableRefId}")]
+    [HttpGet("dataset/{tableId}")]
     [ProducesResponseType(typeof(Table), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> MyDataSet([FromRoute] Guid tableRefId)
+    public async ValueTask<IActionResult> MyDataSet([FromRoute] Guid tableId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
-                return Ok(await _userProc.GetDataSet(user, tableRefId));
+                return Ok(await _userProc.GetDataSet(user, tableId));
             }
             catch (TableNotFoundException)
             {
@@ -227,18 +227,18 @@ public class UserController : ControllerBase
     /// <summary>
     /// Deletes the data set of a user.
     /// </summary>
-    /// <param name="tableRefId">The table reference ID.</param>
-    [HttpDelete("dataset/{tableRefId}")]
+    /// <param name="tableId">The table reference ID.</param>
+    [HttpDelete("dataset/{tableId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> DeleteDataSet([FromRoute] Guid tableRefId)
+    public async ValueTask<IActionResult> DeleteDataSet([FromRoute] Guid tableId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
-                await _userProc.DeleteDataSet(user, tableRefId);
+                await _userProc.DeleteDataSet(user, tableId);
                 return Ok();
             }
             catch (TableNotFoundException)
@@ -259,21 +259,21 @@ public class UserController : ControllerBase
     /// <summary>
     /// Adds a column to an existing table.
     /// </summary>
-    /// <param name="tableRefId">The table reference ID.</param>
+    /// <param name="tableId">The table reference ID.</param>
     /// <param name="columnName">The name of the new column.</param>
     /// <param name="columnDef">The definition of the new column.</param>
-    [HttpPost("dataset/{tableRefId}/{columnName}")]
+    [HttpPost("dataset/{tableId}/{columnName}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> AddColumnToDataSet([FromRoute] Guid tableRefId, [FromRoute] string columnName, [FromBody] ColumnDefinition columnDef)
+    public async ValueTask<IActionResult> AddColumnToDataSet([FromRoute] Guid tableId, [FromRoute] string columnName, [FromBody] ColumnDefinition columnDef)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
                 var column = _mapper.Map<DataSetColumn>(columnDef);
-                await _userProc.AddDataSetColumn(user, tableRefId, column);
+                await _userProc.AddDataSetColumn(user, tableId, column);
                 return Ok();
             }
             catch (TableNotFoundException)
@@ -298,19 +298,19 @@ public class UserController : ControllerBase
     /// <summary>
     /// Removes a column from an existing table.
     /// </summary>
-    /// <param name="tableRefId">The table reference ID.</param>
+    /// <param name="tableId">The table reference ID.</param>
     /// <param name="columnName">The name of the column.</param>
-    [HttpDelete("dataset/{tableRefId}/{columnName}")]
+    [HttpDelete("dataset/{tableId}/{columnName}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> RemoveColumnFromDataSet([FromRoute] Guid tableRefId, [FromRoute] string columnName)
+    public async ValueTask<IActionResult> RemoveColumnFromDataSet([FromRoute] Guid tableId, [FromRoute] string columnName)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
-                await _userProc.RemoveDataSetColumn(user, tableRefId, columnName);
+                await _userProc.RemoveDataSetColumn(user, tableId, columnName);
                 return Ok();
             }
             catch (TableNotFoundException)
@@ -390,19 +390,19 @@ public class UserController : ControllerBase
     /// <summary>
     /// Queries a single sheet that a user may access.
     /// </summary>
-    /// <param name="tableRefId">The table reference ID.</param>
+    /// <param name="tableId">The table reference ID.</param>
     /// <returns>The table reference of the sheet.</returns>
-    [HttpGet("sheet/{tableRefId}")]
+    [HttpGet("sheet/{tableId}")]
     [ProducesResponseType(typeof(Table), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> MySheet([FromRoute] Guid tableRefId)
+    public async ValueTask<IActionResult> MySheet([FromRoute] Guid tableId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
-                return Ok(await _userProc.GetSheet(user, tableRefId));
+                return Ok(await _userProc.GetSheet(user, tableId));
             }
             catch (TableNotFoundException)
             {
@@ -460,18 +460,18 @@ public class UserController : ControllerBase
     /// <summary>
     /// Deletes the sheet of a user.
     /// </summary>
-    /// <param name="tableRefId">The table reference ID.</param>
-    [HttpDelete("sheet/{tableRefId}")]
+    /// <param name="tableId">The table reference ID.</param>
+    [HttpDelete("sheet/{tableId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> DeleteSheet([FromRoute] Guid tableRefId)
+    public async ValueTask<IActionResult> DeleteSheet([FromRoute] Guid tableId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
-                await _userProc.DeleteSheet(user, tableRefId);
+                await _userProc.DeleteSheet(user, tableId);
                 return Ok();
             }
             catch (TableNotFoundException)
@@ -523,18 +523,18 @@ public class UserController : ControllerBase
     /// <summary>
     /// Queries a collection of collaborators for a table that the user posesses.
     /// </summary>
-    /// <param name="tableRefId">The table reference ID.</param>
+    /// <param name="tableId">The table reference ID.</param>
     /// <returns>A collection of all collaborators for this table.</returns>
-    [HttpGet("table/{tableRefId}/collaborator")]
+    [HttpGet("table/{tableId}/collaborator")]
     [ProducesResponseType(typeof(ICollection<User>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
-    public async ValueTask<IActionResult> GetCollaborators([FromRoute] Guid tableRefId)
+    public async ValueTask<IActionResult> GetCollaborators([FromRoute] Guid tableId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
-                return Ok(await _userProc.GetCollaborators(user, tableRefId));
+                return Ok(await _userProc.GetCollaborators(user, tableId));
             }
             catch (TableNotFoundException)
             {
@@ -545,19 +545,19 @@ public class UserController : ControllerBase
     /// <summary>
     /// Adds a user as a collaborator to a table.
     /// </summary>
-    /// <param name="tableRefId">The table reference ID.</param>
+    /// <param name="tableId">The table reference ID.</param>
     /// <param name="userId">The collaborator's <see cref="User.UserId"/>.</param>
-    [HttpPost("table/{tableRefId}/collaborator/{userId}")]
+    [HttpPost("table/{tableId}/collaborator/{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> AddCollaborator([FromRoute] Guid tableRefId, [FromRoute] Guid userId)
+    public async ValueTask<IActionResult> AddCollaborator([FromRoute] Guid tableId, [FromRoute] Guid userId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
-                await _userProc.AddCollaborator(user, tableRefId, userId);
+                await _userProc.AddCollaborator(user, tableId, userId);
                 return Ok();
             }
             catch (TableNotFoundException)
@@ -582,19 +582,19 @@ public class UserController : ControllerBase
     /// <summary>
     /// Removes a user as a collaborator from a table.
     /// </summary>
-    /// <param name="tableRefId">The table reference ID.</param>
+    /// <param name="tableId">The table reference ID.</param>
     /// <param name="userId">The collaborator's <see cref="User.UserId"/>.</param>
-    [HttpDelete("table/{tableRefId}/collaborator/{userId}")]
+    [HttpDelete("table/{tableId}/collaborator/{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> RemoveCollaborator([FromRoute] Guid tableRefId, [FromRoute] Guid userId)
+    public async ValueTask<IActionResult> RemoveCollaborator([FromRoute] Guid tableId, [FromRoute] Guid userId)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
-                await _userProc.RemoveCollaborator(user, tableRefId, userId);
+                await _userProc.RemoveCollaborator(user, tableId, userId);
                 return Ok();
             }
             catch (TableNotFoundException)
