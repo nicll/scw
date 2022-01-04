@@ -39,13 +39,14 @@ public class Startup
 
         services.AddAutoMapper(config => config.AddProfile<AutoMapperProfile>());
 
-        services.AddDbContextPool<DbSysContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={SysUser}; Password={SysPass}; SearchPath=scw1_sys,public").UseLazyLoadingProxies());
-        services.AddDbContextPool<DbDynContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={DynUser}; Password={DynPass}; SearchPath=scw1_dyn"));
+        services.AddDbContext<DbSysContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={SysUser}; Password={SysPass}; SearchPath=scw1_sys,public").UseLazyLoadingProxies());
+        services.AddDbContext<DbDynContext>(o => o.UseNpgsql($"Server={Server}; Port={Port}; Database=scw; User Id={DynUser}; Password={DynPass}; SearchPath=scw1_dyn"));
         services.AddScoped<ISysDbRepository, SysDbRepository>();
         services.AddScoped<IDynDbRepository, DynDbRepository>();
         services.AddScoped<IUserOperations, UserOperations>();
         services.AddScoped<ITableOperations, TableOperations>();
         services.AddScoped<IAuthProcedures, AuthProcedures>();
+        services.AddScoped<IMapProcedures, MapProcedures>();
         services.AddScoped<IUserProcedures, UserProcedures>();
         services.AddScoped<IAdminProcedures, AdminProcedures>();
         services.AddScoped<IServiceProcedures, ServiceProcedures>();

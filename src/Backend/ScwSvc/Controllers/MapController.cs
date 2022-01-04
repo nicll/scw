@@ -41,7 +41,7 @@ public class MapController : ControllerBase
         });
 
     [HttpGet("name2id/{name}")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async ValueTask<IActionResult> UserNameToId([FromRoute] string name)

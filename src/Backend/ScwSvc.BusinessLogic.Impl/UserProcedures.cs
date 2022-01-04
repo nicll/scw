@@ -27,10 +27,10 @@ public class UserProcedures : IUserProcedures
 
     public Task<Table> GetDataSet(User user, Guid tableId)
     {
-        var table = user.OwnTables.FirstOrDefault(t => t.TableId == tableId);
+        var table = user.OwnTables.Concat(user.Collaborations).FirstOrDefault(t => t.TableId == tableId);
 
         if (table is null)
-            throw new TableNotFoundException("The table was not found in the user's tables.") { TableId = tableId };
+            throw new TableNotFoundException("The table was not found in the user's tables or collaborations.") { TableId = tableId };
 
         if (table.TableType != TableType.DataSet)
             throw new TableMismatchException("Table was not a data set.");
@@ -40,10 +40,10 @@ public class UserProcedures : IUserProcedures
 
     public Task<Table> GetSheet(User user, Guid tableId)
     {
-        var table = user.OwnTables.FirstOrDefault(t => t.TableId == tableId);
+        var table = user.OwnTables.Concat(user.Collaborations).FirstOrDefault(t => t.TableId == tableId);
 
         if (table is null)
-            throw new TableNotFoundException("The table was not found in the user's tables.") { TableId = tableId };
+            throw new TableNotFoundException("The table was not found in the user's tables or collaborations.") { TableId = tableId };
 
         if (table.TableType != TableType.Sheet)
             throw new TableMismatchException("Table was not a sheet.");

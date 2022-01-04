@@ -20,6 +20,7 @@ internal static class Utils
     {
         _PrepareBase(owner, table);
         table.TableType = TableType.Sheet;
+        table.Columns = Array.Empty<DataSetColumn>();
         return table;
     }
 
