@@ -18,11 +18,11 @@ public class SysDbRepositoryTests
     private SysDbRepository _sysDb;
     private readonly User
         _commonUser = new() { Name = "CommonUser", Role = UserRole.Common, UserId = Guid.Parse(CommonUserId), PasswordHash = new byte[32], Collaborations = new List<Table>() },
-        _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.Parse(ManagerUserId), Collaborations = new List<Table>(), OwnTables = Array.Empty<Table>() },
-        _adminUser = new() { Name = "AdminUser", Role = UserRole.Admin, UserId = Guid.Parse(AdminUserId), Collaborations = new List<Table>(), OwnTables = Array.Empty<Table>() };
+        _managerUser = new() { Name = "ManagerUser", Role = UserRole.Manager, UserId = Guid.Parse(ManagerUserId), PasswordHash = new byte[32], Collaborations = new List<Table>(), OwnTables = Array.Empty<Table>() },
+        _adminUser = new() { Name = "AdminUser", Role = UserRole.Admin, UserId = Guid.Parse(AdminUserId), PasswordHash = new byte[32], Collaborations = new List<Table>(), OwnTables = Array.Empty<Table>() };
     private readonly Table
-        _datasetTable = new() { TableId = Guid.NewGuid(), TableType = TableType.DataSet, OwnerUserId = Guid.Parse(CommonUserId) },
-        _sheetTable = new() { TableId = Guid.NewGuid(), TableType = TableType.Sheet, OwnerUserId = Guid.Parse(CommonUserId) };
+        _datasetTable = new() { TableId = Guid.NewGuid(), DisplayName = "one", TableType = TableType.DataSet, OwnerUserId = Guid.Parse(CommonUserId) },
+        _sheetTable = new() { TableId = Guid.NewGuid(), DisplayName = "two", TableType = TableType.Sheet, OwnerUserId = Guid.Parse(CommonUserId) };
 
     [OneTimeSetUp]
     public void SetupOnce()

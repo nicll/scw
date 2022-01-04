@@ -25,17 +25,22 @@ public class ServiceController : ControllerBase
     private readonly IUserOperations _debugUser;
 #endif
 
+#if !DEBUG
     public ServiceController(ILogger<ServiceController> logger, IServiceProcedures serviceProc)
     {
         _logger = logger;
         _serviceProc = serviceProc;
     }
+#endif
 
 #if DEBUG
     [Microsoft.Extensions.DependencyInjection.ActivatorUtilitiesConstructor]
     public ServiceController(ILogger<ServiceController> logger, IServiceProcedures serviceProc, IUserOperations userProc)
-        : this(logger, serviceProc)
-        => _debugUser = userProc;
+    {
+        _logger = logger;
+        _serviceProc = serviceProc;
+        _debugUser = userProc;
+    }
 #endif
 
     [HttpPost("[action]")]
@@ -57,7 +62,7 @@ public class ServiceController : ControllerBase
             _logger.LogInformation($"Register success: user='{loginCredentials.Username}'");
             return Ok();
         }
-        catch (UserAlreadyExistsException ex)
+        catch (UserAlreadyExistsException)
         {
             _logger.LogInformation($"Register failed: user already exists; user='{loginCredentials.Username}'");
             return BadRequest("User with this name already exists.");

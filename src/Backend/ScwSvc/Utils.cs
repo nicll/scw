@@ -81,6 +81,10 @@ internal static class Utils
             try
             {
                 var owner = GetUserIdAsStringOrNull(user);
+
+                if (owner is null)
+                    return null;
+
                 var ownerId = Guid.Parse(owner);
                 return (owner, ownerId);
             }

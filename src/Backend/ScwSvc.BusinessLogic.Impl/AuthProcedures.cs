@@ -2,7 +2,7 @@
 
 namespace ScwSvc.Procedures.Impl;
 
-public class AuthProcedures
+public class AuthProcedures : IAuthProcedures
 {
     private readonly IUserOperations _user;
 

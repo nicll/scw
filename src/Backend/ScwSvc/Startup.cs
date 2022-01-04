@@ -45,6 +45,7 @@ public class Startup
         services.AddScoped<IDynDbRepository, DynDbRepository>();
         services.AddScoped<IUserOperations, UserOperations>();
         services.AddScoped<ITableOperations, TableOperations>();
+        services.AddScoped<IAuthProcedures, AuthProcedures>();
         services.AddScoped<IUserProcedures, UserProcedures>();
         services.AddScoped<IAdminProcedures, AdminProcedures>();
         services.AddScoped<IServiceProcedures, ServiceProcedures>();
