@@ -32,6 +32,7 @@ public class MapController : ControllerBase
     public async ValueTask<IActionResult> UserIdToName([FromRoute] Guid userId)
         => await AuthenticateAndRun(_authProc, User, async _ =>
         {
+            _logger.LogInformation($"{_.UserId} executed UserIdToName: user={userId}");
             var name = await _mapProc.UserIdToName(userId);
 
             if (name is null)
@@ -48,6 +49,7 @@ public class MapController : ControllerBase
 
         => await AuthenticateAndRun(_authProc, User, async _ =>
         {
+            _logger.LogInformation($"{_.UserId} executed UserNameToId: name={name}");
             var id = await _mapProc.UserNameToId(name);
 
             if (!id.HasValue)

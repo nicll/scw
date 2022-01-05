@@ -109,14 +109,6 @@ internal static class Utils
             return SessionResult.Valid(user);
         }
 
-        internal static async Task<IActionResult> AuthenticateAndRun(IAuthProcedures authProc, ClaimsPrincipal cpUser, Func<User, IActionResult> code)
-            => await GetUserOrError(authProc, cpUser) switch
-            {
-                SessionResult.InvalidSession error => error.Error,
-                SessionResult.ValidSession user => code(user.User),
-                var result => throw new InvalidOperationException($"Invalid result from {nameof(GetUserOrError)}: {result?.GetType().Name}")
-            };
-
         internal static async Task<IActionResult> AuthenticateAndRun(IAuthProcedures authProc, ClaimsPrincipal cpUser, Func<User, Task<IActionResult>> code)
             => await GetUserOrError(authProc, cpUser) switch
             {

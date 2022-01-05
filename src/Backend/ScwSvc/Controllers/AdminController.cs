@@ -47,6 +47,7 @@ public class AdminController : ControllerBase
     public async ValueTask<IActionResult> GetUser([FromRoute] Guid userId)
         => await AuthenticateAndRun(_authProc, User, async _ =>
         {
+            _logger.LogInformation($"{_.UserId} executed GetUser: user={userId}");
             var user = await _adminProc.GetUser(userId);
 
             if (user is null)
@@ -64,6 +65,7 @@ public class AdminController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed AddUser: name={credentials.Username}");
                 await _adminProc.AddUser(credentials.Username, credentials.Password);
                 return Ok();
             }
@@ -91,6 +93,7 @@ public class AdminController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed DeleteUser: user={userId}");
                 await _adminProc.DeleteUser(userId);
                 return Ok();
             }
@@ -116,6 +119,7 @@ public class AdminController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed ChangeUserName: user={userId}; name={username}");
                 await _adminProc.ChangeUserName(userId, username);
                 return Ok();
             }
@@ -149,6 +153,7 @@ public class AdminController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed ChangeUserPassword: user={userId}");
                 await _adminProc.ChangeUserPassword(userId, password);
                 return Ok();
             }
@@ -178,6 +183,7 @@ public class AdminController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed ChangeUserRole: user={userId}; role={role}");
                 await _adminProc.ChangeUserRole(userId, role);
                 return Ok();
             }
@@ -200,6 +206,7 @@ public class AdminController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed GetUserTables: user={userId}");
                 await _adminProc.GetUserTables(userId);
                 return Ok();
             }
@@ -217,6 +224,7 @@ public class AdminController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed GetUserTablesOwn: user={userId}");
                 await _adminProc.GetUserTablesOwn(userId);
                 return Ok();
             }
@@ -234,6 +242,7 @@ public class AdminController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed GetUserTablesCollaborations: user={userId}");
                 await _adminProc.GetUserTablesCollaboration(userId);
                 return Ok();
             }
@@ -244,16 +253,31 @@ public class AdminController : ControllerBase
         });
 
     [HttpGet("table")]
-    public async Task<ICollection<Table>> GetTables()
-        => await _adminProc.GetAllTables();
+    [ProducesResponseType(typeof(ICollection<Table>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetTables()
+        => await AuthenticateAndRun(_authProc, User, async _ =>
+        {
+            _logger.LogInformation($"{_.UserId} executed GetTables");
+            return Ok(await _adminProc.GetAllTables());
+        });
 
     [HttpGet("dataset")]
-    public async Task<ICollection<Table>> GetDataSets()
-        => await _adminProc.GetAllDataSets();
+    [ProducesResponseType(typeof(ICollection<Table>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDataSets()
+        => await AuthenticateAndRun(_authProc, User, async _ =>
+        {
+            _logger.LogInformation($"{_.UserId} executed GetDataSets");
+            return Ok(await _adminProc.GetAllDataSets());
+        });
 
     [HttpGet("sheet")]
-    public async Task<ICollection<Table>> GetSheets()
-        => await _adminProc.GetAllSheets();
+    [ProducesResponseType(typeof(ICollection<Table>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSheets()
+        => await AuthenticateAndRun(_authProc, User, async _ =>
+        {
+            _logger.LogInformation($"{_.UserId} executed GetSheets");
+            return Ok(await _adminProc.GetAllSheets());
+        });
 
     [HttpPost("dataset")]
     [Authorize(Policy = AdminOnly)]
@@ -268,6 +292,7 @@ public class AdminController : ControllerBase
             {
                 var table = _mapper.Map<Table>(dsModel);
                 table = _adminProc.PrepareDataSet(user, table);
+                _logger.LogInformation($"{user.UserId} executed CreateDataSet: table={table.TableId}");
                 await _adminProc.CreateDataSet(user, table);
                 return Created("/api/data/dataset/" + table.TableId, table);
             }
@@ -296,11 +321,12 @@ public class AdminController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> RemoveDataSet([FromRoute] Guid tableId)
+    public async ValueTask<IActionResult> DeleteDataSet([FromRoute] Guid tableId)
         => await AuthenticateAndRun(_authProc, User, async _ =>
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed DeleteDataSet: table={tableId}");
                 await _adminProc.DeleteDataSet(tableId);
                 return Ok();
             }
@@ -332,6 +358,7 @@ public class AdminController : ControllerBase
             {
                 var table = _mapper.Map<Table>(shModel);
                 table = _adminProc.PrepareSheet(user, table);
+                _logger.LogInformation($"{user.UserId} executed CreateSheet: table={table.TableId}");
                 await _adminProc.CreateSheet(user, table);
                 return Created("/api/data/sheet/" + table.TableId, table);
             }
@@ -360,11 +387,12 @@ public class AdminController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> RemoveSheet([FromRoute] Guid tableId)
+    public async ValueTask<IActionResult> DeleteSheet([FromRoute] Guid tableId)
         => await AuthenticateAndRun(_authProc, User, async _ =>
         {
             try
             {
+                _logger.LogInformation($"{_.UserId} executed DeleteSheet: table={tableId}");
                 await _adminProc.DeleteSheet(tableId);
                 return Ok();
             }

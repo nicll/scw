@@ -196,11 +196,15 @@ public class ServiceController : ControllerBase
     {
         try
         {
+            _logger.LogWarning("Creating demo users.");
+
             for (int i = 0; i < Enum.GetValues<UserRole>().Length; ++i)
             {
                 var userId = await _debugUser.AddUser("test" + i, "test");
                 await _debugUser.ModifyUser(userId, null, null, (UserRole)i);
             }
+
+            _logger.LogInformation("Created demo users.");
             return Ok();
         }
         catch

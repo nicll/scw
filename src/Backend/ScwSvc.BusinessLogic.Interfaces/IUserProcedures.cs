@@ -22,6 +22,13 @@ public interface IUserProcedures
     int MaxSheetsPerUser { get; set; }
 
     /// <summary>
+    /// Get the name of the user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Name of the user.</returns>
+    Task<string> GetUserName(User user);
+
+    /// <summary>
     /// Change the name of a user.
     /// </summary>
     /// <param name="user">The user.</param>
@@ -41,6 +48,83 @@ public interface IUserProcedures
     /// <exception cref="UserModificationException">Thrown if the new password was invalid.</exception>
     /// <exception cref="DatabaseException">Thrown if a general database error occurs.</exception>
     Task ChangeUserPassword(User user, string password);
+
+    /// <summary>
+    /// Get the data sets of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Collection of user's data sets.</returns>
+    Task<ICollection<Table>> GetDataSets(User user);
+
+    /// <summary>
+    /// Get the number of data sets of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Number of the user's data sets.</returns>
+    Task<int> GetDataSetCount(User user);
+
+    /// <summary>
+    /// Get the own data sets of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Collection of user's own data sets.</returns>
+    Task<ICollection<Table>> GetOwnDataSets(User user);
+
+    /// <summary>
+    /// Get the collaboration data sets of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Collection of user's collaboration data sets.</returns>
+    Task<ICollection<Table>> GetCollaborationDataSets(User user);
+
+    /// <summary>
+    /// Get the sheets of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Collection of user's sheets.</returns>
+    Task<ICollection<Table>> GetSheets(User user);
+
+    /// <summary>
+    /// Get the number of sheets of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Number of the user's sheets.</returns>
+    Task<int> GetSheetCount(User user);
+
+    /// <summary>
+    /// Get the own sheets of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Collection of user's own sheets.</returns>
+    Task<ICollection<Table>> GetOwnSheets(User user);
+
+    /// <summary>
+    /// Get the collaboration sheets of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Collection of user's collaboration sheets.</returns>
+    Task<ICollection<Table>> GetCollaborationSheets(User user);
+
+    /// <summary>
+    /// Get the tables of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Collection of user's tables.</returns>
+    Task<ICollection<Table>> GetTables(User user);
+
+    /// <summary>
+    /// Get the own tables of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Collection of user's own tables.</returns>
+    Task<ICollection<Table>> GetOwnTables(User user);
+
+    /// <summary>
+    /// Get the collaboration tables of a user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>Collection of user's collaboration tables.</returns>
+    Task<ICollection<Table>> GetCollaborationTables(User user);
 
     /// <summary>
     /// Get the data set of a specific user with the corresponding ID.

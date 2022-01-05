@@ -47,6 +47,7 @@ public class GraphQLTableController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed GetDataSetLookupName: table={tableId}");
                 return Ok((await _graphqlProc.GetDataSetLookupName(user, tableId)).ToSimplifiedFormat());
             }
             catch (TableNotFoundException)
@@ -74,6 +75,7 @@ public class GraphQLTableController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed GetSheetLookupName: table={tableId}");
                 return Ok((await _graphqlProc.GetSheetLookupName(user, tableId)).ToSimplifiedFormat());
             }
             catch (TableNotFoundException)

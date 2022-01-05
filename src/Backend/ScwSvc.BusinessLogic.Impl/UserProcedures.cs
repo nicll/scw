@@ -19,11 +19,47 @@ public class UserProcedures : IUserProcedures
         _table = table;
     }
 
+    public Task<string> GetUserName(User user)
+        => Task.FromResult(user.Name);
+
     public async Task ChangeUserName(User user, string name)
         => await _user.ModifyUser(user.UserId, name, null, null);
 
     public async Task ChangeUserPassword(User user, string password)
         => await _user.ModifyUser(user.UserId, null, password, null);
+
+    public Task<ICollection<Table>> GetDataSets(User user)
+        => Task.FromResult((ICollection<Table>)user.OwnTables.Concat(user.Collaborations).Where(t => t.TableType == TableType.DataSet).ToArray());
+
+    public Task<int> GetDataSetCount(User user)
+        => Task.FromResult(user.OwnTables.Count(t => t.TableType == TableType.DataSet));
+
+    public Task<ICollection<Table>> GetOwnDataSets(User user)
+        => Task.FromResult((ICollection<Table>)user.OwnTables.Where(t => t.TableType == TableType.DataSet));
+
+    public Task<ICollection<Table>> GetCollaborationDataSets(User user)
+        => Task.FromResult((ICollection<Table>)user.Collaborations.Where(t => t.TableType == TableType.DataSet));
+
+    public Task<ICollection<Table>> GetSheets(User user)
+        => Task.FromResult((ICollection<Table>)user.OwnTables.Concat(user.Collaborations).Where(t => t.TableType == TableType.Sheet).ToArray());
+
+    public Task<int> GetSheetCount(User user)
+        => Task.FromResult(user.OwnTables.Count(t => t.TableType == TableType.Sheet));
+
+    public Task<ICollection<Table>> GetOwnSheets(User user)
+        => Task.FromResult((ICollection<Table>)user.OwnTables.Where(t => t.TableType == TableType.Sheet));
+
+    public Task<ICollection<Table>> GetCollaborationSheets(User user)
+        => Task.FromResult((ICollection<Table>)user.Collaborations.Where(t => t.TableType == TableType.Sheet));
+
+    public Task<ICollection<Table>> GetTables(User user)
+        => Task.FromResult((ICollection<Table>)user.OwnTables.Concat(user.Collaborations).ToArray());
+
+    public Task<ICollection<Table>> GetOwnTables(User user)
+        => Task.FromResult(user.OwnTables);
+
+    public Task<ICollection<Table>> GetCollaborationTables(User user)
+        => Task.FromResult(user.Collaborations);
 
     public Task<Table> GetDataSet(User user, Guid tableId)
     {
