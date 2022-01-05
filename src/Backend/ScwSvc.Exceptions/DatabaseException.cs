@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ScwSvc.Exceptions;
+﻿namespace ScwSvc.Exceptions;
 
 public class DatabaseException : Exception
 {

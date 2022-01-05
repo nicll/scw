@@ -6,27 +6,27 @@ namespace ScwSvc.Procedures.Impl;
 
 public class UserProcedures : IUserProcedures
 {
-    private readonly IUserOperations _user;
-    private readonly ITableOperations _table;
+    private readonly IUserOperations _userOp;
+    private readonly ITableOperations _tableOp;
 
     public int MaxDataSetsPerUser { get; set; } = 20;
 
     public int MaxSheetsPerUser { get; set; } = 20;
 
-    public UserProcedures(IUserOperations user, ITableOperations table)
+    public UserProcedures(IUserOperations userOp, ITableOperations tableOp)
     {
-        _user = user;
-        _table = table;
+        _userOp = userOp;
+        _tableOp = tableOp;
     }
 
     public Task<string> GetUserName(User user)
         => Task.FromResult(user.Name);
 
     public async Task ChangeUserName(User user, string name)
-        => await _user.ModifyUser(user.UserId, name, null, null);
+        => await _userOp.ModifyUser(user.UserId, name, null, null);
 
     public async Task ChangeUserPassword(User user, string password)
-        => await _user.ModifyUser(user.UserId, null, password, null);
+        => await _userOp.ModifyUser(user.UserId, null, password, null);
 
     public Task<ICollection<Table>> GetDataSets(User user)
         => Task.FromResult((ICollection<Table>)user.OwnTables.Concat(user.Collaborations).Where(t => t.TableType == TableType.DataSet).ToArray());
@@ -101,7 +101,7 @@ public class UserProcedures : IUserProcedures
         if (owner.OwnTables.Count(t => t.TableType == TableType.DataSet) >= MaxDataSetsPerUser)
             throw new TableLimitExceededException("User has too many data sets.");
 
-        await _table.AddTable(table);
+        await _tableOp.AddTable(table);
     }
 
     public async Task CreateSheet(User owner, Table table)
@@ -112,21 +112,21 @@ public class UserProcedures : IUserProcedures
         if (owner.OwnTables.Count(t => t.TableType == TableType.Sheet) >= MaxSheetsPerUser)
             throw new TableLimitExceededException("User has too many sheets.");
 
-        await _table.AddTable(table);
+        await _tableOp.AddTable(table);
     }
 
     public async Task DeleteDataSet(User owner, Guid tableId)
     {
         _ = await GetDataSet(owner, tableId);
 
-        await _table.DeleteTable(tableId);
+        await _tableOp.DeleteTable(tableId);
     }
 
     public async Task DeleteSheet(User owner, Guid tableId)
     {
         _ = await GetSheet(owner, tableId);
 
-        await _table.DeleteTable(tableId);
+        await _tableOp.DeleteTable(tableId);
     }
 
     public async Task AddDataSetColumn(User owner, Guid tableId, DataSetColumn column)
@@ -143,14 +143,14 @@ public class UserProcedures : IUserProcedures
             Nullable = column.Nullable
         };
 
-        await _table.AddColumn(table.TableId, col);
+        await _tableOp.AddColumn(table.TableId, col);
     }
 
     public async Task RemoveDataSetColumn(User owner, Guid tableId, string columnName)
     {
         _ = await GetDataSet(owner, tableId);
 
-        await _table.RemoveColumn(tableId, columnName);
+        await _tableOp.RemoveColumn(tableId, columnName);
     }
 
     public Task<ICollection<User>> GetCollaborators(User user, Guid tableId)
@@ -170,12 +170,12 @@ public class UserProcedures : IUserProcedures
         if (table is null)
             throw new TableNotFoundException("The table was not found in the user's tables.");
 
-        var collaborator = await _user.GetUserById(userId);
+        var collaborator = await _userOp.GetUserById(userId);
 
         if (collaborator is null)
             throw new UserNotFoundException("Collaborator was not found.");
 
-        await _table.AddCollaborator(table, collaborator);
+        await _tableOp.AddCollaborator(table, collaborator);
         // ToDo: logging
     }
 
@@ -186,12 +186,12 @@ public class UserProcedures : IUserProcedures
         if (table is null)
             throw new TableNotFoundException("The table was not found in the user's tables.");
 
-        var collaborator = await _user.GetUserById(userId);
+        var collaborator = await _userOp.GetUserById(userId);
 
         if (collaborator is null)
             throw new UserNotFoundException("Collaborator was not found.");
 
-        await _table.RemoveCollaborator(table, collaborator);
+        await _tableOp.RemoveCollaborator(table, collaborator);
         // ToDo: logging
     }
 }

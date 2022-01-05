@@ -10,7 +10,7 @@ public class TableCollaboratorException : InvalidTableException
     {
     }
 
-    public TableCollaboratorException(string message, System.Exception innerException) : base(message, innerException)
+    public TableCollaboratorException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

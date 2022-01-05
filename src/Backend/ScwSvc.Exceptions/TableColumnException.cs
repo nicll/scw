@@ -10,7 +10,7 @@ public class TableColumnException : InvalidTableException
     {
     }
 
-    public TableColumnException(string message, System.Exception innerException) : base(message, innerException)
+    public TableColumnException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ScwSvc.Exceptions;
+﻿namespace ScwSvc.Exceptions;
 
 public class UserNotFoundException : InvalidUserException
 {
@@ -16,7 +14,7 @@ public class UserNotFoundException : InvalidUserException
     {
     }
 
-    public UserNotFoundException(string message, System.Exception innerException) : base(message, innerException)
+    public UserNotFoundException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

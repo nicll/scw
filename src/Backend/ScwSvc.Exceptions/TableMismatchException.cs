@@ -10,7 +10,7 @@ public class TableMismatchException : InvalidTableException
     {
     }
 
-    public TableMismatchException(string message, System.Exception innerException) : base(message, innerException)
+    public TableMismatchException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

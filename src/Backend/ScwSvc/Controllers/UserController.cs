@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +35,7 @@ public class UserController : ControllerBase
     [HttpGet("username")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-    public async ValueTask<IActionResult> MyUsername()
+    public async ValueTask<IActionResult> MyUserName()
         => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetUserName(user)));
 
     [HttpPatch("username")]
@@ -44,11 +43,12 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async ValueTask<IActionResult> ChangeUsername([FromBody] string username)
+    public async ValueTask<IActionResult> ChangeUserName([FromBody] string username)
         => await AuthenticateAndRun(_authProc, User, async user =>
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed ChangeUserName: name={username}");
                 await _userProc.ChangeUserName(user, username);
                 return Ok();
             }
@@ -81,6 +81,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed ChangePassword");
                 await _userProc.ChangeUserPassword(user, password);
                 return Ok();
             }
@@ -107,7 +108,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsAll()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetDataSets(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MyDataSetsAll");
+            return Ok(await _userProc.GetDataSets(user));
+        });
 
     /// <summary>
     /// Queries a collection of all data sets that the user owns.
@@ -117,7 +122,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsOwn()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetOwnDataSets(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MyDataSetsOwn");
+            return Ok(await _userProc.GetOwnDataSets(user));
+        });
 
     /// <summary>
     /// Queries the number of all data sets that the user owns.
@@ -127,7 +136,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsOwnCount()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetDataSetCount(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MyDataSetsOwnCount");
+            return Ok(await _userProc.GetDataSetCount(user));
+        });
 
     /// <summary>
     /// Queries the remaining number of data sets that the user can create.
@@ -137,7 +150,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsOwnRemaining()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(_userProc.MaxDataSetsPerUser - await _userProc.GetDataSetCount(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MyDataSetsOwnRemaining");
+            return Ok(_userProc.MaxDataSetsPerUser - await _userProc.GetDataSetCount(user));
+        });
 
     /// <summary>
     /// Queries a collection of other people's data sets that the user may access.
@@ -147,7 +164,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyDataSetsCollaborations()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetCollaborationDataSets(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MyDataSetsCollaborations");
+            return Ok(await _userProc.GetCollaborationDataSets(user));
+        });
 
     /// <summary>
     /// Queries a single data set that a user may access.
@@ -164,6 +185,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed MyDataSet: table={tableId}");
                 return Ok(await _userProc.GetDataSet(user, tableId));
             }
             catch (TableNotFoundException)
@@ -193,6 +215,7 @@ public class UserController : ControllerBase
             {
                 var table = _mapper.Map<Table>(dsModel);
                 table = _userProc.PrepareDataSet(user, table);
+                _logger.LogInformation($"{user.UserId} executed CreateDataSet: table={table.TableId}");
                 await _userProc.CreateDataSet(user, table);
                 return Created("/api/data/dataset/" + table.TableId, table);
             }
@@ -233,6 +256,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed DeleteDataSet: table={tableId}");
                 await _userProc.DeleteDataSet(user, tableId);
                 return Ok();
             }
@@ -267,6 +291,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed AddColumnToDataSet: table={tableId}; columnName={columnName}");
                 var column = _mapper.Map<DataSetColumn>(columnDef);
                 await _userProc.AddDataSetColumn(user, tableId, column);
                 return Ok();
@@ -305,6 +330,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed RemoveColumnFromDataSet: table={tableId}; columnName={columnName}");
                 await _userProc.RemoveDataSetColumn(user, tableId, columnName);
                 return Ok();
             }
@@ -335,7 +361,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsAll()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetSheets(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MySheetsAll");
+            return Ok(await _userProc.GetSheets(user));
+        });
 
     /// <summary>
     /// Queries a collection of all sheets that the user owns.
@@ -345,7 +375,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsOwn()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetOwnSheets(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MySheetsOwn");
+            return Ok(await _userProc.GetOwnSheets(user));
+        });
 
     /// <summary>
     /// Queries the number of all sheets that the user owns.
@@ -355,7 +389,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsOwnCount()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetSheetCount(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MySheetsOwnCount");
+            return Ok(await _userProc.GetSheetCount(user));
+        });
 
     /// <summary>
     /// Queries the remaining number of sheets that the user can create.
@@ -365,7 +403,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsOwnRemaining()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(_userProc.MaxSheetsPerUser - await _userProc.GetSheetCount(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MySheetsOwnRemaining");
+            return Ok(_userProc.MaxSheetsPerUser - await _userProc.GetSheetCount(user));
+        });
 
     /// <summary>
     /// Queries a collection of other people's sheets that the user may access.
@@ -375,7 +417,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MySheetsCollaborations()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetCollaborationSheets(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MySheetsCollaborations");
+            return Ok(await _userProc.GetCollaborationSheets(user));
+        });
 
     /// <summary>
     /// Queries a single sheet that a user may access.
@@ -392,6 +438,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed MySheet: table={tableId}");
                 return Ok(await _userProc.GetSheet(user, tableId));
             }
             catch (TableNotFoundException)
@@ -421,6 +468,7 @@ public class UserController : ControllerBase
             {
                 var table = _mapper.Map<Table>(shModel);
                 table = _userProc.PrepareSheet(user, table);
+                _logger.LogInformation($"{user.UserId} executed CreateSheet: table={table.TableId}");
                 await _userProc.CreateSheet(user, table);
                 return Created("/api/data/sheet/" + table.TableId, table);
             }
@@ -461,6 +509,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed DeleteSheet: table={tableId}");
                 await _userProc.DeleteSheet(user, tableId);
                 return Ok();
             }
@@ -487,7 +536,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyTablesAll()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetTables(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MyTablesAll");
+            return Ok(await _userProc.GetTables(user));
+        });
 
     /// <summary>
     /// Queries a collection of all tables (datasets and sheets) that the user owns.
@@ -497,7 +550,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyTablesOwn()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetOwnTables(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MyTablesOwn");
+            return Ok(await _userProc.GetOwnTables(user));
+        });
 
     /// <summary>
     /// Queries a collection of other people's tables (datasets and sheets) that the user may access.
@@ -507,7 +564,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Table>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     public async ValueTask<IActionResult> MyTablesCollaborations()
-        => await AuthenticateAndRun(_authProc, User, async user => Ok(await _userProc.GetCollaborationTables(user)));
+        => await AuthenticateAndRun(_authProc, User, async user =>
+        {
+            _logger.LogInformation($"{user.UserId} executed MyTablesCollaborations");
+            return Ok(await _userProc.GetCollaborationTables(user));
+        });
 
     /// <summary>
     /// Queries a collection of collaborators for a table that the user posesses.
@@ -523,6 +584,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed GetCollaborations: table={tableId}");
                 return Ok(await _userProc.GetCollaborators(user, tableId));
             }
             catch (TableNotFoundException)
@@ -546,6 +608,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed AddCollaborations: table={tableId}; user={userId}");
                 await _userProc.AddCollaborator(user, tableId, userId);
                 return Ok();
             }
@@ -583,6 +646,7 @@ public class UserController : ControllerBase
         {
             try
             {
+                _logger.LogInformation($"{user.UserId} executed RemoveCollaborations: table={tableId}; user={userId}");
                 await _userProc.RemoveCollaborator(user, tableId, userId);
                 return Ok();
             }

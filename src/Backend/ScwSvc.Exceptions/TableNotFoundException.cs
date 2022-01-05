@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ScwSvc.Exceptions;
+﻿namespace ScwSvc.Exceptions;
 
 public class TableNotFoundException : InvalidTableException
 {
@@ -14,7 +12,7 @@ public class TableNotFoundException : InvalidTableException
     {
     }
 
-    public TableNotFoundException(string message, System.Exception innerException) : base(message, innerException)
+    public TableNotFoundException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

@@ -5,53 +5,53 @@ namespace ScwSvc.Procedures.Impl;
 
 public class AdminProcedures : IAdminProcedures
 {
-    private readonly IUserOperations _user;
-    private readonly ITableOperations _table;
+    private readonly IUserOperations _userOp;
+    private readonly ITableOperations _tableOp;
 
-    public AdminProcedures(IUserOperations user, ITableOperations table)
+    public AdminProcedures(IUserOperations userOp, ITableOperations tableOp)
     {
-        _user = user;
-        _table = table;
+        _userOp = userOp;
+        _tableOp = tableOp;
     }
 
     public async Task<ICollection<User>> GetAllUsers()
-        => await _user.GetUsers();
+        => await _userOp.GetUsers();
 
     public async Task<User?> GetUser(Guid userId)
-        => await _user.GetUserById(userId);
+        => await _userOp.GetUserById(userId);
 
     public async Task AddUser(string name, string password)
-        => await _user.AddUser(name, password);
+        => await _userOp.AddUser(name, password);
 
     public async Task DeleteUser(Guid userId)
-        => await _user.DeleteUser(userId);
+        => await _userOp.DeleteUser(userId);
 
     public async Task ChangeUserName(Guid userId, string name)
-        => await _user.ModifyUser(userId, name, null, null);
+        => await _userOp.ModifyUser(userId, name, null, null);
 
     public async Task ChangeUserPassword(Guid userId, string password)
-        => await _user.ModifyUser(userId, null, password, null);
+        => await _userOp.ModifyUser(userId, null, password, null);
 
     public async Task ChangeUserRole(Guid userId, UserRole role)
-        => await _user.ModifyUser(userId, null, null, role);
+        => await _userOp.ModifyUser(userId, null, null, role);
 
     public async Task<ICollection<Table>> GetUserTables(Guid userId)
-        => await _table.GetTables(userId, TableQuery.Own | TableQuery.Collaborations);
+        => await _tableOp.GetTables(userId, TableQuery.Own | TableQuery.Collaborations);
 
     public async Task<ICollection<Table>> GetUserTablesOwn(Guid userId)
-        => await _table.GetTables(userId, TableQuery.Own);
+        => await _tableOp.GetTables(userId, TableQuery.Own);
 
     public async Task<ICollection<Table>> GetUserTablesCollaboration(Guid userId)
-        => await _table.GetTables(userId, TableQuery.Collaborations);
+        => await _tableOp.GetTables(userId, TableQuery.Collaborations);
 
     public async Task<ICollection<Table>> GetAllTables()
-        => await _table.GetTables();
+        => await _tableOp.GetTables();
 
     public async Task<ICollection<Table>> GetAllDataSets()
-        => await _table.GetTables(TableQuery.DataSet);
+        => await _tableOp.GetTables(TableQuery.DataSet);
 
     public async Task<ICollection<Table>> GetAllSheets()
-        => await _table.GetTables(TableQuery.Sheet);
+        => await _tableOp.GetTables(TableQuery.Sheet);
 
     public Table PrepareDataSet(User owner, Table table)
         => _PrepareDataSet(owner, table);
@@ -64,7 +64,7 @@ public class AdminProcedures : IAdminProcedures
         if (table.TableType != TableType.DataSet)
             throw new TableMismatchException("Incorrect table type.");
 
-        await _table.AddTable(table);
+        await _tableOp.AddTable(table);
     }
 
     public async Task CreateSheet(User owner, Table table)
@@ -72,28 +72,28 @@ public class AdminProcedures : IAdminProcedures
         if (table.TableType != TableType.Sheet)
             throw new TableMismatchException("Incorrect table type.");
 
-        await _table.AddTable(table);
+        await _tableOp.AddTable(table);
     }
 
     public async Task DeleteDataSet(Guid tableId)
     {
-        var table = await _table.GetTable(tableId)
+        var table = await _tableOp.GetTable(tableId)
             ?? throw new TableNotFoundException("Table was not found.") { TableId = tableId };
 
         if (table.TableType != TableType.DataSet)
             throw new TableMismatchException("Incorrect table type.");
 
-        await _table.DeleteTable(tableId);
+        await _tableOp.DeleteTable(tableId);
     }
 
     public async Task DeleteSheet(Guid tableId)
     {
-        var table = await _table.GetTable(tableId)
+        var table = await _tableOp.GetTable(tableId)
             ?? throw new TableNotFoundException("Table was not found.") { TableId = tableId };
 
         if (table.TableType != TableType.Sheet)
             throw new TableMismatchException("Incorrect table type.");
 
-        await _table.DeleteTable(tableId);
+        await _tableOp.DeleteTable(tableId);
     }
 }

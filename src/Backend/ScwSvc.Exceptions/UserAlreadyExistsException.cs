@@ -10,7 +10,7 @@ public class UserAlreadyExistsException : InvalidUserException
     {
     }
 
-    public UserAlreadyExistsException(string message, System.Exception innerException) : base(message, innerException)
+    public UserAlreadyExistsException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

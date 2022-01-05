@@ -10,7 +10,7 @@ public class TableLimitExceededException : InvalidTableException
     {
     }
 
-    public TableLimitExceededException(string message, System.Exception innerException) : base(message, innerException)
+    public TableLimitExceededException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

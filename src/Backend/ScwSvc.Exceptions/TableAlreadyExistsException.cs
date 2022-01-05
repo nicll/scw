@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ScwSvc.Exceptions;
+﻿namespace ScwSvc.Exceptions;
 
 public class TableAlreadyExistsException : InvalidTableException
 {
@@ -14,7 +12,7 @@ public class TableAlreadyExistsException : InvalidTableException
     {
     }
 
-    public TableAlreadyExistsException(string message, System.Exception innerException) : base(message, innerException)
+    public TableAlreadyExistsException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

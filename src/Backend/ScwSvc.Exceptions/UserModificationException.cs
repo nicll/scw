@@ -1,5 +1,4 @@
-﻿using System;
-using ScwSvc.Models;
+﻿using ScwSvc.Models;
 
 namespace ScwSvc.Exceptions;
 
