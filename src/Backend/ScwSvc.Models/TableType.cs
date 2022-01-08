@@ -5,7 +5,6 @@ namespace ScwSvc.Models;
 /// <summary>
 /// Lists the different kinds of tables.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum TableType
 {
     /// <summary>

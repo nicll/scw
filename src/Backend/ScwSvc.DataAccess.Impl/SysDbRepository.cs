@@ -107,6 +107,26 @@ public class SysDbRepository : ISysDbRepository
             await _SaveChanges();
     }
 
+    public async Task CreateLogEvent(LogEvent logEvent)
+    {
+        await _sysDb.Log.AddAsync(logEvent).ConfigureAwait(false);
+
+        if (AutoSave)
+            await _SaveChanges();
+    }
+
+    public async Task<LogEvent?> GetLogEvent(Guid logEventId)
+        => await _sysDb.Log.FindAsync(logEventId).ConfigureAwait(false);
+
+    public IQueryable<LogEvent> CreateLogQuery()
+        => _sysDb.Log;
+
+    public async Task<ICollection<LogEvent>> ExecuteLogQuery(IQueryable<LogEvent> query)
+        => await query.ToArrayAsync().ConfigureAwait(false);
+
+    public IAsyncEnumerable<LogEvent> AsAsyncLogQuery(IQueryable<LogEvent> query)
+        => query.AsAsyncEnumerable();
+
     // only actually saves when AutoSave is disabled
     public async Task SaveChanges()
     {

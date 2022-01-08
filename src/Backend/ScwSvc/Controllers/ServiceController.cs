@@ -135,6 +135,11 @@ public class ServiceController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async ValueTask<ActionResult> Logout()
     {
+        var userId = Utils.Authentication.GetUserIdAsGuidOrNull(User);
+
+        if (userId.HasValue)
+            await _serviceProc.LogoutUser(userId.Value);
+
         await HttpContext.SignOutAsync().ConfigureAwait(false);
         return Ok();
     }

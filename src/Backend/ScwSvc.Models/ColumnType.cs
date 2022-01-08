@@ -5,7 +5,6 @@ namespace ScwSvc.Models;
 /// <summary>
 /// The different kinds of data types that a column may contain.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ColumnType
 {
     /// <summary>

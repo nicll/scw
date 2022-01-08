@@ -170,4 +170,19 @@ public interface IAdminProcedures
     /// <exception cref="TableMismatchException">Thrown if the table type was not <see cref="TableType.Sheet"/>.</exception>
     /// <exception cref="DatabaseException">Thrown if a general database error occurs.</exception>
     Task DeleteSheet(Guid tableId);
+
+    /// <summary>
+    /// Try to get a single logged event.
+    /// </summary>
+    /// <param name="logEventId">ID of the logged event.</param>
+    /// <returns>Logged event or <see langword="null"/>.</returns>
+    Task<LogEvent?> GetLogEvent(Guid logEventId);
+
+    /// <summary>
+    /// Get logged events restricted to the given filters.
+    /// </summary>
+    /// <param name="typeFilter">If defined, restricts types of events to the input.</param>
+    /// <param name="dateFilter">If defined, restricts the date range of events.</param>
+    /// <returns>Collection of matching events.</returns>
+    Task<ICollection<LogEvent>> GetLogEvents(LogEventType? typeFilter, (DateTime start, DateTime end)? dateFilter);
 }

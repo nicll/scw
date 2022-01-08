@@ -5,7 +5,12 @@ namespace ScwSvc.Procedures.Impl;
 
 public class GraphQLTableProcedures : IGraphQLTableProcedures
 {
-    public Task<Guid> GetDataSetLookupName(User user, Guid tableId)
+    private readonly IUserOperations _userOp;
+
+    public GraphQLTableProcedures(IUserOperations userOp)
+        => _userOp = userOp;
+
+    public async Task<Guid> GetDataSetLookupName(User user, Guid tableId)
     {
         var table = user.OwnTables.Concat(user.Collaborations).FirstOrDefault(t => t.TableId == tableId);
 
@@ -15,10 +20,11 @@ public class GraphQLTableProcedures : IGraphQLTableProcedures
         if (table.TableType != TableType.DataSet)
             throw new TableMismatchException("Table was not a data set.");
 
-        return Task.FromResult(table.LookupName);
+        await _userOp._LogLookupEvent(user.UserId, tableId);
+        return table.LookupName;
     }
 
-    public Task<Guid> GetSheetLookupName(User user, Guid tableId)
+    public async Task<Guid> GetSheetLookupName(User user, Guid tableId)
     {
         var table = user.OwnTables.Concat(user.Collaborations).FirstOrDefault(t => t.TableId == tableId);
 
@@ -28,6 +34,7 @@ public class GraphQLTableProcedures : IGraphQLTableProcedures
         if (table.TableType != TableType.Sheet)
             throw new TableMismatchException("Table was not a sheet.");
 
-        return Task.FromResult(table.LookupName);
+        await _userOp._LogLookupEvent(user.UserId, tableId);
+        return table.LookupName;
     }
 }

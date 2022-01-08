@@ -9,6 +9,8 @@ public class DbSysContext : DbContext
 
     public DbSet<Table> Tables { get; set; }
 
+    public DbSet<LogEvent> Log { get; set; }
+
     public DbSysContext(DbContextOptions<DbSysContext> options) : base(options)
     {
         if (Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
@@ -19,6 +21,12 @@ public class DbSysContext : DbContext
     {
         modelBuilder.HasDefaultSchema("scw1_sys");
         modelBuilder.Entity<DataSetColumn>().HasKey(c => new { c.TableId, c.Position });
+
+        modelBuilder.Entity<UserLogEvent>();
+        modelBuilder.Entity<LookupLogEvent>();
+        modelBuilder.Entity<TableLogEvent>();
+        modelBuilder.Entity<TableDefinitionLogEvent>();
+        modelBuilder.Entity<TableCollaboratorLogEvent>();
 
         modelBuilder.Entity<User>().HasIndex(u => u.Name).IsUnique();
         modelBuilder.Entity<DataSetColumn>().HasAlternateKey(d => new { d.TableId, d.Name });

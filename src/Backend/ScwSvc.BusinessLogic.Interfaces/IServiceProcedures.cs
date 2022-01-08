@@ -24,4 +24,10 @@ public interface IServiceProcedures
     /// <returns>The user object if credentials correct or <see langword="null"/> if mismatched.</returns>
     /// <exception cref="UserNotFoundException">Thrown if no user with the supplied name exists.</exception>
     Task<User?> LoginUser(string username, string password);
+
+    /// <summary>
+    /// Log out a user.
+    /// </summary>
+    /// <param name="userId">The ID of the user.</param>
+    Task LogoutUser(Guid userId);
 }

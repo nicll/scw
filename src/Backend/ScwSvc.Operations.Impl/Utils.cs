@@ -5,6 +5,15 @@ namespace ScwSvc.Operations.Impl;
 
 internal static class Utils
 {
+    private static readonly Dictionary<LogEventType, Type> _typeMap = new()
+    {
+        { LogEventType.User, typeof(UserLogEvent) },
+        { LogEventType.Lookup, typeof(LookupLogEvent) },
+        { LogEventType.TableDefinition, typeof(TableDefinitionLogEvent) },
+        { LogEventType.TableCollaboration, typeof(TableCollaboratorLogEvent) },
+        { LogEventType.Table, typeof(TableLogEvent) }
+    };
+
     /// <summary>
     /// The pepper used by the backend.
     /// </summary>
@@ -40,4 +49,17 @@ internal static class Utils
     /// <returns>Whether or not the two areas contain the same content.</returns>
     internal static bool CompareHashes(in ReadOnlySpan<byte> left, in ReadOnlySpan<byte> right)
         => left.SequenceEqual(right);
+
+    internal static Type[] LogEventTypeToTypes(LogEventType filter)
+    {
+        var types = new List<Type>();
+
+        foreach (var filterType in _typeMap)
+        {
+            if ((filterType.Key & filter) == filterType.Key)
+                types.Add(filterType.Value);
+        }
+
+        return types.ToArray();
+    }
 }

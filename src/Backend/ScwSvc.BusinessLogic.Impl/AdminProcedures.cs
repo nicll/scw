@@ -21,19 +21,34 @@ public class AdminProcedures : IAdminProcedures
         => await _userOp.GetUserById(userId);
 
     public async Task AddUser(string name, string password)
-        => await _userOp.AddUser(name, password);
+    {
+        var userId = await _userOp.AddUser(name, password);
+        await _userOp._LogUserEvent(userId, UserLogEventType.CreateUser);
+    }
 
     public async Task DeleteUser(Guid userId)
-        => await _userOp.DeleteUser(userId);
+    {
+        await _userOp.DeleteUser(userId);
+        await _userOp._LogUserEvent(userId, UserLogEventType.DeleteUser);
+    }
 
     public async Task ChangeUserName(Guid userId, string name)
-        => await _userOp.ModifyUser(userId, name, null, null);
+    {
+        await _userOp.ModifyUser(userId, name, null, null);
+        await _userOp._LogUserEvent(userId, UserLogEventType.ChangeName);
+    }
 
     public async Task ChangeUserPassword(Guid userId, string password)
-        => await _userOp.ModifyUser(userId, null, password, null);
+    {
+        await _userOp.ModifyUser(userId, null, password, null);
+        await _userOp._LogUserEvent(userId, UserLogEventType.ChangePassword);
+    }
 
     public async Task ChangeUserRole(Guid userId, UserRole role)
-        => await _userOp.ModifyUser(userId, null, null, role);
+    {
+        await _userOp.ModifyUser(userId, null, null, role);
+        await _userOp._LogUserEvent(userId, UserLogEventType.ChangeRole);
+    }
 
     public async Task<ICollection<Table>> GetUserTables(Guid userId)
         => await _tableOp.GetTables(userId, TableQuery.Own | TableQuery.Collaborations);
@@ -65,6 +80,7 @@ public class AdminProcedures : IAdminProcedures
             throw new TableMismatchException("Incorrect table type.");
 
         await _tableOp.AddTable(table);
+        await _tableOp._LogTableDefEvent(table.TableId, TableType.DataSet, TableDefinitionLogEventType.CreateTable);
     }
 
     public async Task CreateSheet(User owner, Table table)
@@ -73,6 +89,7 @@ public class AdminProcedures : IAdminProcedures
             throw new TableMismatchException("Incorrect table type.");
 
         await _tableOp.AddTable(table);
+        await _tableOp._LogTableDefEvent(table.TableId, TableType.Sheet, TableDefinitionLogEventType.CreateTable);
     }
 
     public async Task DeleteDataSet(Guid tableId)
@@ -84,6 +101,7 @@ public class AdminProcedures : IAdminProcedures
             throw new TableMismatchException("Incorrect table type.");
 
         await _tableOp.DeleteTable(tableId);
+        await _tableOp._LogTableDefEvent(table.TableId, TableType.DataSet, TableDefinitionLogEventType.DeleteTable);
     }
 
     public async Task DeleteSheet(Guid tableId)
@@ -95,5 +113,12 @@ public class AdminProcedures : IAdminProcedures
             throw new TableMismatchException("Incorrect table type.");
 
         await _tableOp.DeleteTable(tableId);
+        await _tableOp._LogTableDefEvent(table.TableId, TableType.Sheet, TableDefinitionLogEventType.DeleteTable);
     }
+
+    public async Task<LogEvent?> GetLogEvent(Guid logEventId)
+        => await _userOp.GetLogEvent(logEventId);
+
+    public async Task<ICollection<LogEvent>> GetLogEvents(LogEventType? typeFilter, (DateTime start, DateTime end)? dateFilter)
+        => await _userOp.GetLogEvents(typeFilter, dateFilter);
 }

@@ -70,4 +70,33 @@ public interface IUserOperations
     /// </returns>
     /// <exception cref="UserNotFoundException">Thrown if no user with the supplied name exists.</exception>
     Task<User?> LoginUser(string name, string password);
+
+    /// <summary>
+    /// Log a user-related event.
+    /// </summary>
+    /// <param name="logEvent">The event to log.</param>
+    /// <exception cref="DatabaseException">Thrown if a any database error occurs.</exception>
+    Task LogUserEvent(UserLogEvent logEvent);
+
+    /// <summary>
+    /// Log a lookup-related event.
+    /// </summary>
+    /// <exception cref="DatabaseException">Thrown if a any database error occurs.</exception>
+    /// <param name="logEvent">The event to log.</param>
+    Task LogLookupEvent(LookupLogEvent logEvent);
+
+    /// <summary>
+    /// Try to get a single log event.
+    /// </summary>
+    /// <param name="logEventId">The ID of the log event.</param>
+    /// <returns>Logged event or <see langword="null"/>.</returns>
+    Task<LogEvent?> GetLogEvent(Guid logEventId);
+
+    /// <summary>
+    /// Fetch a customizable collection of logged events using the specified filters.
+    /// </summary>
+    /// <param name="typeFilter">If specified, restricts the log event types to the set types.</param>
+    /// <param name="dateFilter">If specified, restricts timespan of logged events.</param>
+    /// <returns>Customized collection of logged events.</returns>
+    Task<ICollection<LogEvent>> GetLogEvents(LogEventType? typeFilter = null, (DateTime start, DateTime end)? dateFilter = null);
 }

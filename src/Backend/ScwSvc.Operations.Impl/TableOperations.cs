@@ -225,4 +225,10 @@ public class TableOperations : ITableOperations
         await _sysDb.ModifyTable(table);
         await _sysDb.SaveChanges();
     }
+
+    public async Task LogTableEvent(TableLogEvent logEvent)
+    {
+        await _sysDb.CreateLogEvent(logEvent);
+        await _sysDb.SaveChanges();
+    }
 }

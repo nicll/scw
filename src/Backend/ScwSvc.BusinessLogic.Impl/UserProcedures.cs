@@ -23,10 +23,16 @@ public class UserProcedures : IUserProcedures
         => Task.FromResult(user.Name);
 
     public async Task ChangeUserName(User user, string name)
-        => await _userOp.ModifyUser(user.UserId, name, null, null);
+    {
+        await _userOp.ModifyUser(user.UserId, name, null, null);
+        await _userOp._LogUserEvent(user.UserId, UserLogEventType.ChangeName);
+    }
 
     public async Task ChangeUserPassword(User user, string password)
-        => await _userOp.ModifyUser(user.UserId, null, password, null);
+    {
+        await _userOp.ModifyUser(user.UserId, null, password, null);
+        await _userOp._LogUserEvent(user.UserId, UserLogEventType.ChangePassword);
+    }
 
     public Task<ICollection<Table>> GetDataSets(User user)
         => Task.FromResult((ICollection<Table>)user.OwnTables.Concat(user.Collaborations).Where(t => t.TableType == TableType.DataSet).ToArray());
@@ -102,6 +108,7 @@ public class UserProcedures : IUserProcedures
             throw new TableLimitExceededException("User has too many data sets.");
 
         await _tableOp.AddTable(table);
+        await _tableOp._LogTableDefEvent(table.TableId, TableType.DataSet, TableDefinitionLogEventType.CreateTable);
     }
 
     public async Task CreateSheet(User owner, Table table)
@@ -113,6 +120,7 @@ public class UserProcedures : IUserProcedures
             throw new TableLimitExceededException("User has too many sheets.");
 
         await _tableOp.AddTable(table);
+        await _tableOp._LogTableDefEvent(table.TableId, TableType.Sheet, TableDefinitionLogEventType.CreateTable);
     }
 
     public async Task DeleteDataSet(User owner, Guid tableId)
@@ -120,6 +128,7 @@ public class UserProcedures : IUserProcedures
         _ = await GetDataSet(owner, tableId);
 
         await _tableOp.DeleteTable(tableId);
+        await _tableOp._LogTableDefEvent(tableId, TableType.DataSet, TableDefinitionLogEventType.DeleteTable);
     }
 
     public async Task DeleteSheet(User owner, Guid tableId)
@@ -127,6 +136,7 @@ public class UserProcedures : IUserProcedures
         _ = await GetSheet(owner, tableId);
 
         await _tableOp.DeleteTable(tableId);
+        await _tableOp._LogTableDefEvent(tableId, TableType.Sheet, TableDefinitionLogEventType.DeleteTable);
     }
 
     public async Task AddDataSetColumn(User owner, Guid tableId, DataSetColumn column)
@@ -144,6 +154,7 @@ public class UserProcedures : IUserProcedures
         };
 
         await _tableOp.AddColumn(table.TableId, col);
+        await _tableOp._LogTableDefEvent(tableId, TableType.DataSet, TableDefinitionLogEventType.AddColumn);
     }
 
     public async Task RemoveDataSetColumn(User owner, Guid tableId, string columnName)
@@ -151,6 +162,7 @@ public class UserProcedures : IUserProcedures
         _ = await GetDataSet(owner, tableId);
 
         await _tableOp.RemoveColumn(tableId, columnName);
+        await _tableOp._LogTableDefEvent(tableId, TableType.DataSet, TableDefinitionLogEventType.RemoveColumn);
     }
 
     public Task<ICollection<User>> GetCollaborators(User user, Guid tableId)
@@ -176,7 +188,7 @@ public class UserProcedures : IUserProcedures
             throw new UserNotFoundException("Collaborator was not found.");
 
         await _tableOp.AddCollaborator(table, collaborator);
-        // ToDo: logging
+        await _tableOp._LogTableCollabEvent(tableId, userId, TableCollaboratorLogEventType.AddCollaborator);
     }
 
     public async Task RemoveCollaborator(User owner, Guid tableId, Guid userId)
@@ -192,6 +204,6 @@ public class UserProcedures : IUserProcedures
             throw new UserNotFoundException("Collaborator was not found.");
 
         await _tableOp.RemoveCollaborator(table, collaborator);
-        // ToDo: logging
+        await _tableOp._LogTableCollabEvent(tableId, userId, TableCollaboratorLogEventType.RemoveCollaborator);
     }
 }

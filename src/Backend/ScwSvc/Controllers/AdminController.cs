@@ -410,4 +410,40 @@ public class AdminController : ControllerBase
                 throw;
             }
         });
+
+    [HttpGet("log/{eventId}")]
+    [ProducesResponseType(typeof(LogEvent), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    public async ValueTask<IActionResult> GetLogEvent([FromRoute] Guid eventId)
+        => await AuthenticateAndRun(_authProc, User, async _ =>
+        {
+            var logEvent = await _adminProc.GetLogEvent(eventId);
+
+            if (logEvent is null)
+                return NotFound("No logged event with this ID exists.");
+
+            return Ok(logEvent);
+        });
+
+    [HttpGet("log")]
+    [ProducesResponseType(typeof(ICollection<LogEvent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    public async ValueTask<IActionResult> GetLogEvents([FromQuery] LogEventType? eventType = null, [FromQuery] DateTime? start = null, [FromQuery] DateTime? end = null)
+        => await AuthenticateAndRun(_authProc, User, async _ =>
+        {
+            try
+            {
+                if (start.HasValue != end.HasValue)
+                    return BadRequest("Start and end date must both be set.");
+
+                (DateTime start, DateTime end)? dateRange = start.HasValue ? (start.Value, end!.Value) : null;
+
+                return Ok(await _adminProc.GetLogEvents(eventType, dateRange));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not get logged events.");
+                throw;
+            }
+        });
 }

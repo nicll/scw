@@ -117,7 +117,7 @@ internal static class Utils
                 var result => throw new InvalidOperationException($"Invalid result from {nameof(GetUserOrError)}: {result?.GetType().Name}")
             };
 
-        internal abstract record SessionResult
+        internal abstract record class SessionResult
         {
             private SessionResult() { }
 
@@ -125,14 +125,14 @@ internal static class Utils
 
             internal static InvalidSession Invalid(IActionResult error) => new InvalidSession(error);
 
-            internal record ValidSession(User User) : SessionResult { }
+            internal record class ValidSession(User User) : SessionResult { }
 
-            internal record InvalidSession(IActionResult Error) : SessionResult { }
+            internal record class InvalidSession(IActionResult Error) : SessionResult { }
         }
     }
 
     internal static string ToSimplifiedFormat(this Guid userId)
-    => userId.ToString("N");
+        => userId.ToString("N");
 
     internal static bool AllUnique<T>(this IEnumerable<T> source)
     {

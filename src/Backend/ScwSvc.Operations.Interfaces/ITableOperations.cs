@@ -105,4 +105,11 @@ public interface ITableOperations
     /// <exception cref="TableCollaboratorException">Thrown if the collaborator was invalid.</exception>
     /// <exception cref="DatabaseException">Thrown if a general database error occurs.</exception>
     Task RemoveCollaborator(Table table, User user);
+
+    /// <summary>
+    /// Log a table-related event.
+    /// </summary>
+    /// <param name="logEvent">The event to log.</param>
+    /// <exception cref="DatabaseException">Thrown if a general database error occurs.</exception>
+    Task LogTableEvent(TableLogEvent logEvent);
 }

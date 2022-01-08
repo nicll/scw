@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -35,7 +36,12 @@ public class Startup
     {
         services.Configure<KestrelServerOptions>(o => o.AddServerHeader = false);
 
-        services.AddControllers();
+        services.AddControllers()
+            .AddJsonOptions(opts =>
+            {
+                opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                opts.JsonSerializerOptions.Converters.Add(new PolymorphicJsonConverter<LogEvent>());
+            });
 
         services.AddAutoMapper(config => config.AddProfile<AutoMapperProfile>());
 

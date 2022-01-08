@@ -125,6 +125,39 @@ public interface ISysDbRepository
     Task ModifyTable(Table table);
 
     /// <summary>
+    /// Save an event to the log.
+    /// </summary>
+    /// <param name="logEvent">Event to log.</param>
+    Task CreateLogEvent(LogEvent logEvent);
+
+    /// <summary>
+    /// Fetch an event from the log.
+    /// </summary>
+    /// <param name="logEventId">ID of the event to fetch.</param>
+    /// <returns>Logged event or <see langword="null"/>.</returns>
+    Task<LogEvent?> GetLogEvent(Guid logEventId);
+
+    /// <summary>
+    /// Create a customizable log query.
+    /// </summary>
+    /// <returns><see cref="IQueryable{T}"/> of all log.</returns>
+    IQueryable<LogEvent> CreateLogQuery();
+
+    /// <summary>
+    /// Execute the customized log query.
+    /// </summary>
+    /// <param name="query">The log query.</param>
+    /// <returns>Collection of resulting log entries.</returns>
+    Task<ICollection<LogEvent>> ExecuteLogQuery(IQueryable<LogEvent> query);
+
+    /// <summary>
+    /// Convert the log query to an async enumerable.
+    /// </summary>
+    /// <param name="query">The log query.</param>
+    /// <returns>The converted async enumerable.</returns>
+    IAsyncEnumerable<LogEvent> AsAsyncLogQuery(IQueryable<LogEvent> query);
+
+    /// <summary>
     /// Save all changes.
     /// </summary>
     /// <exception cref="DatabaseException">Thrown if a any database error occurs.</exception>

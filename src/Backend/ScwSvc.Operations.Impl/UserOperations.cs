@@ -1,4 +1,6 @@
-﻿namespace ScwSvc.Operations.Impl;
+﻿using System.Linq;
+
+namespace ScwSvc.Operations.Impl;
 
 public class UserOperations : IUserOperations
 {
@@ -125,9 +127,50 @@ public class UserOperations : IUserOperations
     private static void EnsureUserPasswordValid(string password)
     {
         if (password.Length < 4)
-            throw new UserCredentialsInvalidException("User name is too short.") { InvalidValue = password };
+            throw new UserCredentialsInvalidException("Password is too short.") { InvalidValue = password };
 
         if (password.Length > 256)
-            throw new UserCredentialsInvalidException("User name is too long.") { InvalidValue = password };
+            throw new UserCredentialsInvalidException("Password is too long.") { InvalidValue = password };
+    }
+
+    public async Task LogUserEvent(UserLogEvent logEvent)
+    {
+        await _sysDb.CreateLogEvent(logEvent);
+        await _sysDb.SaveChanges();
+    }
+
+    public async Task LogLookupEvent(LookupLogEvent logEvent)
+    {
+        await _sysDb.CreateLogEvent(logEvent);
+        await _sysDb.SaveChanges();
+    }
+
+    public async Task<LogEvent?> GetLogEvent(Guid logEventId)
+        => await _sysDb.GetLogEvent(logEventId);
+
+    public async Task<ICollection<LogEvent>> GetLogEvents(LogEventType? typeFilter = null, (DateTime start, DateTime end)? dateFilter = null)
+    {
+        var query = _sysDb.CreateLogQuery();
+
+        if (dateFilter.HasValue)
+            query = query.Where(e => e.Timestamp >= dateFilter.Value.start && e.Timestamp <= dateFilter.Value.end);
+
+        if (typeFilter.HasValue)
+        {
+            if (typeFilter == LogEventType.Invalid)
+                throw new ArgumentException("Type filter empty.", nameof(typeFilter));
+
+            if ((typeFilter.Value & LogEventType.All) != typeFilter.Value)
+                throw new ArgumentException("Type filter contains unknown flag(s).", nameof(typeFilter));
+
+            var filter = typeFilter.Value & LogEventType.All;
+            var allowedTypes = LogEventTypeToTypes(filter);
+
+            return await _sysDb.AsAsyncLogQuery(query)
+                .WhereAwait(e => ValueTask.FromResult(allowedTypes.Contains(e.GetType())))
+                .ToArrayAsync();
+        }
+
+        return await _sysDb.ExecuteLogQuery(query);
     }
 }

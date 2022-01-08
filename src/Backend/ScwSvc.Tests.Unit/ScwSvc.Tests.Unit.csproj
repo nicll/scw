@@ -14,6 +14,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ScwSvc.BusinessLogic.Impl\ScwSvc.Procedures.Impl.csproj" />
+    <ProjectReference Include="..\ScwSvc.BusinessLogic.Interfaces\ScwSvc.Procedures.Interfaces.csproj" />
+    <ProjectReference Include="..\ScwSvc.DataAccess.Impl\ScwSvc.DataAccess.Impl.csproj" />
+    <ProjectReference Include="..\ScwSvc.DataAccess.Interfaces\ScwSvc.DataAccess.Interfaces.csproj" />
+    <ProjectReference Include="..\ScwSvc.Exceptions\ScwSvc.Exceptions.csproj" />
+    <ProjectReference Include="..\ScwSvc.Models\ScwSvc.Models.csproj" />
+    <ProjectReference Include="..\ScwSvc.Operations.Impl\ScwSvc.Operations.Impl.csproj" />
+    <ProjectReference Include="..\ScwSvc.Operations.Interfaces\ScwSvc.Operations.Interfaces.csproj" />
     <ProjectReference Include="..\ScwSvc\ScwSvc.csproj" />
   </ItemGroup>
 
