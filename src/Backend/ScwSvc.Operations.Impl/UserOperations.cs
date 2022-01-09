@@ -25,7 +25,9 @@ public class UserOperations : IUserOperations
             Name = name,
             PasswordHash = HashUserPassword(userId, password),
             Role = UserRole.Common,
-            CreationDate = DateTime.UtcNow
+            CreationDate = DateTime.UtcNow,
+            OwnTables = Array.Empty<Table>(),
+            Collaborations = Array.Empty<Table>()
         });
 
         await _sysDb.SaveChanges();
