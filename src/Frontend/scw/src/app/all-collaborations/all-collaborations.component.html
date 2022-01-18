@@ -2,8 +2,8 @@
 <mat-tab-group>
     <mat-tab *ngFor="let tab of tabs;  let index = index" [label]="tab.displayName">
         <ng-template matTabContent >
-            <app-sheet *ngIf="tab.tableType=='Sheet'" [tableId]="tab.tableRefId"></app-sheet>
-            <app-dataset *ngIf="(tab.tableType=='DataSet')" [tableId]="tab.tableRefId" [isCollab]="true"></app-dataset>
+            <app-sheet *ngIf="tab.tableType=='Sheet'" [tableId]="tab.tableId"></app-sheet>
+            <app-dataset *ngIf="(tab.tableType=='DataSet')" [tableId]="tab.tableId" [isCollab]="true"></app-dataset>
         </ng-template>
     </mat-tab>
 </mat-tab-group>
