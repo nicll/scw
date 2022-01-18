@@ -68,6 +68,7 @@ import {RadioButtonModule} from "primeng/radiobutton";
 import {InputNumberModule} from "primeng/inputnumber";
 import { AdminStatisticsPageComponent } from './admin-statistics-page/admin-statistics-page.component';
 import {ChartModule} from "primeng/chart";
+import { CreateRowDialogComponent } from './Dialogs/create-row-dialog/create-row-dialog.component';
 
 @NgModule({
   declarations: [
@@ -135,7 +136,8 @@ import {ChartModule} from "primeng/chart";
     RadioButtonModule,
     InputNumberModule,
     AdminUserListComponent,
-    AdminStatisticsPageComponent
+    AdminStatisticsPageComponent,
+    CreateRowDialogComponent
   ],
     imports: [
         DesignerModule,

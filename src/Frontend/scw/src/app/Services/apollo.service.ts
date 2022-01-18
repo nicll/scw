@@ -78,22 +78,23 @@ export class ApolloService {
     else{
       mutation=mutation+`input: { _id: ${id}, ${table}Patch:{`;
     }
-    console.log(data)
     data.forEach((val:string, key:string) => {
       key=key[0].toLowerCase()+key.substring(1)
       //ToDo: parse
-      val = String(val);
+      val = String(val)
       console.log(val, key);
+      console.log(typeof val);
       if(val.includes(".")){
-        if(val.indexOf(".") != -1 && val.indexOf(".") == val.lastIndexOf(".")) //Floats in graphql have to be parsed, everything else doesn't
-        mutation = mutation.concat(key + `:` + parseFloat(val) + `,`);
+        if(val.indexOf(".") == val.lastIndexOf(".")) //Floats in graphql have to be parsed, everything else doesn't
+          mutation = mutation.concat(key + `:` + parseFloat(val) + `,`);
       }
       else
         mutation = mutation.concat(key + `:"` + val + `",`);
     });
-    mutation = mutation.concat(`}}){__typename}}`);
     console.log(mutation);
-    return this.apollo.mutate<number>({
+    mutation = mutation.concat("}}){__typename}}");
+
+return this.apollo.mutate<number>({
       mutation: gql(mutation)
     })
   }

@@ -280,7 +280,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
 
           this.user.GetDataSets().subscribe(y => {
-            let element = (y[y.length - 1].tableRefId)
+            let element = (y[y.length - 1].tableId)
 
             // @ts-ignore
             this.apollo.lookUpDataSetId(element).subscribe(z => {
@@ -306,7 +306,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
         //@ts-ignore
 
-        //this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableRefId, map1).subscribe())
+        //this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableId, map1).subscribe())
 
         // console.log(JSON.stringify(element))
         // console.log(wsname);
@@ -350,18 +350,21 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   }
 
   openNew() {
-/*    this.user.GetDataSets().subscribe(y => {
-      let element = (y[y.length - 1].tableRefId)*/
+    this.user.GetDataSets().subscribe(y => {
+      let element = (y[y.length - 1].tableId)
+      console.log("element" + element)
       // @ts-ignore
       this.apollo.lookUpDataSetId(this.tableId).subscribe(z => {
-     /*   let map = new Map([
-          ["column1", "123.12"],
-          ["column2", '"2000-12-30T12:23:45.123Z"']
-        ])*/
+        let map = new Map([
+          ["dataSetColumnString", '"Test1"'],
+          ["columnInteger1", '"111"'],
+          ["columnInteger2", '"222"'],
+          ["columnRealNumber", '222.2'],
+        ])
           // @ts-ignore
           this.apollo.Insert(z, map).subscribe();
         }
       )
-
-  }
+  })
+}
 }
