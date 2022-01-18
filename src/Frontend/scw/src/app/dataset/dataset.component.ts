@@ -274,7 +274,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
 
           this.user.GetDataSets().subscribe(y => {
-            let element = (y[y.length - 1].tableRefId)
+            let element = (y[y.length - 1].tableId)
 
             // @ts-ignore
             this.apollo.lookUpDataSetId(element).subscribe(z => {
@@ -300,7 +300,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
         //@ts-ignore
 
-        //this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableRefId, map1).subscribe())
+        //this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableId, map1).subscribe())
 
         // console.log(JSON.stringify(element))
         // console.log(wsname);
