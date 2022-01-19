@@ -207,8 +207,8 @@ public class AdminController : ControllerBase
             try
             {
                 _logger.LogInformation($"{_.UserId} executed GetUserTables: user={userId}");
-                await _adminProc.GetUserTables(userId);
-                return Ok();
+                var tables = await _adminProc.GetUserTables(userId);
+                return Ok(tables);
             }
             catch (UserNotFoundException)
             {
@@ -225,8 +225,8 @@ public class AdminController : ControllerBase
             try
             {
                 _logger.LogInformation($"{_.UserId} executed GetUserTablesOwn: user={userId}");
-                await _adminProc.GetUserTablesOwn(userId);
-                return Ok();
+                var tables = await _adminProc.GetUserTablesOwn(userId);
+                return Ok(tables);
             }
             catch (UserNotFoundException)
             {
@@ -243,8 +243,8 @@ public class AdminController : ControllerBase
             try
             {
                 _logger.LogInformation($"{_.UserId} executed GetUserTablesCollaborations: user={userId}");
-                await _adminProc.GetUserTablesCollaboration(userId);
-                return Ok();
+                var tables = await _adminProc.GetUserTablesCollaboration(userId);
+                return Ok(tables);
             }
             catch (UserNotFoundException)
             {

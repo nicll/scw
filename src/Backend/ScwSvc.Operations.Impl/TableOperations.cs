@@ -45,7 +45,7 @@ public class TableOperations : ITableOperations
         var user = await _sysDb.GetUserById(userId)
             ?? throw new UserNotFoundException("User with this ID was not found.") { UserId = userId };
 
-        var userTables = (query & TableQuery.TableTypeMask) switch
+        var userTables = (query & TableQuery.TableRelationshipMask) switch
         {
             TableQuery.Own | TableQuery.Collaborations
                 => _sysDb.CreateTablesQuery()
