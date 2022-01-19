@@ -323,7 +323,7 @@ export class UserService {
 
   public AdminGetTablesOfUser(id: string): Observable<Table[]> {
     return this.http
-      .get<Table[]>(this.baseUri + '/Admin/user/' + id + '/table', { withCredentials: true })
+      .get<Table[]>(this.baseUri + '/Admin/user/' + id + '/table/own', { withCredentials: true })
       .pipe(
         catchError((err) => {
           console.error(err);
@@ -331,8 +331,8 @@ export class UserService {
           return throwError(err);
         }),
         map((sheet) => {
-          console.log(id);
-          console.log(sheet);
+          //console.log(id);
+          //console.log(sheet);
           return sheet;
         })
       );

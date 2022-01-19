@@ -82,23 +82,26 @@
             <input type="text" pInputText id="name" [(ngModel)]="user.username" required autofocus />
             <small class="p-invalid" *ngIf="submitted && !user.username">Name is required.</small>
         </div>
+        <div class="p-field-radiobutton p-col-6">
+            <p-radioButton id="role3" name="role" value="Admin" [(ngModel)]="user.role"></p-radioButton>
+            <label for="role3">Admin</label>
+            <div class="p-field">
+                <label class="p-mb-3">Role</label>
+                <div class="p-formgrid p-grid">
+                    <div class="p-field-radiobutton p-col-6">
+                        <p-radioButton id="role1" name="role" value="Common" [(ngModel)]="user.role!"></p-radioButton>
+                        <label for="role1">Common</label>
+                    </div>
+                    <div class="p-field-radiobutton p-col-6">
+                        <p-radioButton id="role2" name="role" value="Manager" [(ngModel)]="user.role!"></p-radioButton>
+                        <label for="role2">Manager</label>
+                    </div>
+                    <div class="p-field-radiobutton p-col-6">
+                        <p-radioButton id="role3" name="role" value="Admin" [(ngModel)]="user.role!"></p-radioButton>
+                        <label for="role3">Admin</label>
+                    </div>
 
-        <div class="p-field">
-            <label class="p-mb-3">Role</label>
-            <div class="p-formgrid p-grid">
-                <div class="p-field-radiobutton p-col-6">
-                    <p-radioButton id="role1" name="role" value="Common" [(ngModel)]="user.role!"></p-radioButton>
-                    <label for="role1">Common</label>
                 </div>
-                <div class="p-field-radiobutton p-col-6">
-                    <p-radioButton id="role2" name="role" value="Manager" [(ngModel)]="user.role!"></p-radioButton>
-                    <label for="role2">Manager</label>
-                </div>
-                <div class="p-field-radiobutton p-col-6">
-                    <p-radioButton id="role3" name="role" value="Admin" [(ngModel)]="user.role!"></p-radioButton>
-                    <label for="role3">Admin</label>
-                </div>
-
             </div>
         </div>
 
