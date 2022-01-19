@@ -7,6 +7,12 @@ import {Table, TableModule} from 'primeng/table';
 import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
 import GC from "@grapecity/spread-sheets";
 import Tables = GC.Spread.Sheets.Tables;
+import {DataSet} from "../Models/DataSet";
+import {MatDialog} from "@angular/material/dialog";
+import {AddColumnDialogComponent} from "../Dialogs/add-column-dialog/add-column-dialog.component";
+import {
+  ShowTablesOfUserDialogComponent
+} from "../Dialogs/show-tables-of-user-dialog/show-tables-of-user-dialog.component";
 
 
 @Component({
@@ -34,7 +40,7 @@ export class AdminUserListComponent implements OnInit {
 
   @ViewChild('dt') table: Table | undefined;
 
-  constructor(public userservice: UserService, public apollo: ApolloService, public collab: CollaborationsService, private messageService: MessageService, private confirmationService: ConfirmationService) {
+  constructor(public dialog: MatDialog,public userservice: UserService, public apollo: ApolloService, public collab: CollaborationsService, private messageService: MessageService, private confirmationService: ConfirmationService) {
     this.selectedUser = new User("defaultName", "defaultUserId", 0, "defaultRole");
     this.items = [
       {label: 'View Details', icon: 'pi pi-fw pi-search', command: () => this.viewUser(this.selectedUser)},
@@ -46,8 +52,15 @@ export class AdminUserListComponent implements OnInit {
     this.submitted = false;
     this.users = []
 
-    this.userservice.GetAllUsersAdmin().subscribe((user: User[]) => {
-      this.users = user
+    this.userservice.GetAllUsersAdmin().subscribe((usersTransmitted: User[]) => {
+      this.users = usersTransmitted
+      for (let i = 0; i < this.users.length; i++) {
+        // @ts-ignore
+        this.userservice.AdminGetTablesOfUser(this.users[i].userId).subscribe((tables: Table[]) => {
+          // @ts-ignore
+          this.users[i].ownedTables = tables
+        })
+        }
       console.log(this.users);
     }, error => {
       console.log(error)
@@ -72,17 +85,12 @@ export class AdminUserListComponent implements OnInit {
       })
     })
   }
-
   hideDialog() {
     this.userDialog = false;
     this.submitted = false;
   }
-
-
   ngOnInit() {
   }
-
-
   editUser(user: User) {
     this.user = {...user};
     this.userDialog = true;
@@ -122,6 +130,13 @@ export class AdminUserListComponent implements OnInit {
     }
   }
 
+  showTablesOfUserDialog(user: User) {
+    console.log(user)
+    const dialogRef = this.dialog.open(ShowTablesOfUserDialogComponent, {
+      data: user,
+    });
+      console.log("showTablesOfUserDialog")
+  }
 }
 
 

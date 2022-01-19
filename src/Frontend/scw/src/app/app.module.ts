@@ -69,6 +69,7 @@ import {InputNumberModule} from "primeng/inputnumber";
 import { AdminStatisticsPageComponent } from './admin-statistics-page/admin-statistics-page.component';
 import {ChartModule} from "primeng/chart";
 import { CreateRowDialogComponent } from './Dialogs/create-row-dialog/create-row-dialog.component';
+import { ShowTablesOfUserDialogComponent } from './Dialogs/show-tables-of-user-dialog/show-tables-of-user-dialog.component';
 
 @NgModule({
   declarations: [
@@ -137,7 +138,8 @@ import { CreateRowDialogComponent } from './Dialogs/create-row-dialog/create-row
     InputNumberModule,
     AdminUserListComponent,
     AdminStatisticsPageComponent,
-    CreateRowDialogComponent
+    CreateRowDialogComponent,
+    ShowTablesOfUserDialogComponent
   ],
     imports: [
         DesignerModule,

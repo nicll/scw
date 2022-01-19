@@ -54,6 +54,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   dataset: Array<Array<any>> = new Array();
   rowData: any;
   rowIndex: any;
+  creationDate?: Date;
   exportColumns: any[];
   _selectedColumns: any[];
 
@@ -117,20 +118,15 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     //load data from graphql
-    if (this.tableId != undefined) {
-      let id = this.tableId;
-      this.user.GetDataSet(id).subscribe((dataset) => {
+    if(this.tableId != undefined){
+      let id=this.tableId;
+      this.user.GetDataSet(id).subscribe(dataset=>{//Get details of DataSet
         console.log(dataset);
-        //Get details of DataSet
-        this.apollo.lookUpDataSetId(id).subscribe((id) => {
-          //Get the GraphqlId
-          let query = this.apollo.QueryBuilder(
-            id,
-            dataset.columns.map((v) => v.name)
-          ); //Build our query
-          this.apollo.GetData<any>(query).subscribe((data) => {
-            this.data =
-              data.data['all' + this.apollo.makeQueryRightCase(id + 's')].nodes;
+        this.creationDate = dataset.creationDate;
+        this.apollo.lookUpDataSetId(id).subscribe(id=>{//Get the GraphqlId
+          let query=this.apollo.QueryBuilder(id, dataset.columns.map(v=>v.name))//Build our query
+          this.apollo.GetData<any>(query).subscribe(data=>{
+            this.data=data.data["all"+this.apollo.makeQueryRightCase(id+"s")].nodes;
             let dataclone: any[] = [];
             this.data.forEach((val) => dataclone.push(Object.assign({}, val)));
             dataclone.forEach((element: any) => {
@@ -177,8 +173,10 @@ export class DatasetComponent implements AfterViewInit, OnInit {
       .subscribe((data) => console.log('Sheet deleted'), (err) => console.log(err));
   }
 
-  onEditComplete(event: {field: string; data: any; originalEvent: Event; index: number;}): void {
-    if ( event.index == null || event.index == undefined || !event.field || !event.data ||!this.tableId ) {
+  onEditComplete(event: {field:string, data:any, originalEvent:Event,index:number}): void {
+    console.log("DATE: " + this.creationDate)
+
+    if(event.index==null||event.index==undefined||!event.field||!event.data||!this.tableId){
       return;
     } //check if valid
     console.log(event.data);
@@ -348,9 +346,9 @@ export class DatasetComponent implements AfterViewInit, OnInit {
     });
   }
   postDataSet(table: any[], displayNameTable: any) {
-    this.user.PostDataSet(new Table(displayNameTable, table)).subscribe()
+    this.user.PostDataSet(new Table(displayNameTable, table, new Date())).subscribe()
   }
-  public openAddRowDialog(){
+  openAddRowDialog(){
     this.dialog.open(CreateRowDialogComponent,{width:"500px", data:{
       tableId: this.tableId,
       cols: this.cols
