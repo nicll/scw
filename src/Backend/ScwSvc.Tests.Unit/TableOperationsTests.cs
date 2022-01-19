@@ -5,7 +5,6 @@ using ScwSvc.DataAccess.Impl;
 using ScwSvc.Exceptions;
 using ScwSvc.Models;
 using ScwSvc.Operations.Impl;
-using ScwSvc.Operations.Interfaces;
 
 namespace ScwSvc.Tests.Unit;
 
@@ -13,7 +12,7 @@ public class TableOperationsTests
 {
     private DbSysContext _sysDb;
     private DbDynContext _dynDb;
-    private ITableOperations _tableOp;
+    private TableOperations _tableOp;
 
     [OneTimeSetUp]
     public void SetupOnce()

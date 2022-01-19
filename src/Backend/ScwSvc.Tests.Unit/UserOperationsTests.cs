@@ -6,13 +6,12 @@ using ScwSvc.DataAccess.Impl;
 using ScwSvc.Exceptions;
 using ScwSvc.Models;
 using ScwSvc.Operations.Impl;
-using ScwSvc.Operations.Interfaces;
 
 namespace ScwSvc.Tests.Unit;
 
 public class UserOperationsTests
 {
-    private IUserOperations _userOp;
+    private UserOperations _userOp;
     private Guid _userId;
 
     [OneTimeSetUp]

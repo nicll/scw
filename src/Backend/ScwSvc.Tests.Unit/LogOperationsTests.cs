@@ -5,14 +5,13 @@ using NUnit.Framework;
 using ScwSvc.DataAccess.Impl;
 using ScwSvc.Models;
 using ScwSvc.Operations.Impl;
-using ScwSvc.Operations.Interfaces;
 
 namespace ScwSvc.Tests.Unit;
 
 public class LogOperationsTests
 {
-    private ITableOperations _tableOp;
-    private IUserOperations _userOp;
+    private TableOperations _tableOp;
+    private UserOperations _userOp;
 
     [OneTimeSetUp]
     public void SetupOnce()
