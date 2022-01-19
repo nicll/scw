@@ -1,0 +1,9 @@
+Add Row Dialog
+<mat-nav-list>
+  <mat-list-item *ngFor="let column of cols; let ind=index;">
+    <h4 mat-line>{{column.field}}</h4>
+    <input matInput placeholder="kill me" name="killMe">
+  </mat-list-item>
+</mat-nav-list>
+<button (click)="addRow()">Add</button>
+

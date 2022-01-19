@@ -1,6 +1,7 @@
 import { CollaborationsService } from './../Services/collaborations.service';
 import { RemoveCollaborationsDialogComponent } from './../Dialogs/remove-collaborations-dialog/remove-collaborations-dialog.component';
 import { AddCollaboratorDialogComponent } from './../Dialogs/add-collaborator-dialog/add-collaborator-dialog.component';
+import { CreateRowDialogComponent } from './../Dialogs/create-row-dialog/create-row-dialog.component';
 import {
   AfterViewInit,
   Component,
@@ -27,6 +28,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AddColumnDialogComponent } from '../Dialogs/add-column-dialog/add-column-dialog.component';
 import { DeleteColumnDialogComponent } from '../Dialogs/delete-column-dialog/delete-column-dialog.component';
 import {Column} from "../Models/Column";
+import {DataSetDialogComponent} from "../Dialogs/data-set-dialog/data-set-dialog.component";
 
 @Component({
   selector: 'app-dataset',
@@ -348,8 +350,17 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   postDataSet(table: any[], displayNameTable: any) {
     this.user.PostDataSet(new Table(displayNameTable, table)).subscribe()
   }
+  public openAddRowDialog(){
+    this.dialog.open(CreateRowDialogComponent,{width:"500px", data:{
+      tableId: this.tableId,
+      cols: this.cols
+
+      }});//Set width because, column names are too long
+  }
 
   openNew() {
+    this.openAddRowDialog();
+    /*
     this.user.GetDataSets().subscribe(y => {
       let element = (y[y.length - 1].tableId)
       console.log("element" + element)
@@ -365,6 +376,6 @@ export class DatasetComponent implements AfterViewInit, OnInit {
           this.apollo.Insert(z, map).subscribe();
         }
       )
-  })
+  })*/
 }
 }
