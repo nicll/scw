@@ -44,7 +44,7 @@ export class DataSetDialogComponent {
     }
   }
   public Ok(){
-    this.user.PostDataSet(new Table(this.displayname,this.dataSource.data)).subscribe(_=>this.dialogRef.close(),err=>this.message=err)
+    this.user.PostDataSet(new Table(this.displayname,this.dataSource.data, new Date())).subscribe(_=>this.dialogRef.close(),err=>this.message=err)
   }
   public Cancel(){
     this.dialogRef.close();

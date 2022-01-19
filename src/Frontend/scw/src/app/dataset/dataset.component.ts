@@ -51,6 +51,7 @@ export class DatasetComponent implements AfterViewInit, OnInit{
   dataset: Array<Array<any>> | undefined
   rowData: any;
   rowIndex: any;
+  creationDate?: Date;
   exportColumns: any[];
   _selectedColumns: any[];
 
@@ -112,6 +113,8 @@ export class DatasetComponent implements AfterViewInit, OnInit{
     if(this.tableId != undefined){
       let id=this.tableId;
       this.user.GetDataSet(id).subscribe(dataset=>{//Get details of DataSet
+        console.log(dataset);
+        this.creationDate = dataset.creationDate;
         this.apollo.lookUpDataSetId(id).subscribe(id=>{//Get the GraphqlId
           let query=this.apollo.QueryBuilder(id, dataset.columns.map(v=>v.name))//Build our query
           this.apollo.GetData<any>(query).subscribe(data=>{
@@ -147,6 +150,8 @@ export class DatasetComponent implements AfterViewInit, OnInit{
   }
 
   onEditComplete(event: {field:string, data:any, originalEvent:Event,index:number}): void {
+    console.log("DATE: " + this.creationDate)
+
     if(event.index==null||event.index==undefined||!event.field||!event.data||!this.tableId){
       return;
     }
@@ -321,7 +326,7 @@ export class DatasetComponent implements AfterViewInit, OnInit{
   }
 
   public postDataSet(table: any[], displayNameTable: any) {
-    this.user.PostDataSet(new Table(displayNameTable, table)).subscribe()
+    this.user.PostDataSet(new Table(displayNameTable, table, new Date())).subscribe()
   }
   public openAddRowDialog(){
     this.dialog.open(CreateRowDialogComponent,{width:"500px", data:{

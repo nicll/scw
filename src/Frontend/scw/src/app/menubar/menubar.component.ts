@@ -15,20 +15,21 @@ import {Router} from "@angular/router";
 export class MenubarComponent implements OnInit {
   adminItem: MenuItem[];
   role: String;
-  constructor(private user:UserService, private router:Router) {
+  visibility: boolean;
+
+  constructor(private user:UserService) {
+    this.visibility = false;
     this.role = "";
     this.adminItem = [{
       label: 'Admin',
       icon: 'pi pi-globe',
       items: [
         {label: 'User List', icon: 'pi pi-list', routerLink: ['/admin']},
-        {label: 'Feature2', icon: 'pi pi-download', routerLink: ['/pagename']},
-        {label: 'Feature3', icon: 'pi-arrow-circle-up', routerLink: ['/pagename']}
+        {label: 'Statistics', icon: 'pi pi-chart-bar', routerLink: ['/stats']}
       ]
     }];
   }
-
-  items: MenuItem[] = [
+  items = [
     {
       label: 'File',
       icon: 'pi pi-fw pi-file',
@@ -155,13 +156,15 @@ export class MenubarComponent implements OnInit {
       icon: 'pi pi-fw pi-power-off'
     }
   ];
-
   ngOnInit(): void {
     this.user.GetRolesOfUser().subscribe(role => {if (role.includes("Admin")) {
       console.log(role);
+      // @ts-ignore
       this.items.push(this.adminItem[0]);
+      this.visibility = true;
+    }
+    else{
+      this.visibility = true;
     }});
-
   }
-
 }

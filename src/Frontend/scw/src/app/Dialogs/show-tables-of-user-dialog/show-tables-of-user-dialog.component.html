@@ -1,0 +1,78 @@
+Show Tables Of User Dialog
+<p-table #dt [value]="ownedTables" dataKey="tableId" [rowHover]="true"
+         [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]"
+         [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+         [filterDelay]="0" [globalFilterFields]="['tableId','tableType','creationDate']" >
+  <ng-template pTemplate="caption">
+    <div class="table-header">
+      List of Tables by User {{user.userId}}
+      <span class="p-input-icon-left">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" (input)="dt.filterGlobal($any($event).target.value, 'contains')"
+                               placeholder="Global Search"/>
+                    </span>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem"></th>
+      <th pSortableColumn="userId"> TableId
+        <p-columnFilter type="text" field="tableId" display="menu"></p-columnFilter>
+        <p-sortIcon field="tableId"></p-sortIcon>
+      </th>
+      <th pSortableColumn="displayName"> DisplayName
+        <p-columnFilter type="text" field="displayName" display="menu"></p-columnFilter>
+        <p-sortIcon field="displayName"></p-sortIcon>
+      </th>
+      <th pSortableColumn="tableType">tableType
+        <p-columnFilter type="text" field="tableType" display="menu"></p-columnFilter>
+        <p-sortIcon field="tableType"></p-sortIcon>
+      </th>
+      <th pSortableColumn="creationDate">creationDate
+        <p-columnFilter type="date" field="creationDate" display="menu">
+          <ng-template pTemplate="filter">
+            <p-calendar dateFormat="yy/mm/dd"></p-calendar>
+          </ng-template>
+        </p-columnFilter>
+        <p-sortIcon field="creationDate"></p-sortIcon>
+      </th>
+      <th></th>
+      <th style="width: 8rem"></th>
+    </tr>
+    <tr>
+      <th>
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+      </th>
+      <th>
+        <input pInputText type="text" (input)="dt.filter($any($event).target.value, 'tableId', 'startsWith')" placeholder="Search by tableId" class="p-column-filter">
+      </th>
+      <th>
+        <input pInputText type="text" (input)="dt.filter($any($event).target.value, 'displayName', 'contains')" placeholder="Search by displayName" class="p-column-filter">
+      </th>
+      <th>
+        <input pInputText type="text" (input)="dt.filter($any($event).target.value, 'tableType', 'contains')" placeholder="Search by tableType" class="p-column-filter">
+      </th>
+      <th>
+        <input pInputText type="date" (input)="dt.filter($any($event).target.value, 'creationDate', 'bigger')" placeholder="Search by creationDate" class="p-column-filter">
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-ownedTables>
+    <tr>
+      <td style="max-width: 10px">
+        <p-tableCheckbox [value]="ownedTables"></p-tableCheckbox>
+      </td>
+      <td>{{ownedTables.tableId}}</td>
+      <td>{{ownedTables.displayName}}</td>
+      <td>{{ownedTables.tableType}}</td>
+      <td>{{ownedTables.creationDate}}</td>
+
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="8">No tables found.</td>
+    </tr>
+  </ng-template>
+</p-table>
+

@@ -9,6 +9,7 @@ import { Table } from '../Models/Table';
 import { Column } from '../Models/Column';
 import sha256 from 'fast-sha256';
 import { environment } from 'src/environments/environment';
+import {DataSet} from "../Models/DataSet";
 @Injectable({
   providedIn: 'root',
 })
@@ -312,7 +313,7 @@ export class UserService {
 
   public AdminGetTablesOfUser(id: string): Observable<Table[]> {
     return this.http
-      .get<Table[]>(this.baseUri + '/Admin/user/' + id + '/table', { withCredentials: true })
+      .get<Table[]>(this.baseUri + '/Admin/user/' + id + '/table/own', { withCredentials: true })
       .pipe(
         catchError((err) => {
           this.handleError('AdminGetTablesOfUser');
@@ -320,7 +321,22 @@ export class UserService {
           return throwError(err);
         }),
         map((sheet) => {
-          console.log(id);
+          //console.log(id);
+          //console.log(sheet);
+          return sheet;
+        })
+      );
+  }
+  public AdminGetTablesOfAllUsers(): Observable<Table[]> {
+    return this.http
+      .get<Table[]>(this.baseUri + '/Admin/table', { withCredentials: true })
+      .pipe(
+        catchError((err) => {
+          this.handleError('AdminGetTablesOfAllUsers');
+          console.error(err);
+          return throwError(err);
+        }),
+        map((sheet) => {
           console.log(sheet);
           return sheet;
         })
