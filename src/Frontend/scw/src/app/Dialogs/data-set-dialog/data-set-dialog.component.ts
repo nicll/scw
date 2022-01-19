@@ -2,9 +2,9 @@ import { DataSource } from '@angular/cdk/table';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { Column } from '../Models/Column';
-import { Table } from '../Models/Table';
-import { UserService } from '../Services/user.service';
+import { Column } from '../../Models/Column';
+import { Table } from '../../Models/Table';
+import { UserService } from '../../Services/user.service';
 
 let data:Column[]=[  ]
 

@@ -1,3 +1,4 @@
+import { environment } from './../../environments/environment';
 import { Injectable } from '@angular/core';
 import { ApolloQueryResult, FetchResult } from '@apollo/client/core';
 import { gql } from '@apollo/client/core';
@@ -45,12 +46,17 @@ export class ApolloService {
     })
     return query.slice(0, query.length - 1).concat('}}}');
 
-  } 
+  }
   public Insert(table: string, data: Map<string, string>): Observable<FetchResult<number, Record<string, any>, Record<string, any>>> {
     table = this.makeQueryRightCase(table);
     let mutation = `mutation {create${table}(`
     table=table[0].toLowerCase()+table.substring(1);
-    mutation=mutation+`input: {${table}:{`;
+    if(table.charCodeAt(0)>47 && table.charCodeAt(0)<58){
+      mutation=mutation+`input: {_${table}:{`;
+    }
+    else{
+      mutation=mutation+`input: {${table}:{`;
+    }
     data.forEach((key, val) => {
       mutation = mutation.concat(val + ":" + key + ",");
     });
@@ -62,11 +68,18 @@ export class ApolloService {
   }
   public Update(table: string, id: number, data: Map<string, string>): Observable<FetchResult<number, Record<string, any>, Record<string, any>>> {
     table = this.makeQueryRightCase(table);
-    let mutation = `mutation {update${table}ById(`
+    let mutation="";
+    mutation = `mutation {update${table}ById(`
     table=table[0].toLowerCase()+table.substring(1);
-    mutation=mutation+`input: { id: ${id}, ${table}Patch:{`;
+    if(table.charCodeAt(0)>47 && table.charCodeAt(0)<58){
+      mutation=mutation+`input: { id: ${id}, _${table}Patch:{`;
+    }
+    else{
+      mutation=mutation+`input: { id: ${id}, ${table}Patch:{`;
+    }
     data.forEach((key, val) => {
-      mutation = mutation.concat(val + ":" + key + ",");
+      val=val[0].toLowerCase()+val.substring(1)
+      mutation = mutation.concat(val + `:"` + key + `",`);
     });
     mutation = mutation.concat(`}}){__typename}}`);
     console.log(mutation);
@@ -86,11 +99,11 @@ export class ApolloService {
     })
   }
   public lookUpDataSetId(tableId: string): Observable<any> {
-    return this.http.get(`http://localhost:5000/api/graphql/dataset/${tableId}/lookup`,
+    return this.http.get(environment.aspUri+`/api/graphql/dataset/${tableId}/lookup`,
       { withCredentials: true, responseType: 'text' });
   }
   public lookUpSheetId(tableId: string): Observable<string> {
-    return this.http.get(`http://localhost:5000/api/graphql/sheet/${tableId}/lookup`,
+    return this.http.get(environment.aspUri+`/api/graphql/sheet/${tableId}/lookup`,
       { withCredentials: true, responseType: 'text' });
   }
 }
