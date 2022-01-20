@@ -25,7 +25,7 @@ export class RemoveCollaborationsDialogComponent implements OnInit {
     if (this.tableid && this.selectedCollaborator)
     {
       	console.log(this.selectedCollaborator)
-        this.collab.RemoveCollabs(this.tableid, this.selectedCollaborator.userId).subscribe(
+        this.collab.RemoveCollabs(this.tableid, this.selectedCollaborator.userId!).subscribe(
           (next) => this.dialogRef.close(),
           (err) => this.errormessage=err.error
         );

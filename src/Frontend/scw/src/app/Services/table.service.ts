@@ -1,3 +1,4 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
@@ -11,7 +12,7 @@ import { DataSet } from '../Models/DataSet';
 export class TableService {
   baseUri: string = environment.aspUri+'/api';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private snackbar: MatSnackBar) {
   }
 
   public PostSheet(id: string, table: DataSet): Observable<DataSet> {
@@ -22,6 +23,7 @@ export class TableService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000})
           return throwError(err);
         }),
         map((_) => {
@@ -37,6 +39,7 @@ export class TableService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000})
           return throwError(err);
         }),
         map((sheet) => {
@@ -52,6 +55,7 @@ export class TableService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000})
           return throwError(err);
         }),
         map((_) => {
@@ -67,6 +71,7 @@ export class TableService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000})
           return throwError(err);
         }),
         map((sheet) => {
