@@ -6,69 +6,60 @@
 <br>
 <div *ngIf="collaborators.length!=0">Collaborators</div>
 <mat-list>
-  <mat-list-item role="listitem" *ngFor="let collaborator of collaborators">{{collaborator.name}}</mat-list-item>
+    <mat-list-item role="listitem" *ngFor="let collaborator of collaborators">{{collaborator.username}}</mat-list-item>
 </mat-list>
 <app-menubar></app-menubar>
-<p-table #dt [columns]="selectedColumns" [value]="data" styleClass="p-datatable-responsive" selectionMode="multiple"
-         [(selection)]="selectedRows" [metaKeySelection]="true" [responsive]="true"
-         [(contextMenuSelection)]="selectedRows"
-         [rowHover]="true" [contextMenu]="cm"
-         [filterDelay]="0" [globalFilterFields]="['A','B','C','D']" (onEditComplete)="onEditComplete($event)"
-         [paginator]="true" [rows]="10" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+<p-table #dt [columns]="selectedColumns" [value]="data" styleClass="p-datatable-responsive" selectionMode="multiple" [(selection)]="selectedRows" [metaKeySelection]="true" [responsive]="true" [(contextMenuSelection)]="selectedRows" [rowHover]="true" [contextMenu]="cm"
+    [filterDelay]="0" [globalFilterFields]="['A','B','C','D']" (onEditComplete)="onEditComplete($event)" [paginator]="true" [rows]="10" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
 
-  <ng-template pTemplate="caption">
-    <!--    <div class="p-d-flex">
+    <ng-template pTemplate="caption">
+        <!--    <div class="p-d-flex">
             <span class="p-input-icon-left p-ml-auto">
                 <i class="pi pi-search"></i>
                 <input pInputText type="text" (input)="dt.filter($event.target,'A', 'contains')"
                        placeholder="Search keyword"/>
             </span>
         </div>-->
-    <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
-                   selectedItemsLabel="{0} columns selected" [style]="{minWidth: '200px'}"
-                   placeholder="Choose Columns"></p-multiSelect>
-  </ng-template>
+        <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header" selectedItemsLabel="{0} columns selected" [style]="{minWidth: '200px'}" placeholder="Choose Columns"></p-multiSelect>
+    </ng-template>
 
-  <ng-template pTemplate="summary">
-    <div class="p-d-flex">
-      <button type="button" pButton icon="pi pi-file-o" (click)="dt.exportCSV()" class="p-mr-2"></button>
-      <button type="button" pButton pRipple icon="pi pi-file-pdf" (click)="exportPdf()" class="p-button-warning p-mr-2"
-              pTooltip="PDF" tooltipPosition="bottom"></button>
-      <button type="button" pButton pRipple icon="pi pi-file-excel" (click)="exportExcel()"
-              class="p-button-success p-mr-2" pTooltip="XLS" tooltipPosition="bottom"></button>
-      <button type="button" pButton pRipple icon="pi pi-filter" (click)="dt.exportCSV({selectionOnly:true})"
-              class="p-button-info p-ml-auto" pTooltip="Selection Only" tooltipPosition="bottom"></button>
-    </div>
-  </ng-template>
-  <ng-template pTemplate="header" let-cols>
-    <tr>
-      <th *ngFor="let col of cols" [pSortableColumn]="col.field">
-        <div class="p-d-flex p-jc-between p-ai-center">
-          {{col.field}}
-          <p-columnFilter type="text" field="{{col.field}}" display="menu"></p-columnFilter>
+    <ng-template pTemplate="summary">
+        <div class="p-d-flex">
+            <button type="button" pButton icon="pi pi-file-o" (click)="dt.exportCSV()" class="p-mr-2"></button>
+            <button type="button" pButton pRipple icon="pi pi-file-pdf" (click)="exportPdf()" class="p-button-warning p-mr-2" pTooltip="PDF" tooltipPosition="bottom"></button>
+            <button type="button" pButton pRipple icon="pi pi-file-excel" (click)="exportExcel()" class="p-button-success p-mr-2" pTooltip="XLS" tooltipPosition="bottom"></button>
+            <button type="button" pButton pRipple icon="pi pi-filter" (click)="dt.exportCSV({selectionOnly:true})" class="p-button-info p-ml-auto" pTooltip="Selection Only" tooltipPosition="bottom"></button>
         </div>
-        <p-sortIcon [field]="col.field"></p-sortIcon>
-      </th>
-    </tr>
-  </ng-template>
-  <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
-    <tr [pSelectableRow]="rowData" [pContextMenuRow]="rowData" [pContextMenuRowIndex]="rowIndex" [pSelectableRowIndex]="rowIndex">
-      <td *ngFor="let col of columns" [pEditableColumn]="rowData" [pEditableColumnField]="col.field" [pEditableColumnRowIndex]="rowIndex">
-        <p-cellEditor>
-          <ng-template pTemplate="input">
-            <input pInputText type="text" [(ngModel)]="rowData[col.field]" required>
-          </ng-template>
-          <ng-template pTemplate="output">
-            {{rowData[col.field]}}
-          </ng-template>
-        </p-cellEditor>
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template pTemplate="emptymessage">
-    <tr>
-      <td colspan="7">This Dataset is empty.</td>
-    </tr>
-  </ng-template>
+    </ng-template>
+    <ng-template pTemplate="header" let-cols>
+        <tr>
+            <th *ngFor="let col of cols" [pSortableColumn]="col.field">
+                <div class="p-d-flex p-jc-between p-ai-center">
+                    {{col.field}}
+                    <p-columnFilter type="text" field="{{col.field}}" display="menu"></p-columnFilter>
+                </div>
+                <p-sortIcon [field]="col.field"></p-sortIcon>
+            </th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+        <tr [pSelectableRow]="rowData" [pContextMenuRow]="rowData" [pContextMenuRowIndex]="rowIndex" [pSelectableRowIndex]="rowIndex">
+            <td *ngFor="let col of columns" [pEditableColumn]="rowData" [pEditableColumnField]="col.field" [pEditableColumnRowIndex]="rowIndex">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputText type="text" [(ngModel)]="rowData[col.field]" required>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{rowData[col.field]}}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="7">This Dataset is empty.</td>
+        </tr>
+    </ng-template>
 </p-table>
 <p-contextMenu #cm [model]="items" appendTo="body"></p-contextMenu>

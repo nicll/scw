@@ -19,6 +19,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 
 //3rd party stuff
@@ -121,7 +122,8 @@ import { DeleteColumnDialogComponent } from './Dialogs/delete-column-dialog/dele
     MenubarModule,
     InputTextModule,
     ButtonModule,
-    MatListModule
+    MatListModule,
+    MatSnackBarModule
   ],
   providers: [{
     provide: APOLLO_OPTIONS,

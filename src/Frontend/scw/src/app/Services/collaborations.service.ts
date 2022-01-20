@@ -1,3 +1,4 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { environment } from './../../environments/environment';
 import { User } from './../Models/User';
 import { HttpClient } from '@angular/common/http';
@@ -13,7 +14,7 @@ export class CollaborationsService {
 
   private baseUri: string = environment.aspUri+'/api';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private snackbar: MatSnackBar) {
   }
   public AddCollaborator(tableid: string, userid: string): Observable<void> {
     console.log(this.baseUri + '/my/table/'+tableid+"/collaborator/"+userid)
@@ -24,6 +25,7 @@ export class CollaborationsService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000})
           return throwError(err);
         }),
         map((_) => {
@@ -36,6 +38,7 @@ export class CollaborationsService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000})
           return throwError(err);
         }),
         map((tables) => {
@@ -49,6 +52,7 @@ export class CollaborationsService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000})
           return throwError(err);
         }),
         map((users) => {
@@ -64,6 +68,7 @@ export class CollaborationsService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000})
           return throwError(err);
         }),
         map((_) => {

@@ -72,14 +72,23 @@ export class ApolloService {
     mutation = `mutation {update${table}ById(`
     table=table[0].toLowerCase()+table.substring(1);
     if(table.charCodeAt(0)>47 && table.charCodeAt(0)<58){
-      mutation=mutation+`input: { id: ${id}, _${table}Patch:{`;
+      mutation=mutation+`input: { _id: ${id}, _${table}Patch:{`;
     }
     else{
-      mutation=mutation+`input: { id: ${id}, ${table}Patch:{`;
+      mutation=mutation+`input: { _id: ${id}, ${table}Patch:{`;
     }
-    data.forEach((key, val) => {
-      val=val[0].toLowerCase()+val.substring(1)
-      mutation = mutation.concat(val + `:"` + key + `",`);
+    console.log(data)
+    data.forEach((val:string, key:string) => {
+      key=key[0].toLowerCase()+key.substring(1)
+      //ToDo: parse
+      val = String(val);
+      console.log(val, key);
+      if(val.includes(".")){
+        if(val.indexOf(".") != -1 && val.indexOf(".") == val.lastIndexOf(".")) //Floats in graphql have to be parsed, everything else doesn't
+        mutation = mutation.concat(key + `:` + parseFloat(val) + `,`);
+      }
+      else
+        mutation = mutation.concat(key + `:"` + val + `",`);
     });
     mutation = mutation.concat(`}}){__typename}}`);
     console.log(mutation);
