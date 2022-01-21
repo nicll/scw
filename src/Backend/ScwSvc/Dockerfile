@@ -1,7 +1,7 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # init base ASP.NET Core image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR "/app"
 EXPOSE 80/tcp
 EXPOSE 443/tcp
@@ -10,7 +10,7 @@ EXPOSE 443/tcp
 # creates temporary dir /src/ScwSvc
 # copies project file and restores packages
 # copies remaining files and builds project
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR "/src/ScwSvc"
 COPY ["ScwSvc.csproj", "."]
 RUN dotnet restore "ScwSvc.csproj"
