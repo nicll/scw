@@ -12,14 +12,13 @@ EXPOSE 443/tcp
 # copies remaining files and builds project
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR "/src/ScwSvc"
-COPY ["ScwSvc.csproj", "."]
-RUN dotnet restore "ScwSvc.csproj"
 COPY [".", "."]
-RUN dotnet build "ScwSvc.csproj" -c Release -o /app/build
+RUN dotnet restore "ScwSvc/ScwSvc.csproj"
+RUN dotnet build "ScwSvc/ScwSvc.csproj" -c Release -o /app/build
 
 # publish ScwSvc
 FROM build AS publish
-RUN dotnet publish "ScwSvc.csproj" -c Release -o /app/publish
+RUN dotnet publish "ScwSvc/ScwSvc.csproj" -c Release -o /app/publish
 
 # copy published ScwSvc to base image
 FROM base AS final
