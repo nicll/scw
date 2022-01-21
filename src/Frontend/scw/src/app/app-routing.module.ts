@@ -8,17 +8,18 @@ import {SpreadjsComponent} from "./spreadjs/spreadjs.component";
 import {AllCollaborationsComponent} from "./all-collaborations/all-collaborations.component";
 import {AdminUserListComponent} from "./admin-user-list/admin-user-list.component";
 import {AdminStatisticsPageComponent} from "./admin-statistics-page/admin-statistics-page.component";
+import {LoginGuard} from "./Services/login.guard";
 
 const routes: Routes =
   [
-    {path: 'sheet',component: SheetComponent},
+    {path: 'sheet',component: SheetComponent,   canActivate: [LoginGuard]},
     {path: '',component: DatasetComponent},
-    {path:'tables',component:AllTablesComponent},
-    {path:'menubarTest',component:MenubarComponent},
-    {path:'collabs',component:AllCollaborationsComponent},
-    {path:'upload',component:MenubarComponent},
-    {path:'admin',component:AdminUserListComponent},
-    {path:'stats',component:AdminStatisticsPageComponent},
+    {path:'tables',component:AllTablesComponent,   canActivate: [LoginGuard]},
+    {path:'menubarTest',component:MenubarComponent,   canActivate: [LoginGuard]},
+    {path:'collabs',component:AllCollaborationsComponent,   canActivate: [LoginGuard]},
+    {path:'upload',component:MenubarComponent,   canActivate: [LoginGuard]},
+    {path:'admin',component:AdminUserListComponent,   canActivate: [LoginGuard]},
+    {path:'stats',component:AdminStatisticsPageComponent,   canActivate: [LoginGuard]},
   ];
 
 @NgModule({
