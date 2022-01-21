@@ -70,6 +70,7 @@ import { AdminStatisticsPageComponent } from './admin-statistics-page/admin-stat
 import {ChartModule} from "primeng/chart";
 import { CreateRowDialogComponent } from './Dialogs/create-row-dialog/create-row-dialog.component';
 import { ShowTablesOfUserDialogComponent } from './Dialogs/show-tables-of-user-dialog/show-tables-of-user-dialog.component';
+import {LoginGuard} from "./Services/login.guard";
 
 @NgModule({
   declarations: [
@@ -156,7 +157,7 @@ import { ShowTablesOfUserDialogComponent } from './Dialogs/show-tables-of-user-d
       };
     },
     deps: [HttpLink],
-  },],
+  }, LoginGuard],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
