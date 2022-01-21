@@ -94,6 +94,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
     if (this.tableId != undefined) {
       let id = this.tableId;
       this.user.GetDataSet(id).subscribe((dataset) => {
+        console.log(dataset);
         //Get details of DataSet
         this.apollo.lookUpDataSetId(id).subscribe((id) => {
           //Get the GraphqlId
@@ -122,8 +123,9 @@ export class DatasetComponent implements AfterViewInit, OnInit {
             this._selectedColumns = this.cols; //set the selectedcolumns to all columns in dataset
           });
           //this.apollo.Delete(id,1).subscribe(()=>console.log("delete"));
-          //let testdata: Map<string, string> = new Map().set('spalteInteger', `"10"`);
-          //this.apollo.Insert(id,testdata).subscribe(()=>(next:any)=>console.log(next),(err)=>console.log(err));
+          let testdata: Map<string, string> = new Map().set('spalte1', `"10"`).set('test1',`12.2`);
+          this.apollo.Insert(id,testdata).subscribe(
+            ()=>(next:any)=>console.log(next),(err)=>console.log(err));
         });
       });
     }
@@ -163,7 +165,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
           testdata.set(tmp.field, event.data[tmp.field]);
         }
       });
-
+      console.log(testdata);
       this.apollo.Update(id, event.index + 1, testdata).subscribe(
         () => (next: any) => console.log(next),
         (err) => console.log(err)

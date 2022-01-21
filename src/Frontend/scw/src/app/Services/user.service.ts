@@ -8,64 +8,62 @@ import { Table } from '../Models/Table';
 import { Column } from '../Models/Column';
 import sha256 from 'fast-sha256';
 import { environment } from 'src/environments/environment';
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private snackbar: MatSnackBar) {
   }
 
   baseUri: string = environment.aspUri+'/api';
   username: string = "";
 
-  //Basic user api
+  httpTextConfig:{ responseType:"text", withCredentials:boolean} =
+  { responseType: 'text', withCredentials: true}
 
-  public GetUserName(): Observable<string> {
-    return this.http
-      .get(this.baseUri + '/my/username', {
-        responseType: 'text',
-        withCredentials: true,
-      })
-      .pipe(
-        catchError((err) => {
-          console.error(err);
-          return throwError(err);
-        }),
-        map((name) => {
-          return this.username=name;
-        })
+  httpConfig = { withCredentials: true}
+
+  //Basic user api
+  private OnError(error:Error):string{
+    console.error(error);
+    this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
+    return "Error in communication with backend";
+  }
+  public GetUserName(): Observable<string|undefined> {
+    if(this.username)
+      return of(this.username);
+    else
+      return this.http.get(this.baseUri + '/my/username', this.httpTextConfig).pipe(
+        catchError(err => this.OnError(err)),
+        map(name => this.username = name)
       );
   }
-  public Login(username: string, password: string): Observable<any> {
-    let us = {"username":username, "password":new TextDecoder("utf-8").decode(sha256(new TextEncoder().encode(password)))};
-    return this.http
-      .post<User>(this.baseUri + '/Service/login', us, {
-        withCredentials: true,
-      })
-      .pipe(
-        catchError((err) => {
-          console.error(err);
-          return throwError(err);
-        }),
-        map((_) => {
-          console.log("login successful")
-          this.username=us.username;
+  public Login(username: string, password: string): Observable<User | undefined> {
+    let us:User = {
+      "username":username,
+      "password":new TextDecoder("utf-8").decode(sha256(new TextEncoder().encode(password)))
+    };
+
+    return this.http.post<User>(this.baseUri + '/Service/login', us, this.httpConfig).pipe(
+      catchError(err => this.OnError(err)),
+      map((_) => {
+          this.snackbar.open("Successful login", undefined, {duration:5000});
+          this.username = us.username;
           return us;
-        })
+        }),
+
       );
   }
   public Signup(username: string, password: string): Observable<any> {
-    let user = {"username":username, "password":new TextDecoder("utf-8").decode(sha256(new TextEncoder().encode(password)))};
-    return this.http
-      .post<User>(this.baseUri + '/Service/register', user, {
-        withCredentials: true,
-      })
-      .pipe(
-        catchError((err) => {
-          console.error(err);
-          return throwError(err);
-        }),
+    let user:User = {
+      "username":username,
+      "password":new TextDecoder("utf-8").decode(sha256(new TextEncoder().encode(password)))
+    };
+    return this.http.post<User>(this.baseUri + '/Service/register', user, this.httpConfig).pipe(
+        catchError((err) => this.OnError(err)),
         map((_) => {
+          this.snackbar.open("Successful SignUp", undefined, {duration:5000});
           this.username = username;
           return user;
         })
@@ -75,7 +73,10 @@ export class UserService {
     this.username = "";
     return this.http
       .get(this.baseUri + '/Service/Logout', { withCredentials: true })
-      .subscribe((_) => console.log('Logout'));
+      .subscribe(
+        (_) => this.snackbar.open("Successful SignUp", undefined, {duration:5000}),
+        (error) => this.snackbar.open("Error in communication with backend", undefined, {duration:5000})
+      );
   }
 
   //basic DataSet api
@@ -86,6 +87,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((tables) => {
@@ -99,6 +101,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((sheet) => {
@@ -115,6 +118,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((_) => {
@@ -130,6 +134,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((_) => {
@@ -146,6 +151,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((sheets) => {
@@ -159,6 +165,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((sheet) => {
@@ -172,6 +179,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((_) => {
@@ -187,6 +195,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((_) => {
@@ -209,6 +218,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((_) => {
@@ -224,6 +234,7 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((_) => {
@@ -238,12 +249,13 @@ export class UserService {
       .pipe(
         catchError((err) => {
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((sheet) => {
-          return sheet;
+          return sheet.replace('"','').replace('"','');
         })
       );
   }
-
 }
+
