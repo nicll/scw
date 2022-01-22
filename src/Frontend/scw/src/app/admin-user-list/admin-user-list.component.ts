@@ -52,8 +52,8 @@ export class AdminUserListComponent implements OnInit {
     this.submitted = false;
     this.users = []
 
-    this.userservice.GetAllUsersAdmin().subscribe((usersTransmitted: User[]) => {
-      this.users = usersTransmitted
+    this.userservice.GetAllUsersAdmin().subscribe((usersTransmitted: string|User[]) => {
+      this.users = usersTransmitted as User[]
       for (let i = 0; i < this.users.length; i++) {
         // @ts-ignore
         this.userservice.AdminGetTablesOfUser(this.users[i].userId).subscribe((tables: Table[]) => {
@@ -74,8 +74,8 @@ export class AdminUserListComponent implements OnInit {
   }
 
   viewUser(user: User) {
-    this.userservice.AdminGetTablesOfUser(user.userId).subscribe(tables=> {
-      this.userservice.AdminGetCollabsOfUser(user.userId).subscribe(collabs => {
+    this.userservice.AdminGetTablesOfUser(user.userId!).subscribe(tables=> {
+      this.userservice.AdminGetCollabsOfUser(user.userId!).subscribe(collabs => {
         //this.viewUserDialog = true;
         this.messageService.add({
           severity: 'info',
@@ -99,21 +99,21 @@ export class AdminUserListComponent implements OnInit {
 
   deleteUser(user: User) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete the user ' + user.name + '?',
+      message: 'Are you sure you want to delete the user ' + user.username + '?',
       header: 'Confirm',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.userservice.adminDeleteUser(user.userId).subscribe(() => {
+        this.userservice.adminDeleteUser(user.userId!).subscribe(() => {
           this.messageService.add({
             severity: 'success',
             summary: 'User deleted',
-            detail: 'User ' + user.name + ' deleted'
+            detail: 'User ' + user.username + ' deleted'
           });
         }, error => {
           this.messageService.add({
             severity: 'error',
             summary: 'User not deleted',
-            detail: 'User ' + user.name + ' not deleted'
+            detail: 'User ' + user.username + ' not deleted'
           });
         })
       }
@@ -123,7 +123,7 @@ export class AdminUserListComponent implements OnInit {
 
   saveUser() {
     this.submitted = true;
-    if (this.user.name.trim()) {
+    if (this.user.username.trim()) {
       if (this.user.userId) {
         console.log(this.user.userId)
       }

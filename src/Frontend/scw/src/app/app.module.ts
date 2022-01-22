@@ -86,7 +86,10 @@ import { ShowTablesOfUserDialogComponent } from './Dialogs/show-tables-of-user-d
     AllCollaborationsComponent,
     AddCollaboratorDialogComponent,
     RemoveCollaborationsDialogComponent,
-    AdminUserListComponent
+    AdminUserListComponent,
+    AdminStatisticsPageComponent,
+    CreateRowDialogComponent,
+    ShowTablesOfUserDialogComponent,
   ],
   imports: [
     DesignerModule,

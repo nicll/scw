@@ -5,8 +5,8 @@ import {Table} from "./Table";
 export class User{
     username:string;
     password:string;
-    userId:string;
-    role:Roles;
+    userId?:string;
+    role?:Roles;
     ownedTables?:Table[];
     creationDate?:Date;
     constructor(name:string, userId:string, role:Roles, password:string, creationDate?:Date, ownedTables?:Table[]){

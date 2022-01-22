@@ -19,6 +19,8 @@ export class AdminStatisticsPageComponent implements OnInit {
     this.dataGroupedByMonth = new Map<number, number>();
     this.values = [];
     this.user.AdminGetTablesOfAllUsers().subscribe(data => {
+      if(typeof data === "string")
+        return;
       console.log(data);
       for (let i = 0; i < data.length; i++) {
 

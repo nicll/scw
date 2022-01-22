@@ -32,6 +32,7 @@ export class UserService {
     return "Error in communication with backend";
   }
   public GetUserName(): Observable<string|undefined> {
+    this.snackbar.open(this.username);
     if(this.username)
       return of(this.username);
     else
