@@ -71,12 +71,8 @@ export class AdminStatisticsPageComponent{
               this.adminCounts[cacheDateOfTable] = this.adminCounts[cacheDateOfTable] + 1;
               this.mapUserRolesToLastModifiedAndCount[0]= new StatsMapRolesToCount("admin", this.adminCounts);
             }
-
           }
-
-
         })
-
       }
     });
     this.user.AdminGetTablesOfAllUsers().subscribe(data => {

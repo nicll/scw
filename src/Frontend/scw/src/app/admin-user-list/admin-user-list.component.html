@@ -36,6 +36,9 @@
                 <p-columnFilter type="date" field="lastModifiedDate" display="menu"></p-columnFilter>
                 <p-sortIcon field="lastModifiedDate"></p-sortIcon>
             </th>
+            <th pSortableColumn="role">Logs
+            </th>
+
             <th></th>
             <th style="width: 8rem"></th>
         </tr>
@@ -58,6 +61,8 @@
             <th>
                 <input pInputText type="date" (input)="dt.filter($any($event).target.value, 'lastActivityDate', 'bigger')" placeholder="Search by lastActivityDate" class="p-column-filter">
             </th>
+            <th>
+            </th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-user>
@@ -70,6 +75,7 @@
             <td>{{user.role}}</td>
             <td (click)="showTablesOfUserDialog(user)">{{user.ownedTables.length}}</td>
             <td>{{user.lastModifiedDate}}</td>
+            <td (click)="showLogsForUser(user)">Show all the logs for this user</td>
             <td>
                 <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-mr-2" (click)="editUser(user)"></button>
                 <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteUser(user)"></button>
