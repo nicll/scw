@@ -169,7 +169,9 @@ public class UserOperations : IUserOperations
             var allowedTypes = LogEventTypeToTypes(filter);
 
             return await _sysDb.AsAsyncLogQuery(query)
-                .WhereAwait(e => ValueTask.FromResult(allowedTypes.Select(t => t.Name + "Proxy").Contains(e.GetType().Name)))
+                .WhereAwait(e =>
+                    ValueTask.FromResult(allowedTypes.Contains(e.GetType())
+                        || allowedTypes.Select(t => t.Name + "Proxy").Contains(e.GetType().Name)))
                 .ToArrayAsync();
         }
 
