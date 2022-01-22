@@ -9,12 +9,17 @@ export class User{
     role:Roles;
     ownedTables?:Table[];
     creationDate?:Date;
-    constructor(name:string, userId:string, role:Roles, password:string, creationDate?:Date, ownedTables?:Table[]){
+  /**
+   * declares when the user last created a table
+   */
+  lastModifiedDate?:Date;
+    constructor(name:string, userId:string, role:Roles, password:string, creationDate?:Date, ownedTables?:Table[], lastModifiedDate?:Date){
         this.name=name;
         this.userId=userId;
         this.role=role;
         this.creationDate=creationDate;
         this.ownedTables=ownedTables;
+        this.lastModifiedDate=lastModifiedDate;
         this.password=new TextDecoder("utf-8").decode(sha256(new TextEncoder().encode(password)));
     }
 

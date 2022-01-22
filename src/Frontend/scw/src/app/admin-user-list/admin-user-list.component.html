@@ -31,8 +31,12 @@
         <p-sortIcon field="role"></p-sortIcon>
       </th>
       <th pSortableColumn="role">Quantity of Datasets (Owner)
-        <p-columnFilter type="text" field="role" display="menu"></p-columnFilter>
-        <p-sortIcon field="role"></p-sortIcon>
+        <p-columnFilter type="number" field="ownedTables.length" display="menu"></p-columnFilter>
+        <p-sortIcon field="ownedTables.length"></p-sortIcon>
+      </th>
+      <th pSortableColumn="role">Last Activity
+        <p-columnFilter type="date" field="lastModifiedDate" display="menu"></p-columnFilter>
+        <p-sortIcon field="lastModifiedDate"></p-sortIcon>
       </th>
       <th></th>
       <th style="width: 8rem"></th>
@@ -51,7 +55,10 @@
         <input pInputText type="text" (input)="dt.filter($any($event).target.value, 'role', 'contains')" placeholder="Search by Role" class="p-column-filter">
       </th>
       <th>
-        <input pInputText type="number" (input)="dt.filter($any($event).target.value, 'role', 'bigger')" placeholder="Search by Quantity of DataSets" class="p-column-filter">
+        <input pInputText type="number" (input)="dt.filter($any($event).target.value, 'ownedTables', 'bigger')" placeholder="Search by Quantity of DataSets" class="p-column-filter">
+      </th>
+      <th>
+        <input pInputText type="date" (input)="dt.filter($any($event).target.value, 'lastActivityDate', 'bigger')" placeholder="Search by lastActivityDate" class="p-column-filter">
       </th>
     </tr>
   </ng-template>
@@ -64,10 +71,12 @@
       <td>{{user.name}}</td>
       <td>{{user.role}}</td>
       <td (click)="showTablesOfUserDialog(user)">{{user.ownedTables.length}}</td>
+      <td>{{user.lastModifiedDate}}</td>
       <td>
         <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-mr-2" (click)="editUser(user)"></button>
         <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteUser(user)"></button>
       </td>
+
     </tr>
   </ng-template>
   <ng-template pTemplate="emptymessage">

@@ -3,7 +3,8 @@ import {UserService} from '../Services/user.service';
 import {ApolloService} from '../Services/apollo.service';
 import {CollaborationsService} from "../Services/collaborations.service";
 import {User} from "../Models/User";
-import {Table, TableModule} from 'primeng/table';
+import {Table}  from 'primeng/table';
+import {Table as TableModel} from "../Models/Table";
 import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
 import GC from "@grapecity/spread-sheets";
 import Tables = GC.Spread.Sheets.Tables;
@@ -13,6 +14,7 @@ import {AddColumnDialogComponent} from "../Dialogs/add-column-dialog/add-column-
 import {
   ShowTablesOfUserDialogComponent
 } from "../Dialogs/show-tables-of-user-dialog/show-tables-of-user-dialog.component";
+import {StatsMapRolesToCount} from "../Models/StatsMapRolesToCount";
 
 
 @Component({
@@ -38,6 +40,7 @@ export class AdminUserListComponent implements OnInit {
   selectedUser: User;
   items: MenuItem[];
 
+
   @ViewChild('dt') table: Table | undefined;
 
   constructor(public dialog: MatDialog,public userservice: UserService, public apollo: ApolloService, public collab: CollaborationsService, private messageService: MessageService, private confirmationService: ConfirmationService) {
@@ -56,8 +59,8 @@ export class AdminUserListComponent implements OnInit {
       this.users = usersTransmitted
       for (let i = 0; i < this.users.length; i++) {
         // @ts-ignore
-        this.userservice.AdminGetTablesOfUser(this.users[i].userId).subscribe((tables: Table[]) => {
-          // @ts-ignore
+        this.userservice.AdminGetTablesOfUser(this.users[i].userId).subscribe((tables: TableModel[]) => {
+          this.users[i].lastModifiedDate = tables.map(function(e) { return e.creationDate; }).sort().reverse()[0];
           this.users[i].ownedTables = tables
         })
         }
@@ -65,6 +68,7 @@ export class AdminUserListComponent implements OnInit {
     }, error => {
       console.log(error)
     })
+
   }
 
   openNew() {
