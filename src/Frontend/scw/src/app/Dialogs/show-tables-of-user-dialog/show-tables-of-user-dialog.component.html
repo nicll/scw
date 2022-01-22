@@ -36,6 +36,10 @@ Show Tables Of User Dialog
         </p-columnFilter>
         <p-sortIcon field="creationDate"></p-sortIcon>
       </th>
+      <th pSortableColumn="tableType">Log
+        <p-columnFilter type="text" field="tableType" display="menu"></p-columnFilter>
+        <p-sortIcon field="tableType"></p-sortIcon>
+      </th>
       <th></th>
       <th style="width: 8rem"></th>
     </tr>
@@ -55,6 +59,9 @@ Show Tables Of User Dialog
       <th>
         <input pInputText type="date" (input)="dt.filter($any($event).target.value, 'creationDate', 'bigger')" placeholder="Search by creationDate" class="p-column-filter">
       </th>
+      <th>
+        <input pInputText type="text" (input)="dt.filter($any($event).target.value, 'creationDate', 'bigger')" placeholder="Search by creationDate" class="p-column-filter">
+      </th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-ownedTables>
@@ -66,6 +73,7 @@ Show Tables Of User Dialog
       <td>{{ownedTables.displayName}}</td>
       <td>{{ownedTables.tableType}}</td>
       <td>{{ownedTables.creationDate}}</td>
+      <td (click) = "hideTablesDialogAndOpenLogsOfTableDialog(this.ownedTables)"> See Logs for this Table</td>
 
     </tr>
   </ng-template>

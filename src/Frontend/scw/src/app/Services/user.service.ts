@@ -10,6 +10,7 @@ import { Column } from '../Models/Column';
 import sha256 from 'fast-sha256';
 import { environment } from 'src/environments/environment';
 import {DataSet} from "../Models/DataSet";
+import {Log} from "../Models/Log";
 @Injectable({
   providedIn: 'root',
 })
@@ -339,6 +340,21 @@ export class UserService {
         map((sheet) => {
           console.log(sheet);
           return sheet;
+        })
+      );
+  }
+  public AdminGetAllLogs(eventType: string): Observable<Log[]> {
+    return this.http
+      .get<Log[]>(this.baseUri + '/Admin/log', { withCredentials: true })
+      .pipe(
+        catchError((err) => {
+          this.handleError('AdminGetAllLogs');
+          console.error(err);
+          return throwError(err);
+        }),
+        map((log) => {
+          //console.log(log);
+          return log;
         })
       );
   }

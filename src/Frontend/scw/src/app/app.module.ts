@@ -72,6 +72,8 @@ import { CreateRowDialogComponent } from './Dialogs/create-row-dialog/create-row
 import { ShowTablesOfUserDialogComponent } from './Dialogs/show-tables-of-user-dialog/show-tables-of-user-dialog.component';
 import {LoginGuard} from "./Services/login.guard";
 import {AdminGuard} from "./Services/admin.guard";
+import { ShowLogsOfTableDialogComponent } from './Dialogs/show-logs-of-table-dialog/show-logs-of-table-dialog.component';
+import { ShowLogsOfUserDialogComponent } from './Dialogs/show-logs-of-user-dialog/show-logs-of-user-dialog.component';
 
 @NgModule({
   declarations: [
@@ -91,7 +93,9 @@ import {AdminGuard} from "./Services/admin.guard";
     AdminUserListComponent,
     AdminStatisticsPageComponent,
     CreateRowDialogComponent,
-    ShowTablesOfUserDialogComponent
+    ShowTablesOfUserDialogComponent,
+    ShowLogsOfTableDialogComponent,
+    ShowLogsOfUserDialogComponent
   ],
     imports: [
         DesignerModule,

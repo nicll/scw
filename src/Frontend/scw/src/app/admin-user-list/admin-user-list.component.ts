@@ -14,7 +14,12 @@ import {AddColumnDialogComponent} from "../Dialogs/add-column-dialog/add-column-
 import {
   ShowTablesOfUserDialogComponent
 } from "../Dialogs/show-tables-of-user-dialog/show-tables-of-user-dialog.component";
+import {
+  ShowLogsOfTableDialogComponent
+} from "../Dialogs/show-logs-of-table-dialog/show-logs-of-table-dialog.component";
 import {StatsMapRolesToCount} from "../Models/StatsMapRolesToCount";
+import {Log} from "../Models/Log";
+import {ShowLogsOfUserDialogComponent} from "../Dialogs/show-logs-of-user-dialog/show-logs-of-user-dialog.component";
 
 
 @Component({
@@ -62,8 +67,15 @@ export class AdminUserListComponent implements OnInit {
         this.userservice.AdminGetTablesOfUser(this.users[i].userId).subscribe((tables: TableModel[]) => {
           this.users[i].lastModifiedDate = tables.map(function(e) { return e.creationDate; }).sort().reverse()[0];
           this.users[i].ownedTables = tables
-        })
+          this.userservice.AdminGetAllLogs("User").subscribe((logs: Log[]) => {
+            //console.log(logs)
+            this.users[i].logs = logs.filter(log => log.userId === this.users[i].userId)
+            //console.log(this.users[i].logs)
+          })
+
+          })
         }
+
       console.log(this.users);
     }, error => {
       console.log(error)
@@ -93,6 +105,8 @@ export class AdminUserListComponent implements OnInit {
     this.userDialog = false;
     this.submitted = false;
   }
+
+
   ngOnInit() {
   }
   editUser(user: User) {
@@ -134,9 +148,21 @@ export class AdminUserListComponent implements OnInit {
     }
   }
 
+  showLogsForUser(user: User){
+    console.log(user)
+    const dialogRef = this.dialog.open(ShowLogsOfUserDialogComponent, {
+      height: '80%',
+      data: user,
+    });
+    console.log("showTablesOfUserDialog")
+
+  }
+
+
   showTablesOfUserDialog(user: User) {
     console.log(user)
     const dialogRef = this.dialog.open(ShowTablesOfUserDialogComponent, {
+      height: '80%',
       data: user,
     });
       console.log("showTablesOfUserDialog")
