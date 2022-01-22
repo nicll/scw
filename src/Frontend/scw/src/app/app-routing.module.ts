@@ -6,7 +6,6 @@ import { SheetComponent } from './sheet/sheet.component';
 import { DatasetComponent } from './dataset/dataset.component';
 import {MenubarComponent} from "./menubar/menubar.component";
 import {SpreadjsComponent} from "./spreadjs/spreadjs.component";
-import {AllCollaborationsComponent} from "./all-collaborations/all-collaborations.component";
 import {AdminUserListComponent} from "./admin-user-list/admin-user-list.component";
 import {AdminStatisticsPageComponent} from "./admin-statistics-page/admin-statistics-page.component";
 

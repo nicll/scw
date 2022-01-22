@@ -279,8 +279,8 @@ export class UserService {
       .get<Table[]>(this.baseUri + '/Admin/user/' + id + '/table/own', { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('AdminGetTablesOfUser');
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((sheet) => {
@@ -295,8 +295,8 @@ export class UserService {
       .get<Table[]>(this.baseUri + '/Admin/table', { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('AdminGetTablesOfAllUsers');
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((sheet) => {
@@ -311,8 +311,8 @@ export class UserService {
       .get<Table[]>(this.baseUri + '/Admin/user/' + id + '/collaboration', { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('AdminGetCollabsOfUser');
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((sheet) => {
@@ -330,13 +330,44 @@ export class UserService {
       })
       .pipe(
         catchError((err) => {
-          this.handleError('AdminUpdateUsername', userId);
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((_) => {
           this.username = username;
           return username;
+        })
+      );
+  }
+  public GetAllUsersAdmin(): Observable<User[]> {
+    return this.http
+      .get<User[]>(this.baseUri + '/Admin/user', { withCredentials: true })
+      .pipe(
+        catchError((err) => {
+          console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
+          return throwError(err);
+        }),
+        map((users) => {
+          return users;
+        })
+      );
+  }
+  public GetRolesOfUser(): Observable<string> {
+    return this.http
+      .get(this.baseUri + '/Service/MyRoles', {
+        responseType: 'text',
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((err) => {
+          console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
+          return throwError(err);
+        }),
+        map((role) => {
+          return role;
         })
       );
   }
