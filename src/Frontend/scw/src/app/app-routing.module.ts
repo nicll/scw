@@ -9,6 +9,7 @@ import {AllCollaborationsComponent} from "./all-collaborations/all-collaboration
 import {AdminUserListComponent} from "./admin-user-list/admin-user-list.component";
 import {AdminStatisticsPageComponent} from "./admin-statistics-page/admin-statistics-page.component";
 import {LoginGuard} from "./Services/login.guard";
+import {AdminGuard} from "./Services/admin.guard";
 
 const routes: Routes =
   [
@@ -18,8 +19,8 @@ const routes: Routes =
     {path:'menubarTest',component:MenubarComponent,   canActivate: [LoginGuard]},
     {path:'collabs',component:AllCollaborationsComponent,   canActivate: [LoginGuard]},
     {path:'upload',component:MenubarComponent,   canActivate: [LoginGuard]},
-    {path:'admin',component:AdminUserListComponent,   canActivate: [LoginGuard]},
-    {path:'stats',component:AdminStatisticsPageComponent,   canActivate: [LoginGuard]},
+    {path:'admin',component:AdminUserListComponent,   canActivate: [LoginGuard,AdminGuard]},
+    {path:'stats',component:AdminStatisticsPageComponent,   canActivate: [LoginGuard,AdminGuard]},
   ];
 
 @NgModule({

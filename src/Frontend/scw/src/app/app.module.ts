@@ -71,6 +71,7 @@ import {ChartModule} from "primeng/chart";
 import { CreateRowDialogComponent } from './Dialogs/create-row-dialog/create-row-dialog.component';
 import { ShowTablesOfUserDialogComponent } from './Dialogs/show-tables-of-user-dialog/show-tables-of-user-dialog.component';
 import {LoginGuard} from "./Services/login.guard";
+import {AdminGuard} from "./Services/admin.guard";
 
 @NgModule({
   declarations: [
@@ -152,7 +153,7 @@ import {LoginGuard} from "./Services/login.guard";
       };
     },
     deps: [HttpLink],
-  }, LoginGuard],
+  }, LoginGuard, AdminGuard],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

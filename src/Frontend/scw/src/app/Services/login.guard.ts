@@ -8,21 +8,36 @@ import {
   UrlTree
 } from "@angular/router";
 import { AuthService } from "./auth.service";
+import {UserService} from "./user.service";
+import {resolve} from "@angular/compiler-cli/src/ngtsc/file_system";
+import {Observable} from "rxjs";
 
 @Injectable()
 export class LoginGuard implements CanActivate {
   constructor(
     private authService: AuthService,
-    private router: Router) { }
+    private user: UserService,
+    private router: Router) {
+  }
+
   canActivate(
     route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): boolean | Promise<boolean> {
-    const isAuthenticated = this.authService.getAuthStatus();
-    console.log("LoginGuard" + "  canActivate")
-    console.log("------------------" + isAuthenticated)
-    if (!isAuthenticated) {
-      this.router.navigate(['/']);
-    }
-    return isAuthenticated;
+    state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | UrlTree | boolean  {
+    return new Observable<boolean>(obs => {
+      this.user.GetUserName().subscribe(
+        (data) => {
+          console.log("LoginGuard" + "  canActivate")
+          console.log("------------------" , data)
+          if (data.length > 0) {
+            obs.next(true);
+          }
+        }, error => {
+          console.log("LoginGuard" + "  canActivate" + "  error")
+          console.log("------------------" + error)
+          this.router.navigate(['/'])
+          obs.next(false);
+        }
+      );
+    });
   }
 }
