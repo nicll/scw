@@ -49,25 +49,21 @@ export class AdminStatisticsPageComponent{
       console.log(this.users + "  vor schleife#####")
       for (let i = 0; i < this.users.length; i++) {
         console.log("user schleife  " + this.users[i].role);
-        this.user.AdminGetTablesOfUser(this.users[i].userId).subscribe((tables: Table[]) => {
+        this.user.AdminGetTablesOfUser(this.users[i].userId!).subscribe((tables: Table[]) => {
           for (let j = 0; j < tables.length; j++) {
             const cacheDateOfTable = new Date(tables[j].creationDate).getMonth();
             console.log("cacheDateOfTable " + cacheDateOfTable);
-            // @ts-ignore
-            console.log("USERROLE ####" + this.users[i].role);
-            // @ts-ignore
-            if(this.users[i].role.toString() == "Common") {
+            console.log("USERROLE ####" + this.users![i].role);
+            if(this.users![i].role!.toString() == "Common") {
               this.commonCounts[cacheDateOfTable] = this.commonCounts[cacheDateOfTable] + 1;
               this.mapUserRolesToLastModifiedAndCount[0]= new StatsMapRolesToCount("common", this.commonCounts);
             }
-            // @ts-ignore
-            if(this.users[i].role.toString() == "Manager") {
+            if(this.users![i].role!.toString() == "Manager") {
               this.managerCounts[cacheDateOfTable] = this.managerCounts[cacheDateOfTable] + 1;
               this.mapUserRolesToLastModifiedAndCount[0]= new StatsMapRolesToCount("manager", this.managerCounts);
 
             }
-            // @ts-ignore
-            if(this.users[i].role.toString() == "Admin") {
+            if(this.users![i].role!.toString() == "Admin") {
               this.adminCounts[cacheDateOfTable] = this.adminCounts[cacheDateOfTable] + 1;
               this.mapUserRolesToLastModifiedAndCount[0]= new StatsMapRolesToCount("admin", this.adminCounts);
             }

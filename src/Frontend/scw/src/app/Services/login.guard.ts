@@ -28,7 +28,7 @@ export class LoginGuard implements CanActivate {
         (data) => {
           console.log("LoginGuard" + "  canActivate")
           console.log("------------------" , data)
-          if (data.length > 0) {
+          if (data!.length > 0) {
             obs.next(true);
           }
         }, error => {

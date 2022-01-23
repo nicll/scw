@@ -27,7 +27,6 @@ export class DataSetDialogComponent {
   }
   message!:string;
   addRow() {
-    // @ts-ignore
     console.log(this.type)
     if(this.name&&this.type){
       this.dataSource.data.push(new Column(this.name,this.type,this.nullable));

@@ -63,8 +63,7 @@ export class AdminUserListComponent implements OnInit {
     this.userservice.GetAllUsersAdmin().subscribe((usersTransmitted: string|User[]) => {
       this.users = usersTransmitted as User[]
       for (let i = 0; i < this.users.length; i++) {
-        // @ts-ignore
-        this.userservice.AdminGetTablesOfUser(this.users[i].userId).subscribe((tables: TableModel[]) => {
+        this.userservice.AdminGetTablesOfUser(this.users![i].userId!).subscribe((tables: TableModel[]) => {
           this.users[i].lastModifiedDate = tables.map(function(e) { return e.creationDate; }).sort().reverse()[0];
           this.users[i].ownedTables = tables
           this.userservice.AdminGetAllLogs("User").subscribe((logs: Log[]) => {

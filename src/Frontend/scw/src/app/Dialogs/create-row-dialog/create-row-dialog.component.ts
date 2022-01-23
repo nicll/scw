@@ -36,8 +36,6 @@ export class CreateRowDialogComponent implements OnInit {
     }
     for (let i = 0; i < this.cols.length; i++) {
       // @ts-ignore
-      //console.log(document.getElementById("mat-input-" + i).value);
-      // @ts-ignore
       this.answer[i] = document.getElementById("mat-input-" + i).value;
     }
     console.log(this.answer);
@@ -48,8 +46,7 @@ export class CreateRowDialogComponent implements OnInit {
     }
     this.apollo.lookUpDataSetId(this.tableId).subscribe(z => {
       console.log(this.mapData);
-      // @ts-ignore
-      this.apollo.Insert(z, this.mapData).subscribe();
+      this.apollo.Insert(z, this.mapData!).subscribe();
     } );
 
     }

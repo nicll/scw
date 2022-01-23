@@ -5,8 +5,6 @@ import {MenuModule} from 'primeng/menu';
 import {UserService} from "../Services/user.service";
 import {Router} from "@angular/router";
 
-
-// @ts-ignore
 @Component({
   selector: 'app-menubar',
   templateUrl: './menubar.component.html',

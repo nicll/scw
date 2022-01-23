@@ -42,7 +42,6 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   items: MenuItem[];
   data: any[];
   collaborators: User[]=[];
-  cache: any[];
   @Input() isCollab: boolean | undefined;
   completedColumns: any[];
   cols = [
@@ -276,8 +275,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
           this.user.GetDataSets().subscribe(y => {
             let element = (y[y.length - 1].tableId)
 
-            // @ts-ignore
-            this.apollo.lookUpDataSetId(element).subscribe(z => {
+            this.apollo.lookUpDataSetId(element!).subscribe(z => {
               let mapIter = map1.values();
               let keyiter = map1.keys();
               console.log("ELEMENT -----------" + element)
@@ -289,7 +287,6 @@ export class DatasetComponent implements AfterViewInit, OnInit {
               console.log("MAP1 -------- " + keyiter.next().value)
               console.log("MAP1 -------- " + keyiter.next().value)
 
-              // @ts-ignore
               this.apollo.Insert(z, map1).subscribe()
             });
 
@@ -297,8 +294,6 @@ export class DatasetComponent implements AfterViewInit, OnInit {
 
         }
 
-
-        //@ts-ignore
 
         //this.user.GetDataSets().subscribe(y => this.apollo.Insert(y[y.length-1].tableId, map1).subscribe())
 
@@ -357,15 +352,13 @@ export class DatasetComponent implements AfterViewInit, OnInit {
     this.user.GetDataSets().subscribe(y => {
       let element = (y[y.length - 1].tableId)
       console.log("element" + element)
-      // @ts-ignore
-      this.apollo.lookUpDataSetId(this.tableId).subscribe(z => {
+      this.apollo.lookUpDataSetId(this.tableId!).subscribe(z => {
         let map = new Map([
           ["dataSetColumnString", '"Test1"'],
           ["columnInteger1", '"111"'],
           ["columnInteger2", '"222"'],
           ["columnRealNumber", '222.2'],
         ])
-          // @ts-ignore
           this.apollo.Insert(z, map).subscribe();
         }
       )

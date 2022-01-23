@@ -23,8 +23,7 @@ export class ShowTablesOfUserDialogComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public apollo: ApolloService, public userService: UserService, public dialog: MatDialog) {
     //this.cols = this.data.cols;
     this.user = this.data;
-    //@ts-ignore
-    this.ownedTables = this.user.ownedTables;
+    this.ownedTables = this.user.ownedTables!;
 
     this.userService.AdminGetAllLogs("User").subscribe((logs: Log[]) => {
       const deletedAllWhereNoTableId = logs.filter(log => log.tableId != null);
