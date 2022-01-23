@@ -343,8 +343,8 @@ export class UserService {
       .get<Log[]>(this.baseUri + '/Admin/log', { withCredentials: true })
       .pipe(
         catchError((err) => {
-          this.handleError('AdminGetAllLogs');
           console.error(err);
+          this.snackbar.open("Error in communication with backend", undefined, {duration:5000});
           return throwError(err);
         }),
         map((log) => {

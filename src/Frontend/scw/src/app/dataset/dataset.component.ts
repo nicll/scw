@@ -41,6 +41,7 @@ export class DatasetComponent implements AfterViewInit, OnInit {
   uploadedFiles: any[] = [];
   items: MenuItem[];
   data: any[];
+  cache: any[];
   collaborators: User[]=[];
   @Input() isCollab: boolean | undefined;
   completedColumns: any[];
