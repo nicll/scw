@@ -12,6 +12,7 @@ import {StatsMapRolesToCount} from "../Models/StatsMapRolesToCount";
 })
 export class AdminStatisticsPageComponent{
   basicData: any;
+  chartOptions: any;
   stackedData: any;
   stackedOptions: any;
   multiAxisData: any;
@@ -22,6 +23,10 @@ export class AdminStatisticsPageComponent{
   values: number[];
   tables?: Table[];
   users?: User[];
+  data?: any;
+  adminSum?: number;
+  managerSum?: number;
+  commonsSum?: number;
   commonCounts : number[];
   managerCounts : number[];
   adminCounts : number[];
@@ -29,6 +34,7 @@ export class AdminStatisticsPageComponent{
 
  constructor(public user: UserService) {
    this.adminCounts = [0,0,0,0,0,0,0,0,0,0,0,0];
+   this.data = [];
    this.commonCounts = [0,0,0,0,0,0,0,0,0,0,0,0];
    this.managerCounts = [0,0,0,0,0,0,0,0,0,0,0,0];
     this.users = new Array<User>();
@@ -101,37 +107,79 @@ export class AdminStatisticsPageComponent{
     }
 
 
+
+
+   console.log("adminSums " + this.adminSum);
+   console.log("managerSum " + this.managerSum);
+   console.log("commonsSum " + this.commonsSum);
+
     //console.log("values" + this.values);
     setTimeout(() => {
+      this.adminSum = 0;
+      this.managerSum = 0;
+      this.commonsSum = 0;
+      for (let i = 0; i < this.adminCounts.length; i++) {
+        console.log("adminCounts " + this.adminCounts[i]);
+        this.adminSum = this.adminSum + this.adminCounts[i];
+        this.managerSum = this.managerSum + this.managerCounts[i];
+        this.commonsSum = this.commonsSum + this.commonCounts[i];
+      }
+
+      this.data = {
+        datasets: [{
+          data: [
+            this.adminSum,
+            this.managerSum,
+            this.commonsSum
+
+          ],
+          backgroundColor: [
+            "#42A5F5",
+            "#66BB6A",
+            "#FFA726",
+          ],
+          label: 'percentage of tables created according to their roles (all-time)'
+        }],
+        labels: [
+          "Created Tables by Admins",
+          "Created Tables by Managers",
+          "Created Tables by Commons",
+        ]
+      };
       this.basicData = {
         labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         datasets: [
           {
+            type: 'line',
             label: 'Tables created by all Users',
             data: this.values,
             fill: false,
             borderColor: '#42A5F5',
+            borderWidth: 2,
             tension: .4
           },
           {
+            type: 'bar',
             label: 'Tables created by all Commons',
             data: this.commonCounts,
             fill: false,
-            borderColor: '#FFA726',
+            backgroundColor: '#FFA726',
             tension: .4
           },
           {
+            type: 'bar',
             label: 'Tables created by all Managers',
             data: this.managerCounts,
             fill: false,
-            borderColor: '#32a86f',
+            backgroundColor: '#32a86f',
             tension: .4
           },
           {
+            type: 'bar',
             label: 'Tables created by all Admins',
             data: this.adminCounts,
             fill: false,
-            borderColor: '#9a32a8',
+            backgroundColor: '#9a32a8',
             tension: .4
           }
         ]
@@ -171,7 +219,7 @@ export class AdminStatisticsPageComponent{
           32
         ]
       }*/]
-    }; }, 700);
+    }; }, 1000);
     this.stackedOptions = {
       tooltips: {
         mode: 'index',
@@ -187,6 +235,22 @@ export class AdminStatisticsPageComponent{
         }]
       }
     };
+
+    this.chartOptions =
+      {plugins: {
+     legend: {
+       labels: {
+         color: '#495057'
+       }
+     }
+   },
+   scales: {
+     r: {
+       grid: {
+         color: '#ebedef'
+       }
+     }
+   }};
 
 
     this.basicOptions = {

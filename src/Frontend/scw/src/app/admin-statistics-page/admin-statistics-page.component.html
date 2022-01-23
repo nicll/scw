@@ -4,9 +4,12 @@
   <h5>Tables created (by all Users) per Month</h5>
   <p-chart type="bar" [data]="stackedData" [options]="stackedOptions" (onDataSelect)="selectData($event)" height="70vh" ></p-chart>
 </div>
--->
+
 
 <div class="card">
   <h5>Created Tables grouped by Roles</h5>
   <p-chart type="line" [data]="basicData" [options]="basicOptions"></p-chart>
 </div>
+-->
+<p-chart type="bar" [data]="basicData" [options]="basicOptions"></p-chart>
+<p-chart type="polarArea" [data]="data" [options]="chartOptions" [style]="{'width': '40%'}"></p-chart>
